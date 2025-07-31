@@ -1,0 +1,1 @@
+{"constraint": "constraints/iam.allowedPolicyMemberDomains", "listPolicy": {"allowedValues": ["C03ae421x", "allUsers"]}}
