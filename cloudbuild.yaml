@@ -49,7 +49,7 @@ steps:
       - 'GOOGLE_APPLICATION_CREDENTIALS=/workspace/firebase-service-account.json'
 
 # Build timeout
-timeout: '20m'
+timeout: '1200s'
 
 # Build options
 options:
