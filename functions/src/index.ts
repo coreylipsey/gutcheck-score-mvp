@@ -208,13 +208,82 @@ Never suggest generic platforms like Y Combinator unless they are industry-speci
 If local resources aren't available, use national ones that serve the founder's profile.
 Your tone should feel like a helpful coach—confident, supportive, and focused on making the founder feel seen and set up to act.
 
+🧪 URL VALIDATION REQUIREMENT:
+Only suggest resources where you can provide a specific, direct URL that you know exists:
+- Use well-known, established resources with predictable URL structures
+- For books: Use Amazon, Goodreads, or publisher direct links
+- For courses: Use direct course URLs from Coursera, Udemy, etc.
+- For grants: Use specific grant application pages from government/org websites
+- For mentorship: Use specific chapter/contact pages from established organizations
+- If you cannot provide a specific, working URL, suggest a different resource
+
 🔗 URL REQUIREMENTS:
 - For "Creative Capital Award" → find the actual application page, not just creative-capital.org
 - For "The Business of Creativity" book → find the Amazon/Goodreads page, not just a general bookstore
 - For "SCORE Mentors Atlanta" → find the Atlanta chapter page, not just score.org
-- URLs must be specific and actionable, leading directly to the resource mentioned`;
+- URLs must be specific and actionable, leading directly to the resource mentioned
 
-  return await callGemini(prompt, apiKey);
+✅ URL VALIDATION REQUIRED:
+Only suggest resources where you can provide a specific, direct URL:
+1. Use established platforms with predictable URL structures
+2. Ensure the URL leads directly to the specific resource mentioned
+3. If you cannot provide a specific URL for a resource, suggest a different, verifiable resource
+4. Prefer resources from major platforms (Amazon, Coursera, government sites, etc.) where URLs are reliable
+
+🔍 URL TESTING PROCESS:
+After generating your response, I will test each URL to verify:
+- The URL is accessible (returns HTTP 200)
+- The page content contains the resource name you suggested
+- If validation fails, I will regenerate the response with different resources
+
+⛔ NO GENERIC FALLBACKS:
+- Do not suggest "sba.gov/funding-programs" for specific grants
+- Do not suggest "coursera.org/entrepreneurship" for specific courses
+- Do not suggest "score.org" for specific local chapters
+- Only suggest resources where you can provide a direct, working URL`;
+
+  let response = await callGemini(prompt, apiKey);
+  
+  // Extract URLs from the response and validate them
+  const lines = response.split('\n');
+  let needsRegeneration = false;
+  
+  for (const line of lines) {
+    const urlMatch = line.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
+    if (urlMatch) {
+      const url = urlMatch[1].startsWith('http') ? urlMatch[1] : `https://${urlMatch[1]}`;
+      const resourceName = line.replace(/^[^:]+:\s*/, '').replace(/\s*\([^)]+\)$/, '').trim();
+      
+      console.log(`Validating URL: ${url} for resource: ${resourceName}`);
+      
+      // Test URL accessibility
+      const urlValidation = await validateUrl(url);
+      if (!urlValidation.isValid) {
+        console.log(`URL validation failed for ${url}: ${urlValidation.error}`);
+        needsRegeneration = true;
+        break;
+      }
+      
+      // Test URL content relevance
+      const contentValidation = await validateUrlContent(url, resourceName);
+      if (!contentValidation.matches) {
+        console.log(`Content validation failed for ${url}: ${contentValidation.reason}`);
+        needsRegeneration = true;
+        break;
+      }
+      
+      console.log(`✅ URL validation passed for ${url}`);
+    }
+  }
+  
+  // If validation failed, regenerate with a more strict prompt
+  if (needsRegeneration) {
+    console.log('URL validation failed, regenerating with stricter requirements...');
+    const strictPrompt = prompt + '\n\n🚨 CRITICAL: The previous response failed URL validation. Only suggest resources from major, well-known platforms where you are 100% certain the specific URL exists and is accessible.';
+    response = await callGemini(strictPrompt, apiKey);
+  }
+  
+  return response;
 }
 
 async function callGemini(prompt: string, apiKey: string): Promise<string> {
@@ -257,4 +326,55 @@ async function callGemini(prompt: string, apiKey: string): Promise<string> {
   }
 
   return responseText.trim();
+}
+
+// Add URL validation function
+async function validateUrl(url: string): Promise<{ isValid: boolean; status?: number; error?: string }> {
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD', // Only fetch headers, not full content
+      timeout: 5000, // 5 second timeout
+    });
+    
+    return {
+      isValid: response.ok,
+      status: response.status
+    };
+  } catch (error) {
+    return {
+      isValid: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+// Add URL content validation function
+async function validateUrlContent(url: string, expectedResource: string): Promise<{ matches: boolean; reason?: string }> {
+  try {
+    const response = await fetch(url, {
+      timeout: 10000, // 10 second timeout
+    });
+    
+    if (!response.ok) {
+      return { matches: false, reason: `HTTP ${response.status}` };
+    }
+    
+    const text = await response.text();
+    const lowerText = text.toLowerCase();
+    const lowerResource = expectedResource.toLowerCase();
+    
+    // Check if the resource name appears in the page content
+    const resourceWords = lowerResource.split(' ').filter(word => word.length > 3);
+    const matches = resourceWords.some(word => lowerText.includes(word));
+    
+    return {
+      matches,
+      reason: matches ? 'Content matches' : 'Resource name not found in page content'
+    };
+  } catch (error) {
+    return {
+      matches: false,
+      reason: error instanceof Error ? error.message : 'Fetch error'
+    };
+  }
 }
