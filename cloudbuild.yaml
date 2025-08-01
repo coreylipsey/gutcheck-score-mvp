@@ -26,7 +26,7 @@ steps:
 
   # Step 6: Deploy to Firebase (hosting, functions, firestore rules)
   - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['firebase', 'deploy', '--project', '${PROJECT_ID}']
+    args: ['firebase', 'deploy', '--project', '${_PROJECT_ID}']
     dir: '.'
 
 # Build timeout
@@ -39,4 +39,4 @@ options:
 
 # Substitutions (will be set in Cloud Build trigger)
 substitutions:
-  PROJECT_ID: 'gutcheck-score-mvp' 
+  _PROJECT_ID: 'gutcheck-score-mvp' 
