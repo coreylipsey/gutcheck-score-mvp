@@ -176,4 +176,4 @@ For deployment issues or questions:
 
 ---
 
-*Last updated: Sprint 3, Day 1* 
+*Last updated: Sprint 3, Day 1 - CI/CD Pipeline Active* 
