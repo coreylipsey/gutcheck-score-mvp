@@ -11,23 +11,18 @@ steps:
     args: ['install']
     dir: 'functions'
 
-  # Step 3: Set Firebase environment variables from secret
+  # Step 3: Build the Next.js application with Firebase environment variables
   - name: 'node:20'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "$$FIREBASE_CONFIG" > firebase-config.json
-        export NEXT_PUBLIC_FIREBASE_API_KEY=$(node -e "console.log(JSON.parse(process.env.FIREBASE_CONFIG).apiKey)")
-        export NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=$(node -e "console.log(JSON.parse(process.env.FIREBASE_CONFIG).authDomain)")
-        export NEXT_PUBLIC_FIREBASE_PROJECT_ID=$(node -e "console.log(JSON.parse(process.env.FIREBASE_CONFIG).projectId)")
-        export NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=$(node -e "console.log(JSON.parse(process.env.FIREBASE_CONFIG).storageBucket)")
-        export NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=$(node -e "console.log(JSON.parse(process.env.FIREBASE_CONFIG).messagingSenderId)")
-        export NEXT_PUBLIC_FIREBASE_APP_ID=$(node -e "console.log(JSON.parse(process.env.FIREBASE_CONFIG).appId)")
-        npm run build
+    entrypoint: 'npm'
+    args: ['run', 'build']
     dir: '.'
-    secretEnv:
-      - 'FIREBASE_CONFIG'
+    env:
+      - 'NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyAUq0hEPlGnfkj6MJC-7et_gNim-YTyTzg'
+      - 'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=gutcheck-score-mvp.firebaseapp.com'
+      - 'NEXT_PUBLIC_FIREBASE_PROJECT_ID=gutcheck-score-mvp'
+      - 'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=gutcheck-score-mvp.firebasestorage.app'
+      - 'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=286731768309'
+      - 'NEXT_PUBLIC_FIREBASE_APP_ID=1:286731768309:web:daa2346433cefedc1e90bc'
 
   # Step 4: Build Firebase Functions
   - name: 'node:20'
@@ -56,11 +51,7 @@ options:
   logging: CLOUD_LOGGING_ONLY
   machineType: 'E2_HIGHCPU_8'
 
-# Available secrets
-availableSecrets:
-  secretManager:
-    - versionName: projects/gutcheck-score-mvp/secrets/firebase-config/versions/latest
-      env: 'FIREBASE_CONFIG'
+
 
 # Substitutions (will be set in Cloud Build trigger)
 substitutions:
