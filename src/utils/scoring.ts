@@ -238,11 +238,13 @@ export const calculateAllScores = async (responses: AssessmentResponse[]) => {
   };
 };
 
-// Get star rating from overall score
+// Get star rating from overall score (matching HeroScore thresholds)
 export const getStarRating = (overallScore: number): number => {
-  const maxScore = 100;
-  const starRating = Math.round((overallScore / maxScore) * 5);
-  return Math.max(1, Math.min(5, starRating));
+  if (overallScore >= 80) return 5; // Visionary Leader
+  if (overallScore >= 60) return 4; // Strong Execution
+  if (overallScore >= 40) return 3; // Emerging Traction
+  if (overallScore >= 20) return 2; // Developing Potential
+  return 1; // Early Spark
 };
 
 // Get category breakdown for display

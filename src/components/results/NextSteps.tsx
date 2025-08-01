@@ -11,25 +11,47 @@ interface ActionItem {
   category: "Learning" | "Mentorship" | "Funding";
   title: string;
   description: string;
+  url?: string;
 }
 
 export function NextSteps({ sessionData }: NextStepsProps) {
-  // Parse AI recommendations
+  // Parse AI recommendations and extract URLs
   const parseAIRecommendations = (nextSteps: string) => {
     const lines = nextSteps.split('\n');
     const recommendations = {
-      mentorship: '',
-      funding: '',
-      learning: ''
+      mentorship: { title: '', url: '' },
+      funding: { title: '', url: '' },
+      learning: { title: '', url: '' }
     };
     
     lines.forEach(line => {
       if (line.startsWith('Mentorship:')) {
-        recommendations.mentorship = line.replace('Mentorship:', '').trim();
+        const content = line.replace('Mentorship:', '').trim();
+        const urlMatch = content.match(/(https?:\/\/[^\s]+)/);
+        if (urlMatch) {
+          recommendations.mentorship.title = content.replace(urlMatch[0], '').trim();
+          recommendations.mentorship.url = urlMatch[0];
+        } else {
+          recommendations.mentorship.title = content;
+        }
       } else if (line.startsWith('Funding:')) {
-        recommendations.funding = line.replace('Funding:', '').trim();
+        const content = line.replace('Funding:', '').trim();
+        const urlMatch = content.match(/(https?:\/\/[^\s]+)/);
+        if (urlMatch) {
+          recommendations.funding.title = content.replace(urlMatch[0], '').trim();
+          recommendations.funding.url = urlMatch[0];
+        } else {
+          recommendations.funding.title = content;
+        }
       } else if (line.startsWith('Learning:')) {
-        recommendations.learning = line.replace('Learning:', '').trim();
+        const content = line.replace('Learning:', '').trim();
+        const urlMatch = content.match(/(https?:\/\/[^\s]+)/);
+        if (urlMatch) {
+          recommendations.learning.title = content.replace(urlMatch[0], '').trim();
+          recommendations.learning.url = urlMatch[0];
+        } else {
+          recommendations.learning.title = content;
+        }
       }
     });
     
@@ -43,20 +65,23 @@ export function NextSteps({ sessionData }: NextStepsProps) {
     {
       icon: Users,
       category: "Mentorship",
-      title: aiRecommendations.mentorship || "Find a Business Mentor",
-      description: "Connect with experienced entrepreneurs who can guide your journey and provide insights."
+      title: aiRecommendations.mentorship.title || "Find a Business Mentor",
+      description: "Connect with experienced entrepreneurs who can guide your journey and provide insights.",
+      url: aiRecommendations.mentorship.url
     },
     {
       icon: DollarSign,
       category: "Funding",
-      title: aiRecommendations.funding || "Explore Funding Options", 
-      description: "Research grants, accelerators, and early-stage investment opportunities."
+      title: aiRecommendations.funding.title || "Explore Funding Options", 
+      description: "Research grants, accelerators, and early-stage investment opportunities.",
+      url: aiRecommendations.funding.url
     },
     {
       icon: BookOpen,
       category: "Learning",
-      title: aiRecommendations.learning || "Entrepreneurship Fundamentals",
-      description: "Build core business knowledge through structured learning programs and courses."
+      title: aiRecommendations.learning.title || "Entrepreneurship Fundamentals",
+      description: "Build core business knowledge through structured learning programs and courses.",
+      url: aiRecommendations.learning.url
     }
   ] : [
     {
@@ -143,13 +168,26 @@ export function NextSteps({ sessionData }: NextStepsProps) {
 
               {/* CTA Button */}
               <div className="mt-6">
-                <button 
-                  className="flex items-center space-x-2 text-sm font-medium group-hover:space-x-3 transition-all duration-300"
-                  style={{ color: categoryColor }}
-                >
-                  <span>Learn More</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                {item.url ? (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-2 text-sm font-medium group-hover:space-x-3 transition-all duration-300"
+                    style={{ color: categoryColor }}
+                  >
+                    <span>Learn More</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                ) : (
+                  <button 
+                    className="flex items-center space-x-2 text-sm font-medium group-hover:space-x-3 transition-all duration-300"
+                    style={{ color: categoryColor }}
+                  >
+                    <span>Learn More</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           );
