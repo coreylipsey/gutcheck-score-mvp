@@ -111,7 +111,7 @@ export const scoreOpenEndedWithAI = async (
 
     const questionType = questionTypeMap[questionId] || 'general';
 
-    const scoringResponse = await fetch('/api/gemini/score', {
+    const scoringResponse = await fetch('https://scorequestion-ix3v2eesbq-uc.a.run.app', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

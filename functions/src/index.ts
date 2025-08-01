@@ -14,6 +14,82 @@ import {defineString} from "firebase-functions/params";
 // Define the Gemini API key parameter
 const geminiApiKey = defineString("GEMINI_API_KEY");
 
+// Scoring prompts from the framework
+const SCORING_PROMPTS = {
+  entrepreneurialJourney: `You are an expert business evaluator assessing a founder's entrepreneurial journey.
+Score this response on a scale of 1-5 where:
+1 = Vague, lacks structure, no clear direction or milestones
+3 = Decent clarity with some evidence of execution and progress
+5 = Well-articulated, structured response with strong execution and clear growth path
+
+Founder's Response:
+{{RESPONSE}}
+
+Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`,
+
+  businessChallenge: `You are an expert business evaluator assessing how a founder navigates business challenges.
+Score this response on a scale of 1-5 where:
+1 = Poor problem definition, reactive approach, no clear solution strategy
+3 = Clear problem definition, reasonable approach, some evidence of execution
+5 = Exceptional problem clarity, strategic solution, strong evidence of execution/learning
+
+Founder's Response:
+{{RESPONSE}}
+
+Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`,
+
+  setbacksResilience: `You are an expert business evaluator assessing a founder's ability to handle setbacks.
+Score this response on a scale of 1-5 where:
+1 = Poor resilience, gives up easily, no clear recovery strategy
+3 = Moderate resilience, recovers but slowly, some adaptation
+5 = Exceptional resilience, adapts quickly, shows growth mindset and clear recovery process
+
+Founder's Response:
+{{RESPONSE}}
+
+Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`,
+
+  finalVision: `You are an expert business evaluator assessing a founder's long-term vision.
+Score this response on a scale of 1-5 where:
+1 = Vague, unrealistic, or very limited vision, no clear roadmap
+3 = Clear vision with reasonable ambition, some future goals
+5 = Compelling, ambitious vision with clear roadmap and long-term impact
+
+Founder's Response:
+{{RESPONSE}}
+
+Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`
+};
+
+function parseGeminiResponse(response: string): { score: number; explanation: string } {
+  try {
+    // Try to parse as JSON first
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        score: Math.max(1, Math.min(5, Math.round(parsed.score || 3))),
+        explanation: parsed.explanation || 'AI evaluation completed'
+      };
+    }
+
+    // Fallback: extract score from text
+    const scoreMatch = response.match(/score["\s:]*(\d+)/i);
+    const score = scoreMatch ? parseInt(scoreMatch[1]) : 3;
+    
+    return {
+      score: Math.max(1, Math.min(5, score)),
+      explanation: response.substring(0, 200) + (response.length > 200 ? '...' : '')
+    };
+  } catch (error) {
+    console.error('Error parsing Gemini response:', error);
+    return {
+      score: 3,
+      explanation: 'AI evaluation completed with fallback score'
+    };
+  }
+}
+
 // For cost control, you can set the maximum number of containers that can be
 // running at the same time. This helps mitigate the impact of unexpected
 // traffic spikes by instead downgrading performance. This limit is a
@@ -71,6 +147,64 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     console.error('Error generating feedback:', error);
     response.status(500).json({
       error: 'Failed to generate feedback',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// AI Scoring Function
+export const scoreQuestion = onRequest({ cors: true, invoker: "public" }, async (request, response) => {
+  // Enable CORS
+  response.set('Access-Control-Allow-Origin', '*');
+  response.set('Access-Control-Allow-Methods', 'GET, POST');
+  response.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (request.method === 'OPTIONS') {
+    response.status(204).send('');
+    return;
+  }
+
+  if (request.method !== 'POST') {
+    response.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  try {
+    const { questionType, response: questionResponse, questionText } = request.body;
+
+    if (!questionType || !questionResponse) {
+      response.status(400).json({ error: 'Missing required fields: questionType and response' });
+      return;
+    }
+
+    const apiKey = geminiApiKey.value();
+    if (!apiKey) {
+      response.status(500).json({ error: 'Gemini API key not configured' });
+      return;
+    }
+
+    // Get the appropriate prompt for the question type
+    const promptTemplate = SCORING_PROMPTS[questionType];
+    if (!promptTemplate) {
+      response.status(400).json({ error: 'Invalid question type' });
+      return;
+    }
+
+    // Replace placeholder with actual response
+    const prompt = promptTemplate.replace('{{RESPONSE}}', questionResponse);
+
+    // Call Gemini API
+    const geminiResponse = await callGemini(prompt, apiKey);
+    
+    // Parse the response
+    const scoringResult = parseGeminiResponse(geminiResponse);
+
+    response.json(scoringResult);
+
+  } catch (error) {
+    console.error('Error in AI scoring:', error);
+    response.status(500).json({
+      error: 'Failed to score response',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
