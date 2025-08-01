@@ -16,6 +16,13 @@ steps:
     entrypoint: 'npm'
     args: ['run', 'build']
     dir: '.'
+    env:
+      - 'NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyAUq0hEPlGnfkj6MJC-7et_gNim-YTyTzg'
+      - 'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=gutcheck-score-mvp.firebaseapp.com'
+      - 'NEXT_PUBLIC_FIREBASE_PROJECT_ID=gutcheck-score-mvp'
+      - 'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=gutcheck-score-mvp.firebasestorage.app'
+      - 'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=286731768309'
+      - 'NEXT_PUBLIC_FIREBASE_APP_ID=1:286731768309:web:daa2346433cefedc1e90bc'
 
   # Step 4: Build Firebase Functions
   - name: 'node:20'
@@ -33,6 +40,8 @@ steps:
   - name: 'gcr.io/cloud-builders/gcloud'
     args: ['firebase', 'deploy', '--project', '${_PROJECT_ID}']
     dir: '.'
+    env:
+      - 'GOOGLE_APPLICATION_CREDENTIALS=/workspace/firebase-service-account.json'
 
 # Build timeout
 timeout: '20m'
