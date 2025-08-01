@@ -52,6 +52,7 @@ gutcheck-score-mvp/
 - ✅ Automated deployment on push to main branch
 - ✅ Firebase Admin permissions granted
 - 🚀 Ready for first automated deployment test!
+- ✅ Cloud Build trigger now active and enabled!
 
 ## 🚀 Getting Started
 
