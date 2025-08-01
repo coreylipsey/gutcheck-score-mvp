@@ -10,14 +10,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Skip static generation for pages that need Firebase
-  experimental: {
-    missingSuspenseWithCSRError: false,
-  },
-  // Disable static generation for pages that use Firebase
-  generateStaticParams: async () => {
-    return [];
-  },
   // Only include Firebase config in client-side bundle, not during build
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
