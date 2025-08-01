@@ -189,16 +189,16 @@ Funding: Find a grant or tool with a working link specific to the founder's geog
 Learning: Recommend a course, article, or book from reputable platforms like Coursera, Udemy, Amazon, or Medium. Ensure recency and relevance.
 
 📋 Output Format (Plain Text Only)
-Use this exact format: Mentorship: [Resource Name] https://[url] Funding: [Resource Name] https://[url] Learning: [Resource Name] https://[url]
+Use this exact format: Mentorship: [Resource Name] (domain.org) Funding: [Resource Name] (domain.org) Learning: [Resource Name] (domain.org)
 Each line must be:
 Max 300 characters
-Include working URLs for all resources
+Include working domain names in parentheses for all resources
 No emojis, hashtags, markdown, bullet points, or extra styling
 
 ✅ Example:
-Mentorship: Delaware Innovation Space https://www.delawareinnovationspace.com
-Funding: Delaware Division of the Arts Grant https://arts.delaware.gov/grants
-Learning: Coursera's "Creative Entrepreneurship" https://www.coursera.org/learn/creative-entrepreneurship
+Mentorship: Delaware Innovation Space (delawareinnovationspace.com)
+Funding: Delaware Division of the Arts Grant (arts.delaware.gov)
+Learning: Coursera's "Creative Entrepreneurship" (coursera.org)
 
 ⛔ HARD RULES
 You must verify that all links are current, accessible, and contextually relevant.
