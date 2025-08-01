@@ -184,7 +184,13 @@ export const scoreQuestion = onRequest({ cors: true, invoker: "public" }, async 
     }
 
     // Get the appropriate prompt for the question type
-    const promptTemplate = SCORING_PROMPTS[questionType];
+    const validQuestionTypes = ['entrepreneurialJourney', 'businessChallenge', 'setbacksResilience', 'finalVision'] as const;
+    if (!validQuestionTypes.includes(questionType as any)) {
+      response.status(400).json({ error: 'Invalid question type' });
+      return;
+    }
+    
+    const promptTemplate = SCORING_PROMPTS[questionType as keyof typeof SCORING_PROMPTS];
     if (!promptTemplate) {
       response.status(400).json({ error: 'Invalid question type' });
       return;
