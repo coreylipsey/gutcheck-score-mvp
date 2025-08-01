@@ -17,6 +17,8 @@ interface ActionItem {
 export function NextSteps({ sessionData }: NextStepsProps) {
   // Parse AI recommendations and extract URLs
   const parseAIRecommendations = (nextSteps: string) => {
+    console.log('Raw nextSteps:', nextSteps); // Debug log
+    
     const lines = nextSteps.split('\n');
     const recommendations = {
       mentorship: { title: '', url: '' },
@@ -25,36 +27,52 @@ export function NextSteps({ sessionData }: NextStepsProps) {
     };
     
     lines.forEach(line => {
+      console.log('Processing line:', line); // Debug log
+      
       if (line.startsWith('Mentorship:')) {
         const content = line.replace('Mentorship:', '').trim();
+        console.log('Mentorship content:', content); // Debug log
+        
+        // Improved URL regex to catch more patterns
         const urlMatch = content.match(/(https?:\/\/[^\s]+)/);
         if (urlMatch) {
           recommendations.mentorship.title = content.replace(urlMatch[0], '').trim();
           recommendations.mentorship.url = urlMatch[0];
+          console.log('Mentorship parsed:', { title: recommendations.mentorship.title, url: recommendations.mentorship.url }); // Debug log
         } else {
           recommendations.mentorship.title = content;
+          console.log('Mentorship no URL found:', recommendations.mentorship.title); // Debug log
         }
       } else if (line.startsWith('Funding:')) {
         const content = line.replace('Funding:', '').trim();
+        console.log('Funding content:', content); // Debug log
+        
         const urlMatch = content.match(/(https?:\/\/[^\s]+)/);
         if (urlMatch) {
           recommendations.funding.title = content.replace(urlMatch[0], '').trim();
           recommendations.funding.url = urlMatch[0];
+          console.log('Funding parsed:', { title: recommendations.funding.title, url: recommendations.funding.url }); // Debug log
         } else {
           recommendations.funding.title = content;
+          console.log('Funding no URL found:', recommendations.funding.title); // Debug log
         }
       } else if (line.startsWith('Learning:')) {
         const content = line.replace('Learning:', '').trim();
+        console.log('Learning content:', content); // Debug log
+        
         const urlMatch = content.match(/(https?:\/\/[^\s]+)/);
         if (urlMatch) {
           recommendations.learning.title = content.replace(urlMatch[0], '').trim();
           recommendations.learning.url = urlMatch[0];
+          console.log('Learning parsed:', { title: recommendations.learning.title, url: recommendations.learning.url }); // Debug log
         } else {
           recommendations.learning.title = content;
+          console.log('Learning no URL found:', recommendations.learning.title); // Debug log
         }
       }
     });
     
+    console.log('Final recommendations:', recommendations); // Debug log
     return recommendations;
   };
 
@@ -133,7 +151,10 @@ export function NextSteps({ sessionData }: NextStepsProps) {
           return (
             <div
               key={index}
-              className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group cursor-pointer"
+              className={`bg-white rounded-3xl p-8 shadow-lg border border-gray-100 transition-all duration-300 group ${
+                item.url ? 'hover:shadow-xl cursor-pointer hover:scale-105' : 'cursor-default'
+              }`}
+              onClick={item.url ? () => window.open(item.url, '_blank', 'noopener,noreferrer') : undefined}
             >
               {/* Icon and Category */}
               <div className="flex items-center space-x-4 mb-6">
@@ -169,24 +190,15 @@ export function NextSteps({ sessionData }: NextStepsProps) {
               {/* CTA Button */}
               <div className="mt-6">
                 {item.url ? (
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center space-x-2 text-sm font-medium group-hover:space-x-3 transition-all duration-300"
-                    style={{ color: categoryColor }}
-                  >
-                    <span>Learn More</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </a>
+                  <div className="flex items-center space-x-2 text-sm font-medium group-hover:space-x-3 transition-all duration-300">
+                    <span style={{ color: categoryColor }}>Click to visit resource</span>
+                    <ArrowRight className="w-4 h-4" style={{ color: categoryColor }} />
+                  </div>
                 ) : (
-                  <button 
-                    className="flex items-center space-x-2 text-sm font-medium group-hover:space-x-3 transition-all duration-300"
-                    style={{ color: categoryColor }}
-                  >
-                    <span>Learn More</span>
+                  <div className="flex items-center space-x-2 text-sm font-medium text-gray-400">
+                    <span>Resource details coming soon</span>
                     <ArrowRight className="w-4 h-4" />
-                  </button>
+                  </div>
                 )}
               </div>
             </div>
