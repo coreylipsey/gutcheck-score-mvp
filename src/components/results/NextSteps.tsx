@@ -33,11 +33,13 @@ export function NextSteps({ sessionData }: NextStepsProps) {
         const content = line.replace('Mentorship:', '').trim();
         console.log('Mentorship content:', content); // Debug log
         
-        // Improved URL regex to catch more patterns
-        const urlMatch = content.match(/(https?:\/\/[^\s]+)/);
+        // Extract URLs from parentheses and convert to full URLs
+        const urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
         if (urlMatch) {
+          const domain = urlMatch[1];
+          const fullUrl = domain.startsWith('http') ? domain : `https://${domain}`;
           recommendations.mentorship.title = content.replace(urlMatch[0], '').trim();
-          recommendations.mentorship.url = urlMatch[0];
+          recommendations.mentorship.url = fullUrl;
           console.log('Mentorship parsed:', { title: recommendations.mentorship.title, url: recommendations.mentorship.url }); // Debug log
         } else {
           recommendations.mentorship.title = content;
@@ -47,10 +49,12 @@ export function NextSteps({ sessionData }: NextStepsProps) {
         const content = line.replace('Funding:', '').trim();
         console.log('Funding content:', content); // Debug log
         
-        const urlMatch = content.match(/(https?:\/\/[^\s]+)/);
+        const urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
         if (urlMatch) {
+          const domain = urlMatch[1];
+          const fullUrl = domain.startsWith('http') ? domain : `https://${domain}`;
           recommendations.funding.title = content.replace(urlMatch[0], '').trim();
-          recommendations.funding.url = urlMatch[0];
+          recommendations.funding.url = fullUrl;
           console.log('Funding parsed:', { title: recommendations.funding.title, url: recommendations.funding.url }); // Debug log
         } else {
           recommendations.funding.title = content;
@@ -60,10 +64,12 @@ export function NextSteps({ sessionData }: NextStepsProps) {
         const content = line.replace('Learning:', '').trim();
         console.log('Learning content:', content); // Debug log
         
-        const urlMatch = content.match(/(https?:\/\/[^\s]+)/);
+        const urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
         if (urlMatch) {
+          const domain = urlMatch[1];
+          const fullUrl = domain.startsWith('http') ? domain : `https://${domain}`;
           recommendations.learning.title = content.replace(urlMatch[0], '').trim();
-          recommendations.learning.url = urlMatch[0];
+          recommendations.learning.url = fullUrl;
           console.log('Learning parsed:', { title: recommendations.learning.title, url: recommendations.learning.url }); // Debug log
         } else {
           recommendations.learning.title = content;
@@ -151,10 +157,7 @@ export function NextSteps({ sessionData }: NextStepsProps) {
           return (
             <div
               key={index}
-              className={`bg-white rounded-3xl p-8 shadow-lg border border-gray-100 transition-all duration-300 group ${
-                item.url ? 'hover:shadow-xl cursor-pointer hover:scale-105' : 'cursor-default'
-              }`}
-              onClick={item.url ? () => window.open(item.url, '_blank', 'noopener,noreferrer') : undefined}
+              className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group"
             >
               {/* Icon and Category */}
               <div className="flex items-center space-x-4 mb-6">
@@ -190,10 +193,16 @@ export function NextSteps({ sessionData }: NextStepsProps) {
               {/* CTA Button */}
               <div className="mt-6">
                 {item.url ? (
-                  <div className="flex items-center space-x-2 text-sm font-medium group-hover:space-x-3 transition-all duration-300">
-                    <span style={{ color: categoryColor }}>Click to visit resource</span>
-                    <ArrowRight className="w-4 h-4" style={{ color: categoryColor }} />
-                  </div>
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 text-sm font-medium group-hover:space-x-3 transition-all duration-300 hover:underline"
+                    style={{ color: categoryColor }}
+                  >
+                    <span>Learn More</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
                 ) : (
                   <div className="flex items-center space-x-2 text-sm font-medium text-gray-400">
                     <span>Resource details coming soon</span>
