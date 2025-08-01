@@ -36,8 +36,8 @@ export function NextSteps({ sessionData }: NextStepsProps) {
         // Extract URLs from the content (both parentheses format and direct URL format)
         let urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
         if (!urlMatch) {
-          // Try direct URL format: "Resource Name https://url.com"
-          urlMatch = content.match(/(https?:\/\/[^\s]+)/);
+          // Try direct URL format: "Resource Name https://url.com" - match the entire URL including path
+          urlMatch = content.match(/(https?:\/\/[^\s]+(?:\/[^\s]*)*)/);
         }
         
         if (urlMatch) {
@@ -57,8 +57,8 @@ export function NextSteps({ sessionData }: NextStepsProps) {
         // Extract URLs from the content (both parentheses format and direct URL format)
         let urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
         if (!urlMatch) {
-          // Try direct URL format: "Resource Name https://url.com"
-          urlMatch = content.match(/(https?:\/\/[^\s]+)/);
+          // Try direct URL format: "Resource Name https://url.com" - match the entire URL including path
+          urlMatch = content.match(/(https?:\/\/[^\s]+(?:\/[^\s]*)*)/);
         }
         
         if (urlMatch) {
@@ -78,8 +78,8 @@ export function NextSteps({ sessionData }: NextStepsProps) {
         // Extract URLs from the content (both parentheses format and direct URL format)
         let urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
         if (!urlMatch) {
-          // Try direct URL format: "Resource Name https://url.com"
-          urlMatch = content.match(/(https?:\/\/[^\s]+)/);
+          // Try direct URL format: "Resource Name https://url.com" - match the entire URL including path
+          urlMatch = content.match(/(https?:\/\/[^\s]+(?:\/[^\s]*)*)/);
         }
         
         if (urlMatch) {
