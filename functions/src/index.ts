@@ -333,7 +333,6 @@ async function validateUrl(url: string): Promise<{ isValid: boolean; status?: nu
   try {
     const response = await fetch(url, {
       method: 'HEAD', // Only fetch headers, not full content
-      timeout: 5000, // 5 second timeout
     });
     
     return {
@@ -351,9 +350,7 @@ async function validateUrl(url: string): Promise<{ isValid: boolean; status?: nu
 // Add URL content validation function
 async function validateUrlContent(url: string, expectedResource: string): Promise<{ matches: boolean; reason?: string }> {
   try {
-    const response = await fetch(url, {
-      timeout: 10000, // 10 second timeout
-    });
+    const response = await fetch(url);
     
     if (!response.ok) {
       return { matches: false, reason: `HTTP ${response.status}` };
