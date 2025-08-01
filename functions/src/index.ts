@@ -170,7 +170,7 @@ export const scoreQuestion = onRequest({ cors: true, invoker: "public" }, async 
   }
 
   try {
-    const { questionType, response: questionResponse, questionText } = request.body;
+    const { questionType, response: questionResponse } = request.body;
 
     if (!questionType || !questionResponse) {
       response.status(400).json({ error: 'Missing required fields: questionType and response' });
