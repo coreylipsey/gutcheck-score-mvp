@@ -33,11 +33,16 @@ export function NextSteps({ sessionData }: NextStepsProps) {
         const content = line.replace('Mentorship:', '').trim();
         console.log('Mentorship content:', content); // Debug log
         
-        // Extract URLs from parentheses and convert to full URLs
-        const urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
+        // Extract URLs from the content (both parentheses format and direct URL format)
+        let urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
+        if (!urlMatch) {
+          // Try direct URL format: "Resource Name https://url.com"
+          urlMatch = content.match(/(https?:\/\/[^\s]+)/);
+        }
+        
         if (urlMatch) {
-          const domain = urlMatch[1];
-          const fullUrl = domain.startsWith('http') ? domain : `https://${domain}`;
+          const url = urlMatch[1];
+          const fullUrl = url.startsWith('http') ? url : `https://${url}`;
           recommendations.mentorship.title = content.replace(urlMatch[0], '').trim();
           recommendations.mentorship.url = fullUrl;
           console.log('Mentorship parsed:', { title: recommendations.mentorship.title, url: recommendations.mentorship.url }); // Debug log
@@ -49,10 +54,16 @@ export function NextSteps({ sessionData }: NextStepsProps) {
         const content = line.replace('Funding:', '').trim();
         console.log('Funding content:', content); // Debug log
         
-        const urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
+        // Extract URLs from the content (both parentheses format and direct URL format)
+        let urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
+        if (!urlMatch) {
+          // Try direct URL format: "Resource Name https://url.com"
+          urlMatch = content.match(/(https?:\/\/[^\s]+)/);
+        }
+        
         if (urlMatch) {
-          const domain = urlMatch[1];
-          const fullUrl = domain.startsWith('http') ? domain : `https://${domain}`;
+          const url = urlMatch[1];
+          const fullUrl = url.startsWith('http') ? url : `https://${url}`;
           recommendations.funding.title = content.replace(urlMatch[0], '').trim();
           recommendations.funding.url = fullUrl;
           console.log('Funding parsed:', { title: recommendations.funding.title, url: recommendations.funding.url }); // Debug log
@@ -64,10 +75,16 @@ export function NextSteps({ sessionData }: NextStepsProps) {
         const content = line.replace('Learning:', '').trim();
         console.log('Learning content:', content); // Debug log
         
-        const urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
+        // Extract URLs from the content (both parentheses format and direct URL format)
+        let urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
+        if (!urlMatch) {
+          // Try direct URL format: "Resource Name https://url.com"
+          urlMatch = content.match(/(https?:\/\/[^\s]+)/);
+        }
+        
         if (urlMatch) {
-          const domain = urlMatch[1];
-          const fullUrl = domain.startsWith('http') ? domain : `https://${domain}`;
+          const url = urlMatch[1];
+          const fullUrl = url.startsWith('http') ? url : `https://${url}`;
           recommendations.learning.title = content.replace(urlMatch[0], '').trim();
           recommendations.learning.url = fullUrl;
           console.log('Learning parsed:', { title: recommendations.learning.title, url: recommendations.learning.url }); // Debug log
@@ -91,21 +108,21 @@ export function NextSteps({ sessionData }: NextStepsProps) {
       category: "Mentorship",
       title: aiRecommendations.mentorship.title || "Find a Business Mentor",
       description: "Connect with experienced entrepreneurs who can guide your journey and provide insights.",
-      url: aiRecommendations.mentorship.url
+      url: aiRecommendations.mentorship.url || "https://www.score.org"
     },
     {
       icon: DollarSign,
       category: "Funding",
       title: aiRecommendations.funding.title || "Explore Funding Options", 
       description: "Research grants, accelerators, and early-stage investment opportunities.",
-      url: aiRecommendations.funding.url
+      url: aiRecommendations.funding.url || "https://www.sba.gov/funding-programs"
     },
     {
       icon: BookOpen,
       category: "Learning",
       title: aiRecommendations.learning.title || "Entrepreneurship Fundamentals",
       description: "Build core business knowledge through structured learning programs and courses.",
-      url: aiRecommendations.learning.url
+      url: aiRecommendations.learning.url || "https://www.coursera.org/browse/business/entrepreneurship"
     }
   ] : [
     {
