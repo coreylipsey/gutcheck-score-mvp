@@ -189,22 +189,30 @@ Funding: Find a grant or tool with a working link specific to the founder's geog
 Learning: Recommend a course, article, or book from reputable platforms like Coursera, Udemy, Amazon, or Medium. Ensure recency and relevance.
 
 📋 Output Format (Plain Text Only)
-Use this exact format: Mentorship: [Resource Name] (domain.org) Funding: [Resource Name] (domain.org) Learning: [Resource Name] (domain.org)
+Use this exact format: Mentorship: [Resource Name] (specific-url.com) Funding: [Resource Name] (specific-url.com) Learning: [Resource Name] (specific-url.com)
 Each line must be:
 Max 300 characters
-Include working domain names in parentheses for all resources
+Include working URLs that lead directly to the specific resource mentioned
 No emojis, hashtags, markdown, bullet points, or extra styling
 
 ✅ Example:
-Mentorship: Delaware Innovation Space (delawareinnovationspace.com)
-Funding: Delaware Division of the Arts Grant (arts.delaware.gov)
-Learning: Coursera's "Creative Entrepreneurship" (coursera.org)
+Mentorship: Delaware Innovation Space (delawareinnovationspace.com/apply)
+Funding: Delaware Division of the Arts Grant (arts.delaware.gov/grants/apply)
+Learning: Coursera's "Creative Entrepreneurship" (coursera.org/learn/creative-entrepreneurship)
+
+⛔ CRITICAL: The URL must lead directly to the specific resource, not a general category page.
 
 ⛔ HARD RULES
 You must verify that all links are current, accessible, and contextually relevant.
 Never suggest generic platforms like Y Combinator unless they are industry-specific and open.
 If local resources aren't available, use national ones that serve the founder's profile.
-Your tone should feel like a helpful coach—confident, supportive, and focused on making the founder feel seen and set up to act.`;
+Your tone should feel like a helpful coach—confident, supportive, and focused on making the founder feel seen and set up to act.
+
+🔗 URL REQUIREMENTS:
+- For "Creative Capital Award" → find the actual application page, not just creative-capital.org
+- For "The Business of Creativity" book → find the Amazon/Goodreads page, not just a general bookstore
+- For "SCORE Mentors Atlanta" → find the Atlanta chapter page, not just score.org
+- URLs must be specific and actionable, leading directly to the resource mentioned`;
 
   return await callGemini(prompt, apiKey);
 }
