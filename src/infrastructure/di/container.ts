@@ -1,7 +1,7 @@
 export class Container {
   private static instance: Container;
-  private services = new Map<string, any>();
-  private factories = new Map<string, () => any>();
+  private services = new Map<string, unknown>();
+  private factories = new Map<string, () => unknown>();
 
   static getInstance(): Container {
     if (!Container.instance) {
@@ -21,7 +21,7 @@ export class Container {
   resolve<T>(key: string): T {
     // Check if we already have an instance
     if (this.services.has(key)) {
-      return this.services.get(key);
+      return this.services.get(key) as T;
     }
 
     // Check if we have a factory
@@ -33,7 +33,7 @@ export class Container {
     // Create instance and cache it
     const instance = factory();
     this.services.set(key, instance);
-    return instance;
+    return instance as T;
   }
 
   clear(): void {

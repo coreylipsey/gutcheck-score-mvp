@@ -1,9 +1,9 @@
-import { AssessmentSession, AssessmentScores } from '../../domain/entities/Assessment';
+import { AssessmentSession, AssessmentScores, AssessmentResponse } from '../../domain/entities/Assessment';
 import { IAssessmentRepository } from '../../domain/repositories/IAssessmentRepository';
 
 export interface SaveAssessmentSessionRequest {
   sessionId: string;
-  responses: any[];
+  responses: AssessmentResponse[];
   scores: AssessmentScores;
   starRating: number;
   categoryBreakdown: Record<string, number>;

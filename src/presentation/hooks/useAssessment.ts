@@ -28,11 +28,16 @@ export function useAssessment() {
 
   const saveSession = async (request: {
     sessionId: string;
-    responses: any[];
-    scores: any;
+    responses: AssessmentResponse[];
+    scores: Record<string, number>;
     starRating: number;
     categoryBreakdown: Record<string, number>;
-    geminiFeedback?: any;
+    geminiFeedback?: {
+      feedback: string;
+      strengths: string;
+      focusAreas: string;
+      nextSteps: string;
+    };
     userId?: string;
   }) => {
     setIsLoading(true);

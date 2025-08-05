@@ -15,7 +15,7 @@ export class GeminiAIService implements IAIScoringService {
   }
 
   async generateFeedback(
-    responses: any[],
+    responses: Record<string, unknown>[],
     scores: Record<AssessmentCategory, number>,
     industry?: string,
     location?: string
@@ -48,6 +48,8 @@ Score this response on a scale of 1-5 where:
 3 = Decent clarity with some evidence of execution and progress
 5 = Well-articulated, structured response with strong execution and clear growth path
 
+Question: ${questionText}
+
 Founder's Response:
 ${response}
 
@@ -58,6 +60,8 @@ Score this response on a scale of 1-5 where:
 1 = Poor problem definition, reactive approach, no clear solution strategy
 3 = Clear problem definition, reasonable approach, some evidence of execution
 5 = Exceptional problem clarity, strategic solution, strong evidence of execution/learning
+
+Question: ${questionText}
 
 Founder's Response:
 ${response}
@@ -70,6 +74,8 @@ Score this response on a scale of 1-5 where:
 3 = Moderate resilience, recovers but slowly, some adaptation
 5 = Exceptional resilience, adapts quickly, shows growth mindset and clear recovery process
 
+Question: ${questionText}
+
 Founder's Response:
 ${response}
 
@@ -80,6 +86,8 @@ Score this response on a scale of 1-5 where:
 1 = Vague, unrealistic, or very limited vision, no clear roadmap
 3 = Clear vision with reasonable ambition, some future goals
 5 = Compelling, ambitious vision with clear roadmap and long-term impact
+
+Question: ${questionText}
 
 Founder's Response:
 ${response}
@@ -99,7 +107,7 @@ Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanati
     return scoringPrompts[promptType];
   }
 
-  private buildFeedbackPrompt(responses: any[], scores: Record<AssessmentCategory, number>, industry?: string, location?: string): string {
+  private buildFeedbackPrompt(responses: Record<string, unknown>[], scores: Record<AssessmentCategory, number>, industry?: string, location?: string): string {
     return `You are an expert business consultant providing personalized feedback to an entrepreneur.
 
 Assessment Scores:

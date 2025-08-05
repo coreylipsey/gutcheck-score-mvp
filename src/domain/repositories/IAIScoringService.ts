@@ -20,7 +20,7 @@ export interface IAIScoringService {
   ): Promise<AIScoringResult>;
   
   generateFeedback(
-    responses: any[],
+    responses: Record<string, unknown>[],
     scores: Record<AssessmentCategory, number>,
     industry?: string,
     location?: string

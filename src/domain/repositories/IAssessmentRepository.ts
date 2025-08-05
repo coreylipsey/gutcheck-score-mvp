@@ -1,4 +1,4 @@
-import { AssessmentSession, AssessmentResponse } from '../entities/Assessment';
+import { AssessmentSession } from '../entities/Assessment';
 
 export interface IAssessmentRepository {
   save(session: AssessmentSession): Promise<string>;
@@ -13,5 +13,5 @@ export interface IAssessmentRepository {
     aiExplanation: string,
     userId?: string
   ): Promise<string>;
-  getSessionOpenEndedScores(sessionId: string): Promise<any[]>;
+  getSessionOpenEndedScores(sessionId: string): Promise<Record<string, unknown>[]>;
 } 

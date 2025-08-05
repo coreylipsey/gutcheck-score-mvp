@@ -1,9 +1,7 @@
 import { 
   collection, 
-  doc, 
   addDoc, 
   getDocs, 
-  updateDoc, 
   query, 
   where, 
   orderBy, 
@@ -12,7 +10,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { IAssessmentRepository } from '../../domain/repositories/IAssessmentRepository';
-import { AssessmentSession, AssessmentResponse } from '../../domain/entities/Assessment';
+import { AssessmentSession } from '../../domain/entities/Assessment';
 
 export class FirestoreAssessmentRepository implements IAssessmentRepository {
   async save(session: AssessmentSession): Promise<string> {
@@ -114,7 +112,7 @@ export class FirestoreAssessmentRepository implements IAssessmentRepository {
     return docRef.id;
   }
 
-  async getSessionOpenEndedScores(sessionId: string): Promise<any[]> {
+  async getSessionOpenEndedScores(sessionId: string): Promise<Record<string, unknown>[]> {
     const q = query(
       collection(db, 'openEndedScores'),
       where('sessionId', '==', sessionId)

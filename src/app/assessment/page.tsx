@@ -10,7 +10,7 @@ import { validateOpenEndedResponse } from '../../application/services/Validation
 
 export default function AssessmentPage() {
   const router = useRouter();
-  const { calculateScores, saveSession, isLoading, error } = useAssessment();
+  const { calculateScores, saveSession, error } = useAssessment();
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState<AssessmentResponse[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
