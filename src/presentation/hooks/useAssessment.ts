@@ -1,0 +1,61 @@
+import { useState } from 'react';
+import { Container } from '../../infrastructure/di/container';
+import { CalculateAssessmentScore } from '../../application/use-cases/CalculateAssessmentScore';
+import { SaveAssessmentSession } from '../../application/use-cases/SaveAssessmentSession';
+import { AssessmentResponse } from '../../domain/entities/Assessment';
+
+export function useAssessment() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const calculateScores = async (responses: AssessmentResponse[]) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const container = Container.getInstance();
+      const calculateScore = container.resolve<CalculateAssessmentScore>('CalculateAssessmentScore');
+      
+      const scores = await calculateScore.execute(responses);
+      return scores;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to calculate scores');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveSession = async (request: {
+    sessionId: string;
+    responses: any[];
+    scores: any;
+    starRating: number;
+    categoryBreakdown: Record<string, number>;
+    geminiFeedback?: any;
+    userId?: string;
+  }) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const container = Container.getInstance();
+      const saveSessionUseCase = container.resolve<SaveAssessmentSession>('SaveAssessmentSession');
+      
+      const sessionId = await saveSessionUseCase.execute(request);
+      return sessionId;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save session');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    calculateScores,
+    saveSession,
+    isLoading,
+    error,
+  };
+} 
