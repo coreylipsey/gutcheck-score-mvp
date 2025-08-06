@@ -48,7 +48,7 @@ steps:
     args: ['assembleDebug']
     dir: 'android'
     volumes:
-      - name: 'gradle-cache'
+      - name: 'gutcheck-gradle-cache'
         path: '/root/.gradle'
 
   # Step 8: Run Firebase Test Lab robo tests
@@ -81,7 +81,7 @@ options:
   logging: CLOUD_LOGGING_ONLY
   machineType: 'E2_HIGHCPU_8'
   volumes:
-    - name: 'gradle-cache'
+    - name: 'gutcheck-gradle-cache'
       path: '/root/.gradle'
 
 # Substitutions (will be set in Cloud Build trigger)
