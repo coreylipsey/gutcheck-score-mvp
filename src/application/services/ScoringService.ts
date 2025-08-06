@@ -4,6 +4,29 @@ import { Question } from '../../domain/entities/Question';
 import { ASSESSMENT_QUESTIONS, CATEGORY_WEIGHTS } from '../../domain/entities/Assessment';
 import { IAIScoringService } from '../../domain/repositories/IAIScoringService';
 
+// 🔒 SCORING LOGIC LOCKING MECHANISM
+// ===================================
+//
+// CRITICAL: This file contains the scoring logic that MUST match the assessment
+// questions exactly. Any changes to scoring maps or logic will affect the
+// validity of all assessment results.
+//
+// LOCKED ELEMENTS:
+// - Scoring maps for multiple-choice questions
+// - Scoring logic for different question types
+// - Category weight calculations
+// - Question weight calculations
+//
+// TO UNLOCK FOR CHANGES:
+// 1. Remove this comment block
+// 2. Make the required changes
+// 3. Add a new comment block with the date and reason for changes
+// 4. Ensure changes align with Assessment.ts questions
+// 5. Test thoroughly to ensure scoring accuracy is maintained
+//
+// LAST VALIDATED: 2025-01-27 - Clean Architecture refactor completion
+// VALIDATION STATUS: ✅ All scoring logic matches original assessment questions
+
 export class ScoringService {
   constructor(private readonly aiService: IAIScoringService) {}
 

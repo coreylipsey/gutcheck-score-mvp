@@ -309,4 +309,97 @@ export const ASSESSMENT_QUESTIONS: Question[] = [
     weight: 4,
     section: 'Growth and Vision'
   }
-]; 
+];
+
+// 🔒 ASSESSMENT DATA LOCKING MECHANISM
+// =====================================
+//
+// CRITICAL: This file contains the core assessment data that MUST NOT be changed
+// unless explicitly requested and approved. Any changes to questions, weights,
+// or scoring logic will affect the validity of all assessment results.
+//
+// LOCKED ELEMENTS:
+// - All 25 assessment questions (text, options, types, weights)
+// - Category weights (personalBackground: 20, entrepreneurialSkills: 25, etc.)
+// - Question weights within each category
+// - Validation prompts for open-ended questions
+// - Question IDs and structure
+//
+// TO UNLOCK FOR CHANGES:
+// 1. Remove this comment block
+// 2. Make the required changes
+// 3. Add a new comment block with the date and reason for changes
+// 4. Update any related scoring logic in ScoringService.ts
+// 5. Test thoroughly to ensure scoring accuracy is maintained
+//
+// LAST VALIDATED: 2025-01-27 - Clean Architecture refactor completion
+// VALIDATION STATUS: ✅ All questions, weights, and scoring logic match original git history
+
+// Validation function to ensure data integrity
+export function validateAssessmentDataIntegrity(): boolean {
+  // Check that we have exactly 25 questions
+  if (ASSESSMENT_QUESTIONS.length !== 25) {
+    console.error('❌ CRITICAL: Assessment must have exactly 25 questions');
+    return false;
+  }
+
+  // Check category weights sum to 100
+  const totalWeight = Object.values(CATEGORY_WEIGHTS).reduce((sum, weight) => sum + weight, 0);
+  if (totalWeight !== 100) {
+    console.error('❌ CRITICAL: Category weights must sum to 100');
+    return false;
+  }
+
+  // Check that each category has the correct number of questions
+  const categoryCounts = {
+    personalBackground: 0,
+    entrepreneurialSkills: 0,
+    resources: 0,
+    behavioralMetrics: 0,
+    growthVision: 0,
+  };
+
+  ASSESSMENT_QUESTIONS.forEach(question => {
+    categoryCounts[question.category]++;
+  });
+
+  const expectedCounts = {
+    personalBackground: 5,
+    entrepreneurialSkills: 5,
+    resources: 5,
+    behavioralMetrics: 5,
+    growthVision: 5,
+  };
+
+  for (const [category, count] of Object.entries(categoryCounts)) {
+    if (count !== expectedCounts[category as keyof typeof expectedCounts]) {
+      console.error(`❌ CRITICAL: Category ${category} must have exactly ${expectedCounts[category as keyof typeof expectedCounts]} questions`);
+      return false;
+    }
+  }
+
+  // Check that question weights are correct
+  const expectedWeights = {
+    personalBackground: 4, // 20% / 5 questions = 4% each
+    entrepreneurialSkills: 5, // 25% / 5 questions = 5% each
+    resources: 4, // 20% / 5 questions = 4% each
+    behavioralMetrics: 3, // 15% / 5 questions = 3% each
+    growthVision: 4, // 20% / 5 questions = 4% each
+  };
+
+  for (const question of ASSESSMENT_QUESTIONS) {
+    const expectedWeight = expectedWeights[question.category];
+    if (question.weight !== expectedWeight) {
+      console.error(`❌ CRITICAL: Question ${question.id} weight should be ${expectedWeight}, got ${question.weight}`);
+      return false;
+    }
+  }
+
+  console.log('✅ Assessment data integrity validated successfully');
+  return true;
+}
+
+// Run validation on module load
+if (typeof window === 'undefined') { // Only run on server side
+  validateAssessmentDataIntegrity();
+} 

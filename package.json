@@ -17,7 +17,8 @@
     "test:firebase": "gcloud firebase test android run --type=robo --app=android/app/build/outputs/apk/debug/app-debug.apk --device=model=redfin,version=30,locale=en,orientation=portrait --timeout=20m --project=gutcheck-score-mvp",
     "test:devices": "node test-web-app.js",
     "test:simple": "node test-simple.js",
-    "test:quick": "node test-quick.js"
+    "test:quick": "node test-quick.js",
+    "validate:assessment": "node scripts/validate-assessment-data.js"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.2",
