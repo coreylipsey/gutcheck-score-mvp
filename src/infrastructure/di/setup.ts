@@ -4,6 +4,7 @@ import { GeminiAIService } from '../services/GeminiAIService';
 import { ScoringService } from '../../application/services/ScoringService';
 import { CalculateAssessmentScore } from '../../application/use-cases/CalculateAssessmentScore';
 import { SaveAssessmentSession } from '../../application/use-cases/SaveAssessmentSession';
+import { GenerateAIFeedback } from '../../application/use-cases/GenerateAIFeedback';
 
 export function setupDependencies(): void {
   const container = Container.getInstance();
@@ -32,5 +33,9 @@ export function setupDependencies(): void {
 
   container.register('SaveAssessmentSession', () => 
     new SaveAssessmentSession(container.resolve('IAssessmentRepository'))
+  );
+
+  container.register('GenerateAIFeedback', () => 
+    new GenerateAIFeedback(container.resolve('IAIScoringService'))
   );
 } 

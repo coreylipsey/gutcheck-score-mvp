@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Container } from '../../infrastructure/di/container';
 import { CalculateAssessmentScore } from '../../application/use-cases/CalculateAssessmentScore';
 import { SaveAssessmentSession } from '../../application/use-cases/SaveAssessmentSession';
-import { AssessmentResponse } from '../../domain/entities/Assessment';
+import { GenerateAIFeedback } from '../../application/use-cases/GenerateAIFeedback';
+import { AssessmentResponse, AssessmentScores } from '../../domain/entities/Assessment';
 
 export function useAssessment() {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,10 +27,33 @@ export function useAssessment() {
     }
   };
 
+  const generateAIFeedback = async (request: {
+    responses: AssessmentResponse[];
+    scores: AssessmentScores;
+    industry?: string;
+    location?: string;
+  }) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const container = Container.getInstance();
+      const generateFeedbackUseCase = container.resolve<GenerateAIFeedback>('GenerateAIFeedback');
+      
+      const feedback = await generateFeedbackUseCase.execute(request);
+      return feedback;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate AI feedback');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const saveSession = async (request: {
     sessionId: string;
     responses: AssessmentResponse[];
-    scores: Record<string, number>;
+    scores: AssessmentScores;
     starRating: number;
     categoryBreakdown: Record<string, number>;
     geminiFeedback?: {
@@ -59,6 +83,7 @@ export function useAssessment() {
 
   return {
     calculateScores,
+    generateAIFeedback,
     saveSession,
     isLoading,
     error,

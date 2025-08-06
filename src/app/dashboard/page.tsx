@@ -13,18 +13,21 @@ export default function DashboardPage() {
   const [assessmentHistory, setAssessmentHistory] = useState<AssessmentHistory[]>([]);
 
   useEffect(() => {
-    // For now, we'll check localStorage for assessment data
-    const sessionId = localStorage.getItem('assessment_session_id');
-    const responsesData = localStorage.getItem('assessment_responses');
+    // Check localStorage for assessment data
+    const sessionId = localStorage.getItem('sessionId');
+    const responsesData = localStorage.getItem('responsesData');
     
     if (sessionId && responsesData) {
-      // This is a simplified version - in the full implementation, 
-      // we'd fetch from Firebase
-      setAssessmentHistory([{
-        sessionId,
-        completedAt: new Date().toLocaleDateString(),
-        overallScore: 75 // Placeholder score
-      }]);
+      try {
+        const parsedData = JSON.parse(responsesData);
+        setAssessmentHistory([{
+          sessionId,
+          completedAt: new Date().toLocaleDateString(),
+          overallScore: parsedData.scores?.overall || 0
+        }]);
+      } catch (error) {
+        console.error('Error parsing assessment data:', error);
+      }
     }
   }, []);
 

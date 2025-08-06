@@ -1,16 +1,7 @@
 import { AssessmentCategory } from '../../domain/value-objects/Category';
-import { AssessmentResponse } from '../../domain/entities/Assessment';
+import { AssessmentResponse, AssessmentScores } from '../../domain/entities/Assessment';
 import { IAIScoringService } from '../../domain/repositories/IAIScoringService';
 import { ScoringService } from '../services/ScoringService';
-
-export interface AssessmentScores {
-  personalBackground: number;
-  entrepreneurialSkills: number;
-  resources: number;
-  behavioralMetrics: number;
-  growthVision: number;
-  overallScore: number;
-}
 
 export class CalculateAssessmentScore {
   constructor(
