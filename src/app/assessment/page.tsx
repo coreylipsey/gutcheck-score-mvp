@@ -132,23 +132,93 @@ export default function AssessmentPage() {
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-2">Industry</label>
-          <input
-            type="text"
+          <select
             value={industry}
             onChange={(e) => setIndustry(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="e.g., Technology, Healthcare, Retail"
-          />
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+          >
+            <option value="">Select an industry</option>
+            <option value="Technology & Software">Technology & Software</option>
+            <option value="E-Commerce & Retail">E-Commerce & Retail</option>
+            <option value="Healthcare & Biotech">Healthcare & Biotech</option>
+            <option value="Finance & FinTech">Finance & FinTech</option>
+            <option value="Real Estate & PropTech">Real Estate & PropTech</option>
+            <option value="Education & EdTech">Education & EdTech</option>
+            <option value="Food & Beverage">Food & Beverage</option>
+            <option value="Manufacturing & Consumer Goods">Manufacturing & Consumer Goods</option>
+            <option value="Creative & Media">Creative & Media</option>
+            <option value="Transportation & Logistics">Transportation & Logistics</option>
+            <option value="Energy & Sustainability">Energy & Sustainability</option>
+            <option value="Professional Services (Consulting, Law, etc.)">Professional Services (Consulting, Law, etc.)</option>
+            <option value="Government & Nonprofit">Government & Nonprofit</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Location</label>
-          <input
-            type="text"
+          <select
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="e.g., San Francisco, CA"
-          />
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+          >
+            <option value="">Select a location</option>
+            <option value="Alabama">Alabama</option>
+            <option value="Alaska">Alaska</option>
+            <option value="Arizona">Arizona</option>
+            <option value="Arkansas">Arkansas</option>
+            <option value="California">California</option>
+            <option value="Colorado">Colorado</option>
+            <option value="Connecticut">Connecticut</option>
+            <option value="Delaware">Delaware</option>
+            <option value="District of Columbia">District of Columbia</option>
+            <option value="Florida">Florida</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Hawaii">Hawaii</option>
+            <option value="Idaho">Idaho</option>
+            <option value="Illinois">Illinois</option>
+            <option value="Indiana">Indiana</option>
+            <option value="Iowa">Iowa</option>
+            <option value="Kansas">Kansas</option>
+            <option value="Kentucky">Kentucky</option>
+            <option value="Louisiana">Louisiana</option>
+            <option value="Maine">Maine</option>
+            <option value="Maryland">Maryland</option>
+            <option value="Massachusetts">Massachusetts</option>
+            <option value="Michigan">Michigan</option>
+            <option value="Minnesota">Minnesota</option>
+            <option value="Mississippi">Mississippi</option>
+            <option value="Missouri">Missouri</option>
+            <option value="Montana">Montana</option>
+            <option value="Nebraska">Nebraska</option>
+            <option value="Nevada">Nevada</option>
+            <option value="New Hampshire">New Hampshire</option>
+            <option value="New Jersey">New Jersey</option>
+            <option value="New Mexico">New Mexico</option>
+            <option value="New York">New York</option>
+            <option value="North Carolina">North Carolina</option>
+            <option value="North Dakota">North Dakota</option>
+            <option value="Ohio">Ohio</option>
+            <option value="Oklahoma">Oklahoma</option>
+            <option value="Oregon">Oregon</option>
+            <option value="Pennsylvania">Pennsylvania</option>
+            <option value="Rhode Island">Rhode Island</option>
+            <option value="South Carolina">South Carolina</option>
+            <option value="South Dakota">South Dakota</option>
+            <option value="Tennessee">Tennessee</option>
+            <option value="Texas">Texas</option>
+            <option value="Utah">Utah</option>
+            <option value="Vermont">Vermont</option>
+            <option value="Virginia">Virginia</option>
+            <option value="Washington">Washington</option>
+            <option value="West Virginia">West Virginia</option>
+            <option value="Wisconsin">Wisconsin</option>
+            <option value="Wyoming">Wyoming</option>
+            <option value="American Samoa">American Samoa</option>
+            <option value="Guam">Guam</option>
+            <option value="Northern Mariana Islands">Northern Mariana Islands</option>
+            <option value="Puerto Rico">Puerto Rico</option>
+            <option value="U.S. Virgin Islands">U.S. Virgin Islands</option>
+          </select>
         </div>
       </div>
     </div>

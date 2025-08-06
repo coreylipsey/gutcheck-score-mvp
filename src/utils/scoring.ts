@@ -1,4 +1,5 @@
-import { AssessmentQuestion, AssessmentResponse, AssessmentCategory, CATEGORY_WEIGHTS, ASSESSMENT_QUESTIONS } from '@/types/assessment';
+import { AssessmentQuestion, AssessmentResponse, AssessmentCategory } from '@/types/assessment';
+import { ASSESSMENT_QUESTIONS, CATEGORY_WEIGHTS } from '@/domain/entities/Assessment';
 
 // Scoring logic for multiple choice questions
 export const scoreMultipleChoice = (question: AssessmentQuestion, response: string): number => {
