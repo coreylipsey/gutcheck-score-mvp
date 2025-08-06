@@ -270,8 +270,8 @@ export default function AssessmentPage() {
         ) : (
           <AssessmentQuestion
             question={currentQuestion!}
-            onResponse={handleResponse}
-            currentResponse={responses.find(r => r.questionId === currentQuestion!.id)}
+            onChange={handleResponse}
+            value={responses.find(r => r.questionId === currentQuestion!.id)?.response}
           />
         )}
 
