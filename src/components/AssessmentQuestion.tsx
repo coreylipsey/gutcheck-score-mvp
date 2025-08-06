@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AssessmentQuestion as QuestionType } from '@/types/assessment';
+import { Question } from '@/domain/entities/Question';
 import { validateOpenEndedResponse } from '@/utils/scoring';
 
 interface AssessmentQuestionProps {
-  question: QuestionType;
+  question: Question;
   value?: string | number | string[];
   onChange: (value: string | number | string[]) => void;
 }
