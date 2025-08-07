@@ -143,7 +143,8 @@ export class ScoringService {
       }
 
       // Normalize score to category weight (0-100 scale)
-      const normalizedScore = (rawScore / 5) * categoryWeight;
+      // Framework formula: (Raw Score / 5) × (Category Weight / 5)
+      const normalizedScore = (rawScore / 5) * (categoryWeight / 5);
       totalNormalizedScore += normalizedScore;
     }
 

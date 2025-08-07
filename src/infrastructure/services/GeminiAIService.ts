@@ -49,23 +49,30 @@ export class GeminiAIService implements IAIScoringService {
     industry?: string,
     location?: string
   ): Promise<AIFeedback> {
-    const feedbackPrompt = this.buildFeedbackPrompt(responses, scores, industry, location);
-    const feedbackResult = await this.callGemini(feedbackPrompt);
-    
-    const strengthsPrompt = this.buildStrengthsPrompt(scores, industry, location);
-    const strengthsResult = await this.callGemini(strengthsPrompt);
-    
-    const focusAreasPrompt = this.buildFocusAreasPrompt(scores, industry, location);
-    const focusAreasResult = await this.callGemini(focusAreasPrompt);
-    
-    const nextStepsPrompt = this.buildNextStepsPrompt(scores, industry, location);
-    const nextStepsResult = await this.callGemini(nextStepsPrompt);
+    // Call the feedback Firebase Function instead of individual Gemini calls
+    const apiResponse = await fetch('https://us-central1-gutcheck-score-mvp.cloudfunctions.net/generateFeedback', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        responses,
+        scores,
+        industry,
+        location
+      })
+    });
 
+    if (!apiResponse.ok) {
+      throw new Error(`API error: ${apiResponse.statusText}`);
+    }
+
+    const data = await apiResponse.json();
     return {
-      feedback: feedbackResult,
-      strengths: strengthsResult,
-      focusAreas: focusAreasResult,
-      nextSteps: nextStepsResult,
+      feedback: data.feedback || 'AI feedback generation completed.',
+      strengths: data.strengths || 'Your top strength will be identified based on your assessment scores.',
+      focusAreas: data.focusAreas || 'Your priority focus area will be determined from your assessment results.',
+      nextSteps: data.nextSteps || 'Recommended next steps will be provided based on your profile.'
     };
   }
 

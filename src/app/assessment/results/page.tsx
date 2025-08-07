@@ -9,7 +9,7 @@ import { HeroScore } from '@/components/results/HeroScore';
 import { CategoryBreakdown } from '@/components/results/CategoryBreakdown';
 import { PersonalizedInsights } from '@/components/results/PersonalizedInsights';
 import { NextSteps } from '@/components/results/NextSteps';
-import ScoringDebug from '@/components/results/ScoringDebug';
+
 
 export default function ResultsPage() {
   const [sessionData, setSessionData] = useState<FirestoreAssessmentSession | null>(null);
@@ -175,13 +175,7 @@ export default function ResultsPage() {
             <NextSteps sessionData={sessionData} />
           </section>
 
-          {/* Scoring Debug Section */}
-          <section 
-            aria-label="Scoring Debug Information"
-            className="scroll-mt-20"
-          >
-            <ScoringDebug sessionData={sessionData} />
-          </section>
+
 
         </div>
       </div>
