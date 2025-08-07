@@ -151,10 +151,10 @@ export default function AssessmentPage() {
 
   const renderLocationStep = () => (
     <div className="max-w-2xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-6">Tell us about your business</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-900">Tell us about your business</h2>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Industry</label>
+          <label className="block text-sm font-medium mb-2 text-gray-900">Industry</label>
           <select
             value={industry}
             onChange={(e) => setIndustry(e.target.value)}
@@ -178,7 +178,7 @@ export default function AssessmentPage() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Location</label>
+          <label className="block text-sm font-medium mb-2 text-gray-900">Location</label>
           <select
             value={location}
             onChange={(e) => setLocation(e.target.value)}
@@ -270,10 +270,10 @@ export default function AssessmentPage() {
       <div className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-900">
               Question {currentStep + 1} of {totalQuestions}
             </span>
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-900">
               {Math.round(progress)}% Complete
             </span>
           </div>
