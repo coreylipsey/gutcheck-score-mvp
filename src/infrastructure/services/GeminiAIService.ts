@@ -19,7 +19,7 @@ export class GeminiAIService implements IAIScoringService {
 
     const questionType = questionTypeMap[questionId] || 'entrepreneurialJourney';
 
-    // Call Firebase Function instead of Next.js API route
+    // Call Firebase Function for AI scoring
     const apiResponse = await fetch('https://us-central1-gutcheck-score-mvp.cloudfunctions.net/scoreQuestion', {
       method: 'POST',
       headers: {
@@ -49,7 +49,7 @@ export class GeminiAIService implements IAIScoringService {
     industry?: string,
     location?: string
   ): Promise<AIFeedback> {
-    // Call the feedback Firebase Function instead of individual Gemini calls
+    // Call the feedback Firebase Function for AI feedback generation
     const apiResponse = await fetch('https://us-central1-gutcheck-score-mvp.cloudfunctions.net/generateFeedback', {
       method: 'POST',
       headers: {
