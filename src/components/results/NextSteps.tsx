@@ -17,7 +17,7 @@ interface ActionItem {
 export function NextSteps({ sessionData }: NextStepsProps) {
   // Parse AI recommendations and extract URLs
   const parseAIRecommendations = (nextSteps: string) => {
-    console.log('Raw nextSteps:', nextSteps); // Debug log
+    // Process nextSteps content
     
     const lines = nextSteps.split('\n');
     const recommendations = {
@@ -27,11 +27,11 @@ export function NextSteps({ sessionData }: NextStepsProps) {
     };
     
     lines.forEach(line => {
-      console.log('Processing line:', line); // Debug log
+              // Processing line
       
       if (line.startsWith('Mentorship:')) {
         const content = line.replace('Mentorship:', '').trim();
-        console.log('Mentorship content:', content); // Debug log
+        // Extract mentorship content
         
         // Extract URLs from the content (both parentheses format and direct URL format)
         let urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
@@ -45,14 +45,14 @@ export function NextSteps({ sessionData }: NextStepsProps) {
           const fullUrl = url.startsWith('http') ? url : `https://${url}`;
           recommendations.mentorship.title = content.replace(urlMatch[0], '').trim();
           recommendations.mentorship.url = fullUrl;
-          console.log('Mentorship parsed:', { title: recommendations.mentorship.title, url: recommendations.mentorship.url }); // Debug log
+          // Mentorship recommendation parsed
         } else {
           recommendations.mentorship.title = content;
-          console.log('Mentorship no URL found:', recommendations.mentorship.title); // Debug log
+          // Mentorship recommendation without URL
         }
       } else if (line.startsWith('Funding:')) {
         const content = line.replace('Funding:', '').trim();
-        console.log('Funding content:', content); // Debug log
+        // Extract funding content
         
         // Extract URLs from the content (both parentheses format and direct URL format)
         let urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
@@ -66,14 +66,14 @@ export function NextSteps({ sessionData }: NextStepsProps) {
           const fullUrl = url.startsWith('http') ? url : `https://${url}`;
           recommendations.funding.title = content.replace(urlMatch[0], '').trim();
           recommendations.funding.url = fullUrl;
-          console.log('Funding parsed:', { title: recommendations.funding.title, url: recommendations.funding.url }); // Debug log
+          // Funding recommendation parsed
         } else {
           recommendations.funding.title = content;
-          console.log('Funding no URL found:', recommendations.funding.title); // Debug log
+          // Funding recommendation without URL
         }
       } else if (line.startsWith('Learning:')) {
         const content = line.replace('Learning:', '').trim();
-        console.log('Learning content:', content); // Debug log
+        // Extract learning content
         
         // Extract URLs from the content (both parentheses format and direct URL format)
         let urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
@@ -87,15 +87,15 @@ export function NextSteps({ sessionData }: NextStepsProps) {
           const fullUrl = url.startsWith('http') ? url : `https://${url}`;
           recommendations.learning.title = content.replace(urlMatch[0], '').trim();
           recommendations.learning.url = fullUrl;
-          console.log('Learning parsed:', { title: recommendations.learning.title, url: recommendations.learning.url }); // Debug log
+          // Learning recommendation parsed
         } else {
           recommendations.learning.title = content;
-          console.log('Learning no URL found:', recommendations.learning.title); // Debug log
+          // Learning recommendation without URL
         }
       }
     });
     
-    console.log('Final recommendations:', recommendations); // Debug log
+    // Final recommendations processed
     return recommendations;
   };
 

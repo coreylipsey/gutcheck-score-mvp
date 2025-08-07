@@ -21,7 +21,7 @@ export const scoreMultipleChoice = (question: AssessmentQuestion, response: stri
     'q7': [5, 4, 3, 2], // Daily=5, Weekly=4, Monthly=3, Rarely=2
     
     // SECTION 3: Resources
-    'q11': [2, 3, 4, 5, 1], // Lack funding=2, Limited mentorship=3, Access customers=4, Scaling=5, Other=1
+    'q11': [2, 3, 4, 5, 0], // Lack funding=2, Limited mentorship=3, Access customers=4, Scaling=5, Other=0
     'q12': [5, 4, 3], // Sufficient=5, Not enough=4, Self-funded=3
     'q13': [5, 4, 3], // Very strong=5, Moderate=4, Weak=3
     'q14': [5, 3], // Yes=5, No=3

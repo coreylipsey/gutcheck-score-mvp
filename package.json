@@ -11,10 +11,7 @@
     "export": "next build",
     "deploy": "npm run build && firebase deploy",
     "start": "next start",
-    "lint": "next lint",
-
-
-    "validate:assessment": "node scripts/validate-assessment-data.js"
+    "lint": "next lint"
   },
   "dependencies": {
 

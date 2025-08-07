@@ -55,6 +55,8 @@ export class CalculateAssessmentScore {
   }
 
   private calculateOverallScore(categoryScores: Record<AssessmentCategory, number>): number {
-    return Object.values(categoryScores).reduce((sum, score) => sum + score, 0);
+    // Sum all category scores to get total (0-100)
+    const overallScore = Object.values(categoryScores).reduce((sum, score) => sum + score, 0);
+    return Math.round(overallScore);
   }
 } 

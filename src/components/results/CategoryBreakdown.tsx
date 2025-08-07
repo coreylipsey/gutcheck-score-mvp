@@ -120,7 +120,7 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
               {/* Score Display */}
               <div className="mb-6">
                 <div className="text-2xl font-bold" style={{ color: '#0A1F44' }}>
-                  {category.score}/{category.max}
+                  {Math.round(category.score)}/{category.max}
                 </div>
                 
                 {/* Progress Bar */}

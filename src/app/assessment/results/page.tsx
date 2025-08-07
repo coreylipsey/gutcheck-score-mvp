@@ -9,6 +9,7 @@ import { HeroScore } from '@/components/results/HeroScore';
 import { CategoryBreakdown } from '@/components/results/CategoryBreakdown';
 import { PersonalizedInsights } from '@/components/results/PersonalizedInsights';
 import { NextSteps } from '@/components/results/NextSteps';
+import ScoringDebug from '@/components/results/ScoringDebug';
 
 export default function ResultsPage() {
   const [sessionData, setSessionData] = useState<FirestoreAssessmentSession | null>(null);
@@ -22,14 +23,14 @@ export default function ResultsPage() {
         if (sessionId) {
           const data = await getAssessmentSession(sessionId);
           if (data) {
-            console.log('Loaded data from Firestore:', data);
+            // Data loaded from Firestore
             setSessionData(data);
           } else {
             // Fallback to localStorage data if Firestore data not found
             const localData = localStorage.getItem('responsesData');
             if (localData) {
               const parsedData = JSON.parse(localData);
-              console.log('Loaded data from localStorage:', parsedData);
+              // Data loaded from localStorage
               // Create a mock session data object from localStorage
               const mockSessionData: FirestoreAssessmentSession = {
                 id: sessionId,
@@ -172,6 +173,14 @@ export default function ResultsPage() {
             className="scroll-mt-20"
           >
             <NextSteps sessionData={sessionData} />
+          </section>
+
+          {/* Scoring Debug Section */}
+          <section 
+            aria-label="Scoring Debug Information"
+            className="scroll-mt-20"
+          >
+            <ScoringDebug sessionData={sessionData} />
           </section>
 
         </div>

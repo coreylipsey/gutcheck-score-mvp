@@ -311,46 +311,66 @@ export const ASSESSMENT_QUESTIONS: Question[] = [
   }
 ];
 
-// 🔒 ASSESSMENT DATA LOCKING MECHANISM
-// =====================================
+// 🔒 MISSION CRITICAL: ASSESSMENT DATA LOCKING MECHANISM
+// =====================================================
 //
-// CRITICAL: This file contains the core assessment data that MUST NOT be changed
-// unless explicitly requested and approved. Any changes to questions, weights,
-// or scoring logic will affect the validity of all assessment results.
+// ⚠️  WARNING: THIS ASSESSMENT DATA IS LOCKED AND SECURED
+// ⚠️  ANY CHANGES WILL BREAK ALL EXISTING ASSESSMENT RESULTS
+// ⚠️  DO NOT MODIFY WITHOUT EXPLICIT INSTRUCTIONS FROM COREY LIPSEY
 //
-// LOCKED ELEMENTS:
+// 🔐 LOCKING MECHANISMS:
+// 1. COMPREHENSIVE COMMENT BLOCK (THIS SECTION)
+// 2. QUESTION COUNT VALIDATION
+// 3. CATEGORY WEIGHT VALIDATION
+// 4. QUESTION STRUCTURE VALIDATION
+// 5. QUESTION TYPE VALIDATION
+// 6. WEIGHT DISTRIBUTION VALIDATION
+//
+// 📋 LOCKED ELEMENTS:
 // - All 25 assessment questions (text, options, types, weights)
 // - Category weights (personalBackground: 20, entrepreneurialSkills: 25, etc.)
 // - Question weights within each category
 // - Validation prompts for open-ended questions
 // - Question IDs and structure
+// - Question types and options
 //
-// TO UNLOCK FOR CHANGES:
-// 1. Remove this comment block
+// 🚫 TO UNLOCK FOR CHANGES:
+// 1. Remove this entire comment block
 // 2. Make the required changes
-// 3. Add a new comment block with the date and reason for changes
-// 4. Update any related scoring logic in ScoringService.ts
-// 5. Test thoroughly to ensure scoring accuracy is maintained
+// 3. Add a new comment block with:
+//    - Date and time of changes
+//    - Explicit approval from Corey Lipsey
+//    - Reason for changes
+//    - Impact on existing results
+// 4. Update all validation functions
+// 5. Test thoroughly with existing data
+// 6. Document changes in commit message
 //
-// LAST VALIDATED: 2025-01-27 - Clean Architecture refactor completion
-// VALIDATION STATUS: ✅ All questions, weights, and scoring logic match original git history
+// 📅 LOCKED ON: 2025-01-27
+// 🔒 LOCKED BY: Corey Lipsey (MISSION CRITICAL)
+// ✅ VALIDATION STATUS: All assessment data verified and secured
+// 🎯 TARGET SCORE RANGE: 39-100 points (0-100 scale)
 
 // Validation function to ensure data integrity
 export function validateAssessmentDataIntegrity(): boolean {
-  // Check that we have exactly 25 questions
+  console.log('🔒 Validating assessment data integrity...');
+  
+  let allValid = true;
+
+  // 1. Check that we have exactly 25 questions
   if (ASSESSMENT_QUESTIONS.length !== 25) {
     console.error('❌ CRITICAL: Assessment must have exactly 25 questions');
-    return false;
+    allValid = false;
   }
 
-  // Check category weights sum to 100
+  // 2. Check category weights sum to 100
   const totalWeight = Object.values(CATEGORY_WEIGHTS).reduce((sum, weight) => sum + weight, 0);
   if (totalWeight !== 100) {
     console.error('❌ CRITICAL: Category weights must sum to 100');
-    return false;
+    allValid = false;
   }
 
-  // Check that each category has the correct number of questions
+  // 3. Check that each category has the correct number of questions
   const categoryCounts = {
     personalBackground: 0,
     entrepreneurialSkills: 0,
@@ -374,11 +394,11 @@ export function validateAssessmentDataIntegrity(): boolean {
   for (const [category, count] of Object.entries(categoryCounts)) {
     if (count !== expectedCounts[category as keyof typeof expectedCounts]) {
       console.error(`❌ CRITICAL: Category ${category} must have exactly ${expectedCounts[category as keyof typeof expectedCounts]} questions`);
-      return false;
+      allValid = false;
     }
   }
 
-  // Check that question weights are correct
+  // 4. Check that question weights are correct
   const expectedWeights = {
     personalBackground: 4, // 20% / 5 questions = 4% each
     entrepreneurialSkills: 5, // 25% / 5 questions = 5% each
@@ -391,12 +411,63 @@ export function validateAssessmentDataIntegrity(): boolean {
     const expectedWeight = expectedWeights[question.category];
     if (question.weight !== expectedWeight) {
       console.error(`❌ CRITICAL: Question ${question.id} weight should be ${expectedWeight}, got ${question.weight}`);
-      return false;
+      allValid = false;
     }
   }
 
-  console.log('✅ Assessment data integrity validated successfully');
-  return true;
+  // 5. Validate question structure and types
+  const expectedQuestionTypes = {
+    'q1': 'multipleChoice', 'q2': 'multipleChoice', 'q3': 'openEnded', 'q4': 'multipleChoice', 'q5': 'multipleChoice',
+    'q6': 'multipleChoice', 'q7': 'multipleChoice', 'q8': 'openEnded', 'q9': 'multiSelect', 'q10': 'likert',
+    'q11': 'multipleChoice', 'q12': 'multipleChoice', 'q13': 'multipleChoice', 'q14': 'multipleChoice', 'q15': 'multipleChoice',
+    'q16': 'multipleChoice', 'q17': 'multipleChoice', 'q18': 'openEnded', 'q19': 'likert', 'q20': 'multipleChoice',
+    'q21': 'multipleChoice', 'q22': 'multipleChoice', 'q23': 'openEnded', 'q24': 'multipleChoice', 'q25': 'multipleChoice',
+  };
+
+  for (const [questionId, expectedType] of Object.entries(expectedQuestionTypes)) {
+    const question = ASSESSMENT_QUESTIONS.find(q => q.id === questionId);
+    if (!question) {
+      console.error(`❌ CRITICAL: Missing question ${questionId}`);
+      allValid = false;
+      continue;
+    }
+    
+    if (question.type !== expectedType) {
+      console.error(`❌ CRITICAL: Question type mismatch for ${questionId}. Expected: ${expectedType}, Got: ${question.type}`);
+      allValid = false;
+    }
+  }
+
+  // 6. Validate question options for multiple choice questions
+  const expectedOptions = {
+    'q1': 3, 'q2': 3, 'q4': 3, 'q5': 4,
+    'q6': 4, 'q7': 4,
+    'q11': 5, 'q12': 3, 'q13': 3, 'q14': 2, 'q15': 4,
+    'q16': 4, 'q17': 3, 'q20': 3,
+    'q21': 3, 'q22': 4, 'q24': 4, 'q25': 3,
+  };
+
+  for (const [questionId, expectedOptionCount] of Object.entries(expectedOptions)) {
+    const question = ASSESSMENT_QUESTIONS.find(q => q.id === questionId);
+    if (question && question.options) {
+      if (question.options.length !== expectedOptionCount) {
+        console.error(`❌ CRITICAL: Question ${questionId} should have ${expectedOptionCount} options, got ${question.options.length}`);
+        allValid = false;
+      }
+    }
+  }
+
+  if (allValid) {
+    console.log('✅ Assessment data integrity validated successfully');
+    console.log('🔒 All assessment data is locked and secured');
+    console.log('🎯 Target score range: 35-100 points (0-100 scale)');
+  } else {
+    console.error('❌ CRITICAL: Assessment data validation failed');
+    console.error('🚫 Build blocked - assessment integrity compromised');
+    throw new Error('Assessment data validation failed - build blocked');
+  }
+
+  return allValid;
 }
 
 // Run validation on module load
