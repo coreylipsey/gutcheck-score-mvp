@@ -19,8 +19,8 @@ export class GeminiAIService implements IAIScoringService {
 
     const questionType = questionTypeMap[questionId] || 'entrepreneurialJourney';
 
-    // Call our API route directly
-    const apiResponse = await fetch('/api/gemini/score', {
+    // Call Firebase Function instead of Next.js API route
+    const apiResponse = await fetch('https://us-central1-gutcheck-score-mvp.cloudfunctions.net/scoreQuestion', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
