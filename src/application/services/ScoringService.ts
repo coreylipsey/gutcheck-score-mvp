@@ -47,7 +47,8 @@ import { IAIScoringService } from '../../domain/repositories/IAIScoringService';
 
 // Validation function to ensure scoring integrity
 function validateScoringSystemIntegrity(): boolean {
-  // Validate scoring maps
+  // Validate scoring maps (used for validation)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const expectedScoringMaps = {
     'q1': [3, 4, 5],
     'q2': [3, 4, 5],

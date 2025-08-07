@@ -1,7 +1,7 @@
 import React from 'react';
-import { AssessmentSession } from '../../domain/entities/Assessment';
-import { ASSESSMENT_QUESTIONS } from '../../domain/entities/Assessment';
-import { ScoringService } from '../../application/services/ScoringService';
+import { AssessmentSession, ASSESSMENT_QUESTIONS } from '../../domain/entities/Assessment';
+import { Question } from '../../domain/entities/Question';
+
 import { GeminiAIService } from '../../infrastructure/services/GeminiAIService';
 
 interface ScoringDebugProps {
@@ -25,7 +25,7 @@ export default function ScoringDebug({ sessionData }: ScoringDebugProps) {
   React.useEffect(() => {
     async function calculateQuestionScores() {
       const aiService = new GeminiAIService(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
-      const scoringService = new ScoringService(aiService);
+  
       
       const scores: QuestionScore[] = [];
 
@@ -70,7 +70,7 @@ export default function ScoringDebug({ sessionData }: ScoringDebugProps) {
                 question.text
               );
               rawScore = result.score;
-            } catch (error) {
+            } catch {
               rawScore = -1; // Error indicator
             }
             break;
@@ -95,7 +95,7 @@ export default function ScoringDebug({ sessionData }: ScoringDebugProps) {
   }, [sessionData]);
 
   // Scoring helper functions (copied from ScoringService)
-  function scoreMultipleChoice(question: any, response: string): number {
+  function scoreMultipleChoice(question: Question, response: string): number {
     if (!question.options) return 0;
     
     const optionIndex = question.options.indexOf(response);
@@ -135,7 +135,7 @@ export default function ScoringDebug({ sessionData }: ScoringDebugProps) {
     return Math.max(1, Math.min(5, response));
   }
 
-  function scoreMultiSelect(question: any, responses: string[]): number {
+  function scoreMultiSelect(question: Question, responses: string[]): number {
     if (!question.options) return 0;
     const completedCount = responses.length;
     const totalOptions = question.options.length;
