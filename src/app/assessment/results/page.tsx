@@ -38,7 +38,7 @@ export default function ResultsPage() {
                 userId: undefined,
                 responses: parsedData.responses || [],
                 scores: parsedData.scores || {
-                  overall: 0,
+                  overallScore: 0,
                   personalBackground: 0,
                   entrepreneurialSkills: 0,
                   resources: 0,
@@ -77,7 +77,7 @@ export default function ResultsPage() {
             userId: undefined,
             responses: parsedData.responses || [],
             scores: parsedData.scores || {
-              overall: 0,
+              overallScore: 0,
               personalBackground: 0,
               entrepreneurialSkills: 0,
               resources: 0,

@@ -150,7 +150,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
         
         <div className="space-y-4 text-gray-700 leading-relaxed">
           <p>
-            Your Gutcheck Score of {Math.round(sessionData.scores.overall)}/100 places you in the
+            Your Gutcheck Score of {Math.round(sessionData.scores.overallScore)}/100 places you in the
             <strong style={{ color: '#0A1F44' }}> {sessionData.starRating === 1 ? 'Early Spark' :
              sessionData.starRating === 2 ? 'Developing Potential' :
              sessionData.starRating === 3 ? 'Emerging Traction' :

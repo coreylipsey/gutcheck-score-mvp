@@ -9,7 +9,7 @@ interface HeroScoreProps {
 export function HeroScore({ sessionData }: HeroScoreProps) {
   const [showStarDefinitions, setShowStarDefinitions] = useState(false);
   
-  const overallScore = Math.round(sessionData.scores.overall);
+  const overallScore = Math.round(sessionData.scores.overallScore);
   const maxScore = 100;
   
   // Star rating thresholds
