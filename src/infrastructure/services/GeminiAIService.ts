@@ -9,9 +9,38 @@ export class GeminiAIService implements IAIScoringService {
     response: string,
     questionText: string
   ): Promise<AIScoringResult> {
-    const prompt = this.buildScoringPrompt(questionId, response, questionText);
-    const result = await this.callGemini(prompt);
-    return this.parseResponse(result);
+    // Map question IDs to question types
+    const questionTypeMap: Record<string, string> = {
+      'q3': 'entrepreneurialJourney',
+      'q8': 'businessChallenge', 
+      'q18': 'setbacksResilience',
+      'q23': 'finalVision'
+    };
+
+    const questionType = questionTypeMap[questionId] || 'entrepreneurialJourney';
+
+    // Call our API route directly
+    const apiResponse = await fetch('/api/gemini/score', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        questionType,
+        response,
+        questionText
+      })
+    });
+
+    if (!apiResponse.ok) {
+      throw new Error(`API error: ${apiResponse.statusText}`);
+    }
+
+    const data = await apiResponse.json();
+    return {
+      score: data.score || 3,
+      explanation: data.explanation || 'AI evaluation completed'
+    };
   }
 
   async generateFeedback(
@@ -170,45 +199,42 @@ Provide 3-4 specific, actionable next steps in bullet points. Include resources,
   }
 
   private async callGemini(prompt: string): Promise<string> {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt
-                }
-              ]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.3,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 512,
-          }
-        })
-      }
-    );
+    // Map question IDs to question types for the API
+    const questionTypeMap: Record<string, string> = {
+      'q3': 'entrepreneurialJourney',
+      'q8': 'businessChallenge', 
+      'q18': 'setbacksResilience',
+      'q23': 'finalVision'
+    };
 
-    if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.statusText}`);
+    // Extract question ID from the prompt
+    const questionIdMatch = prompt.match(/questionId.*?['"`]([^'"`]+)['"`]/);
+    const questionId = questionIdMatch ? questionIdMatch[1] : 'q3';
+    const questionType = questionTypeMap[questionId] || 'entrepreneurialJourney';
+
+    // Extract response from the prompt
+    const responseMatch = prompt.match(/Founder's Response:\s*([\s\S]*?)(?=\n\n|Return your evaluation|$)/);
+    const response = responseMatch ? responseMatch[1].trim() : '';
+
+    // Call our API route
+    const apiResponse = await fetch('/api/gemini/score', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        questionType,
+        response,
+        questionText: 'Open-ended question response'
+      })
+    });
+
+    if (!apiResponse.ok) {
+      throw new Error(`API error: ${apiResponse.statusText}`);
     }
 
-    const data = await response.json();
-    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
-    if (!responseText) {
-      throw new Error('No response from Gemini API');
-    }
-
-    return responseText;
+    const data = await apiResponse.json();
+    return data.explanation || 'AI evaluation completed';
   }
 
   private parseResponse(response: string): AIScoringResult {
