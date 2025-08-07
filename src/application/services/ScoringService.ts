@@ -146,7 +146,11 @@ export class ScoringService {
       return result.score;
     } catch (error) {
       console.error('AI scoring failed:', error);
-      return 3; // Fallback score
+      // Return a reasonable score based on response length and content
+      const responseLength = response.trim().length;
+      if (responseLength >= 200) return 4;
+      if (responseLength >= 100) return 3;
+      return 2;
     }
   }
 

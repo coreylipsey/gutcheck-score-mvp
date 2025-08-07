@@ -11,7 +11,7 @@ export function setupDependencies(): void {
 
   // Register infrastructure services
   container.register('IAIScoringService', () => 
-    new GeminiAIService(process.env.GEMINI_API_KEY || '')
+    new GeminiAIService(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '')
   );
 
   container.register('IAssessmentRepository', () => 

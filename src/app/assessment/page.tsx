@@ -291,11 +291,24 @@ export default function AssessmentPage() {
         {isLocationStep ? (
           renderLocationStep()
         ) : (
-          <AssessmentQuestion
-            question={currentQuestion!}
-            onChange={handleResponse}
-            value={responses.find(r => r.questionId === currentQuestion!.id)?.response}
-          />
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {currentQuestion?.text}
+              </h2>
+              {currentQuestion?.section && (
+                <p className="text-sm text-gray-500">
+                  Section: {currentQuestion.section}
+                </p>
+              )}
+            </div>
+
+            <AssessmentQuestion
+              question={currentQuestion!}
+              onChange={handleResponse}
+              value={responses.find(r => r.questionId === currentQuestion!.id)?.response}
+            />
+          </div>
         )}
 
         {/* Navigation */}

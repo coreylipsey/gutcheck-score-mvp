@@ -199,6 +199,7 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
 
   return (
     <div className="space-y-6">
+      {/* Response Options */}
       {question.type === 'multipleChoice' && renderMultipleChoice()}
       {question.type === 'multiSelect' && renderMultiSelect()}
       {question.type === 'likert' && renderLikert()}
