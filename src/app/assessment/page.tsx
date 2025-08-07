@@ -85,6 +85,7 @@ export default function AssessmentPage() {
     try {
       // Calculate scores using the new architecture
       const scores = await calculateScores(responses);
+      console.log('Scores calculated in handleSubmit:', scores);
       
       // Generate AI feedback
       const geminiFeedback = await generateAIFeedback({

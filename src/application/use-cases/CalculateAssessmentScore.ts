@@ -55,8 +55,18 @@ export class CalculateAssessmentScore {
   }
 
   private calculateOverallScore(categoryScores: Record<AssessmentCategory, number>): number {
+    console.log('Overall score calculation - category scores:', categoryScores);
+    
     // Sum all category scores to get total (0-100)
-    const overallScore = Object.values(categoryScores).reduce((sum, score) => sum + score, 0);
-    return Math.round(overallScore);
+    const overallScore = Object.values(categoryScores).reduce((sum, score) => {
+      console.log(`Adding ${score} to sum ${sum}`);
+      return sum + score;
+    }, 0);
+    
+    console.log('Final overall score before rounding:', overallScore);
+    const roundedScore = Math.round(overallScore);
+    console.log('Final overall score after rounding:', roundedScore);
+    
+    return roundedScore;
   }
 } 
