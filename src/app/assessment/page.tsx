@@ -100,11 +100,17 @@ export default function AssessmentPage() {
       // Store session ID in localStorage for results page
       localStorage.setItem('sessionId', sessionId);
       
+      // Calculate star rating using proper function
+      const starRating = scores.overallScore >= 80 ? 5 : 
+                        scores.overallScore >= 60 ? 4 : 
+                        scores.overallScore >= 40 ? 3 : 
+                        scores.overallScore >= 20 ? 2 : 1;
+      
       // Store responses data in localStorage as fallback
       localStorage.setItem('responsesData', JSON.stringify({
         responses,
         scores,
-        starRating: Math.ceil(scores.overallScore / 20),
+        starRating,
         categoryBreakdown: {
           personalBackground: scores.personalBackground,
           entrepreneurialSkills: scores.entrepreneurialSkills,
@@ -122,7 +128,7 @@ export default function AssessmentPage() {
         sessionId,
         responses,
         scores,
-        starRating: Math.ceil(scores.overallScore / 20), // Convert to 1-5 scale
+        starRating,
         categoryBreakdown: {
           personalBackground: scores.personalBackground,
           entrepreneurialSkills: scores.entrepreneurialSkills,
