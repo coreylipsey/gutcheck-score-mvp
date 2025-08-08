@@ -156,39 +156,26 @@ export default function AssessmentPage() {
   };
 
   const renderLocationStep = () => (
-    <div className="max-w-2xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900">Tell us about your business</h2>
-      <div className="space-y-4">
+    <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          Tell us about your business
+        </h2>
+        <p className="text-sm text-gray-500">
+          This information helps us provide more personalized feedback and recommendations
+        </p>
+      </div>
+
+      <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium mb-2 text-gray-900">Industry</label>
+          <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+            Where is your business located?
+          </label>
           <select
-            value={industry}
-            onChange={(e) => setIndustry(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-          >
-            <option value="">Select an industry</option>
-            <option value="Technology & Software">Technology & Software</option>
-            <option value="E-Commerce & Retail">E-Commerce & Retail</option>
-            <option value="Healthcare & Biotech">Healthcare & Biotech</option>
-            <option value="Finance & FinTech">Finance & FinTech</option>
-            <option value="Real Estate & PropTech">Real Estate & PropTech</option>
-            <option value="Education & EdTech">Education & EdTech</option>
-            <option value="Food & Beverage">Food & Beverage</option>
-            <option value="Manufacturing & Consumer Goods">Manufacturing & Consumer Goods</option>
-            <option value="Creative & Media">Creative & Media</option>
-            <option value="Transportation & Logistics">Transportation & Logistics</option>
-            <option value="Energy & Sustainability">Energy & Sustainability</option>
-            <option value="Professional Services (Consulting, Law, etc.)">Professional Services (Consulting, Law, etc.)</option>
-            <option value="Government & Nonprofit">Government & Nonprofit</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2 text-gray-900">Location</label>
-          <select
+            id="location"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Select a location</option>
             <option value="Alabama">Alabama</option>
@@ -249,6 +236,34 @@ export default function AssessmentPage() {
             <option value="U.S. Virgin Islands">U.S. Virgin Islands</option>
           </select>
         </div>
+
+        <div>
+          <label htmlFor="industry" className="block text-sm font-medium text-gray-700 mb-2">
+            What industry is your business in?
+          </label>
+          <select
+            id="industry"
+            value={industry}
+            onChange={(e) => setIndustry(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Select an industry</option>
+            <option value="Technology & Software">Technology & Software</option>
+            <option value="E-Commerce & Retail">E-Commerce & Retail</option>
+            <option value="Healthcare & Biotech">Healthcare & Biotech</option>
+            <option value="Finance & FinTech">Finance & FinTech</option>
+            <option value="Real Estate & PropTech">Real Estate & PropTech</option>
+            <option value="Education & EdTech">Education & EdTech</option>
+            <option value="Food & Beverage">Food & Beverage</option>
+            <option value="Manufacturing & Consumer Goods">Manufacturing & Consumer Goods</option>
+            <option value="Creative & Media">Creative & Media</option>
+            <option value="Transportation & Logistics">Transportation & Logistics</option>
+            <option value="Energy & Sustainability">Energy & Sustainability</option>
+            <option value="Professional Services (Consulting, Law, etc.)">Professional Services (Consulting, Law, etc.)</option>
+            <option value="Government & Nonprofit">Government & Nonprofit</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
       </div>
     </div>
   );
@@ -271,18 +286,20 @@ export default function AssessmentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Progress Bar */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-900">
-              Question {currentStep + 1} of {totalQuestions}
-            </span>
-            <span className="text-sm font-medium text-gray-900">
-              {Math.round(progress)}% Complete
-            </span>
-          </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Gutcheck Score™ Assessment
+          </h1>
+          <p className="text-gray-600">
+            {isLocationStep ? 'Step 1 of 2: Business Information' : `Question ${currentStep} of ${totalQuestions}`}
+          </p>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="mb-8">
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
@@ -290,10 +307,24 @@ export default function AssessmentPage() {
             />
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Content */}
         {isLocationStep ? (
           renderLocationStep()
         ) : (
@@ -311,28 +342,34 @@ export default function AssessmentPage() {
 
             <AssessmentQuestion
               question={currentQuestion!}
+              value={responses.find(r => r.questionId === currentQuestion?.id)?.response}
               onChange={handleResponse}
-              value={responses.find(r => r.questionId === currentQuestion!.id)?.response}
             />
           </div>
         )}
 
         {/* Navigation */}
-        <div className="flex justify-between mt-8">
+        <div className="flex justify-between items-center">
           <button
             onClick={handlePrevious}
             disabled={currentStep === 0}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Previous
           </button>
-          
+
           <button
             onClick={handleNext}
             disabled={!canProceed() || isSubmitting}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
           >
-            {isSubmitting ? 'Processing...' : currentStep === totalQuestions - 1 ? 'Submit' : 'Next'}
+            {isSubmitting && (
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
+            <span>{isSubmitting ? 'Processing...' : currentStep === totalQuestions - 1 ? 'Submit Assessment' : 'Next'}</span>
           </button>
         </div>
       </div>
