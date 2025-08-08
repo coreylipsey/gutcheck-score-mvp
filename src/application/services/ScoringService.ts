@@ -142,17 +142,12 @@ export class ScoringService {
           rawScore = 0;
       }
 
-      // Debug logging
-      console.log(`Question ${question.id}: rawScore=${rawScore}, categoryWeight=${categoryWeight}`);
-      
       // Normalize score to category weight (0-100 scale)
       // Framework formula: (Raw Score / 5) × (Category Weight / 5)
       const normalizedScore = (rawScore / 5) * (categoryWeight / 5);
-      console.log(`Question ${question.id}: normalizedScore=${normalizedScore}`);
       totalNormalizedScore += normalizedScore;
     }
 
-    console.log(`Category ${category}: totalNormalizedScore=${totalNormalizedScore}, finalScore=${Math.round(totalNormalizedScore)}`);
     return Math.round(totalNormalizedScore);
   }
 
@@ -221,7 +216,6 @@ export class ScoringService {
 
   private async scoreOpenEndedWithAI(question: Question, response: string): Promise<number> {
     if (!this.validateOpenEndedResponse(response, question.minCharacters || 100)) {
-      console.log(`Question ${question.id}: validation failed, returning 0`);
       return 0;
     }
 
@@ -231,7 +225,6 @@ export class ScoringService {
         response,
         question.text
       );
-      console.log(`Question ${question.id}: AI score=${result.score}`);
       return result.score;
     } catch (error) {
       console.error(`Question ${question.id}: AI scoring failed, returning fallback score 3`, error);
