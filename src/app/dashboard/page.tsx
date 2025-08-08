@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { useAuthContext } from '@/presentation/providers/AuthProvider';
 
 interface AssessmentHistory {
   sessionId: string;
@@ -9,8 +11,9 @@ interface AssessmentHistory {
   overallScore: number;
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const [assessmentHistory, setAssessmentHistory] = useState<AssessmentHistory[]>([]);
+  const { user, logout } = useAuthContext();
 
   useEffect(() => {
     // Check localStorage for assessment data
@@ -37,15 +40,30 @@ export default function DashboardPage() {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Dashboard
-            </h1>
-            <Link
-              href="/assessment"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Take New Assessment
-            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Dashboard
+              </h1>
+              {user && (
+                <p className="text-sm text-gray-600 mt-1">
+                  Welcome back, {user.displayName || user.email}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link
+                href="/assessment"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Take New Assessment
+              </Link>
+              <button
+                onClick={logout}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50"
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -188,5 +206,13 @@ export default function DashboardPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
   );
 } 

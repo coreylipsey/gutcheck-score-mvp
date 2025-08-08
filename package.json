@@ -14,7 +14,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-
     "@google/generative-ai": "^0.24.1",
     "@headlessui/react": "^2.2.7",
     "@heroicons/react": "^2.2.0",
@@ -27,9 +26,9 @@
     "puppeteer": "^24.15.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-hook-form": "^7.61.1",
+    "react-hook-form": "^7.62.0",
     "tailwind-merge": "^3.3.1",
-    "zod": "^4.0.14"
+    "zod": "^4.0.15"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

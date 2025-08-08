@@ -9,12 +9,16 @@ import { HeroScore } from '@/components/results/HeroScore';
 import { CategoryBreakdown } from '@/components/results/CategoryBreakdown';
 import { PersonalizedInsights } from '@/components/results/PersonalizedInsights';
 import { NextSteps } from '@/components/results/NextSteps';
+import { ClaimScoreModal } from '@/components/auth/ClaimScoreModal';
+import { useAuthContext } from '@/presentation/providers/AuthProvider';
 
 
 export default function ResultsPage() {
   const [sessionData, setSessionData] = useState<FirestoreAssessmentSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showClaimModal, setShowClaimModal] = useState(false);
+  const { user } = useAuthContext();
 
   useEffect(() => {
     const loadResults = async () => {
@@ -175,10 +179,69 @@ export default function ResultsPage() {
             <NextSteps sessionData={sessionData} />
           </section>
 
-
+          {/* Claim Score Section for Anonymous Users */}
+          {sessionData.isAnonymous && !user && (
+            <section 
+              aria-label="Save Your Score"
+              className="scroll-mt-20"
+            >
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <div className="text-center">
+                  <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-[#147AFF] to-[#19C2A0] mb-6">
+                    <svg
+                      className="h-8 w-8 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-3xl font-bold text-[#0A1F44] mb-4">
+                    Save Your Gutcheck Score
+                  </h2>
+                  <p className="text-gray-600 mb-8 max-w-2xl mx-auto text-lg">
+                    Create a free account to save your results, track your progress over time, 
+                    and get personalized insights and recommendations for your entrepreneurial journey.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button
+                      onClick={() => setShowClaimModal(true)}
+                      className="px-8 py-4 bg-gradient-to-r from-[#147AFF] to-[#19C2A0] text-white rounded-xl hover:from-[#147AFF]/90 hover:to-[#19C2A0]/90 focus:outline-none focus:ring-2 focus:ring-[#147AFF] focus:ring-offset-2 transition-all font-bold shadow-lg"
+                    >
+                      Create Account & Save Score
+                    </button>
+                    <Link
+                      href="/auth"
+                      className="px-8 py-4 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#147AFF] focus:ring-offset-2 transition-all font-semibold"
+                    >
+                      Sign In to Existing Account
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
 
         </div>
       </div>
+
+      {/* Claim Score Modal */}
+      <ClaimScoreModal
+        isOpen={showClaimModal}
+        onClose={() => setShowClaimModal(false)}
+        onClaimSuccess={() => {
+          setShowClaimModal(false);
+          // Optionally refresh the page or update the session data
+          window.location.reload();
+        }}
+        sessionId={sessionData?.sessionId}
+      />
     </div>
   );
 }

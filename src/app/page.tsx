@@ -1,6 +1,11 @@
+'use client';
+
 import Link from 'next/link';
+import { useAuthContext } from '../presentation/providers/AuthProvider';
 
 export default function Home() {
+  const { user, logout } = useAuthContext();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
@@ -16,9 +21,23 @@ export default function Home() {
               <Link href="/assessment" className="text-gray-500 hover:text-gray-900">
                 Take Assessment
               </Link>
-              <Link href="/dashboard" className="text-gray-500 hover:text-gray-900">
-                Dashboard
-              </Link>
+              {user ? (
+                <>
+                  <Link href="/dashboard" className="text-gray-500 hover:text-gray-900">
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={logout}
+                    className="text-gray-500 hover:text-gray-900"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link href="/auth" className="text-gray-500 hover:text-gray-900">
+                  Sign In
+                </Link>
+              )}
             </nav>
           </div>
         </div>
