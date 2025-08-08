@@ -16,7 +16,7 @@ const registerSchema = z.object({
   confirmPassword: z.string(),
   displayName: z.string().min(2, 'Name must be at least 2 characters').optional(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: "Passwords don&apos;t match",
   path: ["confirmPassword"],
 });
 
@@ -79,7 +79,7 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, loadi
               <p className="text-[#0A1F44]/90 font-medium">
                 {mode === 'login' 
                   ? 'Your entrepreneurial potential, quantified and visible.'
-                  : 'Show them what they can\'t see.'
+                  : 'Show them what they can&apos;t see.'
                 }
               </p>
             </div>
@@ -88,7 +88,7 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, loadi
           {/* Value Proposition Card */}
           <div className="bg-white border border-gray-200 rounded-2xl p-6 lg:p-8 shadow-lg">
             <h3 className="font-bold text-[#0A1F44] text-lg mb-6">
-              {mode === 'login' ? 'Your Progress Awaits' : 'What You\'ll Unlock'}
+              {mode === 'login' ? 'Your Progress Awaits' : 'What You&apos;ll Unlock'}
             </h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -269,7 +269,7 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, loadi
 
             <div className="mt-8 text-center">
               <p className="text-gray-600">
-                {mode === 'login' ? "Don't have an account? " : "Already have an account? "}
+                {mode === 'login' ? "Don&apos;t have an account? " : "Already have an account? "}
                 <button
                   onClick={onModeChange}
                   className="text-[#147AFF] hover:text-[#147AFF]/80 font-semibold underline"
