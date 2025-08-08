@@ -58,7 +58,7 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
   };
 
   const renderMultipleChoice = () => (
-    <div className="space-y-3">
+    <div className="space-y-3" role="radiogroup" aria-labelledby={`question-${question.id}`}>
       {question.options?.map((option, index) => (
         <label
           key={index}
@@ -75,15 +75,16 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
             checked={value === option}
             onChange={() => handleMultipleChoiceChange(option)}
             className="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+            aria-describedby={`option-${question.id}-${index}`}
           />
-          <span className="ml-3 text-gray-900">{option}</span>
+          <span className="ml-3 text-gray-900" id={`option-${question.id}-${index}`}>{option}</span>
         </label>
       ))}
     </div>
   );
 
   const renderMultiSelect = () => (
-    <div className="space-y-3">
+    <div className="space-y-3" role="group" aria-labelledby={`question-${question.id}`}>
       {question.options?.map((option, index) => (
         <label
           key={index}
@@ -100,12 +101,13 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
             checked={selectedOptions.includes(option)}
             onChange={() => handleMultiSelectChange(option)}
             className="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 rounded"
+            aria-describedby={`option-${question.id}-${index}`}
           />
-          <span className="ml-3 text-gray-900">{option}</span>
+          <span className="ml-3 text-gray-900" id={`option-${question.id}-${index}`}>{option}</span>
         </label>
       ))}
       {selectedOptions.length > 0 && (
-        <div className="text-sm text-gray-600 mt-2">
+        <div className="text-sm text-gray-600 mt-2" aria-live="polite">
           Selected: {selectedOptions.length} of {question.options?.length} options
         </div>
       )}
@@ -117,8 +119,8 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
     const isFearOfFailure = question.id === 'q19';
     
     return (
-      <div className="space-y-4">
-        <div className="text-sm text-gray-600 mb-4">
+      <div className="space-y-4" role="group" aria-labelledby={`question-${question.id}`}>
+        <div className="text-sm text-gray-600 mb-4" id={`question-${question.id}`}>
           {isFearOfFailure 
             ? "Rate how much fear of failure prevents you from taking bold steps in your business"
             : "Rate your confidence level from 1 (Not at all confident) to 5 (Extremely confident)"
@@ -128,7 +130,7 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
           <span className="text-sm text-gray-500">
             {isFearOfFailure ? "1 - Not at all" : "1 - Not at all confident"}
           </span>
-          <div className="flex space-x-2">
+          <div className="flex space-x-2" role="radiogroup" aria-label="Rating scale">
             {[1, 2, 3, 4, 5].map((rating) => (
               <button
                 key={rating}
@@ -139,6 +141,8 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
                     ? 'border-blue-500 bg-blue-500 text-white'
                     : 'border-gray-300 text-gray-700 hover:border-blue-300'
                 }`}
+                aria-pressed={value === rating}
+                aria-label={`Rating ${rating}`}
               >
                 {rating}
               </button>
@@ -153,7 +157,7 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
   };
 
   const renderOpenEnded = () => (
-    <div className="space-y-4">
+    <div className="space-y-4" role="group" aria-labelledby={`question-${question.id}`}>
       {question.subHeading && (
         <div className="bg-gray-50 p-4 rounded-lg">
           <p className="text-gray-700 italic">{question.subHeading}</p>
@@ -168,6 +172,9 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
           !isValid && characterCount > 0 ? 'border-red-300 focus:ring-red-500' : ''
         }`}
         rows={6}
+        aria-labelledby={`question-${question.id}`}
+        aria-describedby={`char-count-${question.id} ${!isValid && characterCount > 0 ? 'error-' + question.id : ''}`}
+        aria-invalid={!isValid && characterCount > 0}
       />
       
       <div className="flex justify-between items-center text-sm">
@@ -180,13 +187,13 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
         </div>
         <div className={`font-medium ${
           characterCount < (question.minCharacters || 0) ? 'text-red-600' : 'text-green-600'
-        }`}>
+        }`} id={`char-count-${question.id}`} aria-live="polite">
           {characterCount} characters
         </div>
       </div>
       
       {!isValid && characterCount > 0 && (
-        <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+        <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg" id={`error-${question.id}`} role="alert">
           Please provide a more detailed and thoughtful response. Your answer should be at least {question.minCharacters} characters and show genuine reflection on the question.
         </div>
       )}
