@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AssessmentQuestion from '@/components/AssessmentQuestion';
-import { ASSESSMENT_QUESTIONS } from '../../domain/entities/Assessment';
-import { AssessmentResponse } from '../../types/assessment';
-import { useAssessment } from '../../presentation/hooks/useAssessment';
-import { validateOpenEndedResponse } from '../../application/services/ValidationService';
+import { ASSESSMENT_QUESTIONS } from '@/domain/entities/Assessment';
+import { AssessmentResponse } from '@/domain/entities/Assessment';
+import { useAssessment } from '@/presentation/hooks/useAssessment';
+import { validateOpenEndedResponse } from '@/utils/scoring';
 
 export default function AssessmentPage() {
   const router = useRouter();
