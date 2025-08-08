@@ -8,7 +8,8 @@ import {
   signOut, 
   sendPasswordResetEmail,
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  AuthError as FirebaseAuthError
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { createUser, getUser } from '@/lib/firestore';
@@ -68,10 +69,11 @@ export function useAuth() {
       await createUser(userCredential.user.uid, email, displayName);
       
       return userCredential.user;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const firebaseError = err as FirebaseAuthError;
       const authError: AuthError = {
-        code: err.code,
-        message: getErrorMessage(err.code),
+        code: firebaseError.code,
+        message: getErrorMessage(firebaseError.code),
       };
       setError(authError);
       throw authError;
@@ -83,10 +85,11 @@ export function useAuth() {
       setError(null);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       return userCredential.user;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const firebaseError = err as FirebaseAuthError;
       const authError: AuthError = {
-        code: err.code,
-        message: getErrorMessage(err.code),
+        code: firebaseError.code,
+        message: getErrorMessage(firebaseError.code),
       };
       setError(authError);
       throw authError;
@@ -97,10 +100,11 @@ export function useAuth() {
     try {
       setError(null);
       await signOut(auth);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const firebaseError = err as FirebaseAuthError;
       const authError: AuthError = {
-        code: err.code,
-        message: getErrorMessage(err.code),
+        code: firebaseError.code,
+        message: getErrorMessage(firebaseError.code),
       };
       setError(authError);
       throw authError;
@@ -111,10 +115,11 @@ export function useAuth() {
     try {
       setError(null);
       await sendPasswordResetEmail(auth, email);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const firebaseError = err as FirebaseAuthError;
       const authError: AuthError = {
-        code: err.code,
-        message: getErrorMessage(err.code),
+        code: firebaseError.code,
+        message: getErrorMessage(firebaseError.code),
       };
       setError(authError);
       throw authError;

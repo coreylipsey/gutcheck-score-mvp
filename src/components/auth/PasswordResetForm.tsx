@@ -33,7 +33,7 @@ export function PasswordResetForm({ onSubmit, onBack, loading = false, error, su
     try {
       await onSubmit(data);
       reset();
-    } catch (err) {
+    } catch {
       // Error is handled by the parent component
     }
   };

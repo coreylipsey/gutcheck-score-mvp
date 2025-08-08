@@ -8,6 +8,19 @@ import { PasswordResetForm } from '../../components/auth/PasswordResetForm';
 
 type AuthMode = 'login' | 'register' | 'reset';
 
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+interface RegisterData {
+  email: string;
+  password: string;
+  displayName: string;
+}
+
+type AuthFormData = LoginData | RegisterData;
+
 export default function AuthPage() {
   const [mode, setMode] = useState<AuthMode>('login');
   const [loading, setLoading] = useState(false);
@@ -15,19 +28,21 @@ export default function AuthPage() {
   const { signIn, signUp, resetPassword, error, clearError } = useAuthContext();
   const router = useRouter();
 
-  const handleAuthSubmit = async (data: any) => {
+  const handleAuthSubmit = async (data: AuthFormData) => {
     setLoading(true);
     clearError();
     
     try {
       if (mode === 'login') {
-        await signIn(data.email, data.password);
+        const loginData = data as LoginData;
+        await signIn(loginData.email, loginData.password);
         router.push('/dashboard');
       } else if (mode === 'register') {
-        await signUp(data.email, data.password, data.displayName);
+        const registerData = data as RegisterData;
+        await signUp(registerData.email, registerData.password, registerData.displayName);
         router.push('/dashboard');
       }
-    } catch (err) {
+    } catch {
       // Error is handled by the auth context
     } finally {
       setLoading(false);
@@ -41,7 +56,7 @@ export default function AuthPage() {
     try {
       await resetPassword(data.email);
       setResetSuccess(true);
-    } catch (err) {
+    } catch {
       // Error is handled by the auth context
     } finally {
       setLoading(false);

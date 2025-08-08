@@ -49,7 +49,7 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, loadi
     try {
       await onSubmit(data);
       reset();
-    } catch (err) {
+    } catch {
       // Error is handled by the parent component
     }
   };

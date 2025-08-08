@@ -2,13 +2,14 @@
 
 import { createContext, useContext, ReactNode } from 'react';
 import { useAuth, AuthUser, AuthError } from '../hooks/useAuth';
+import { User } from 'firebase/auth';
 
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   error: AuthError | null;
-  signUp: (email: string, password: string, displayName?: string) => Promise<any>;
-  signIn: (email: string, password: string) => Promise<any>;
+  signUp: (email: string, password: string, displayName?: string) => Promise<User>;
+  signIn: (email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   clearError: () => void;
