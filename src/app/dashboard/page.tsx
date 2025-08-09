@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
+import { getUserAssessmentSessions } from '@/lib/firestore';
 
 interface AssessmentHistory {
   sessionId: string;
@@ -16,23 +17,42 @@ function DashboardContent() {
   const { user, logout } = useAuthContext();
 
   useEffect(() => {
-    // Check localStorage for assessment data
-    const sessionId = localStorage.getItem('sessionId');
-    const responsesData = localStorage.getItem('responsesData');
-    
-    if (sessionId && responsesData) {
-      try {
-        const parsedData = JSON.parse(responsesData);
-        setAssessmentHistory([{
-          sessionId,
-          completedAt: new Date().toLocaleDateString(),
-          overallScore: parsedData.scores?.overall || 0
-        }]);
-      } catch (error) {
-        console.error('Error parsing assessment data:', error);
+    const fetchUserAssessments = async () => {
+      if (user?.uid) {
+        try {
+          // Fetch user assessments from Firestore
+          const sessions = await getUserAssessmentSessions(user.uid);
+          const assessments = sessions.map(session => ({
+            sessionId: session.sessionId,
+            completedAt: session.completedAt.toDate().toLocaleDateString(),
+            overallScore: session.scores.overall
+          }));
+          setAssessmentHistory(assessments);
+        } catch (error) {
+          console.error('Error fetching user assessments:', error);
+          
+          // Fallback to localStorage if Firestore fails
+          const sessionId = localStorage.getItem('sessionId');
+          const responsesData = localStorage.getItem('responsesData');
+          
+          if (sessionId && responsesData) {
+            try {
+              const parsedData = JSON.parse(responsesData);
+              setAssessmentHistory([{
+                sessionId,
+                completedAt: new Date().toLocaleDateString(),
+                overallScore: parsedData.scores?.overall || 0
+              }]);
+            } catch (localError) {
+              console.error('Error parsing localStorage data:', localError);
+            }
+          }
+        }
       }
-    }
-  }, []);
+    };
+
+    fetchUserAssessments();
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-gray-50">

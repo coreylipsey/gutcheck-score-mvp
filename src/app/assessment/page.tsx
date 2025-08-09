@@ -7,10 +7,12 @@ import { ASSESSMENT_QUESTIONS } from '@/domain/entities/Assessment';
 import { AssessmentResponse } from '@/domain/entities/Assessment';
 import { useAssessment } from '@/presentation/hooks/useAssessment';
 import { validateOpenEndedResponse } from '@/utils/scoring';
+import { useAuthContext } from '@/presentation/providers/AuthProvider';
 
 export default function AssessmentPage() {
   const router = useRouter();
   const { calculateScores, generateAIFeedback, saveSession, error } = useAssessment();
+  const { user } = useAuthContext();
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState<AssessmentResponse[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -137,7 +139,7 @@ export default function AssessmentPage() {
           growthVision: scores.growthVision,
         },
         geminiFeedback,
-        userId: undefined, // Anonymous for now
+        userId: user?.uid, // Use authenticated user ID if available
       });
 
       // Navigate to results
