@@ -3,7 +3,8 @@
 import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { getAssessmentSession } from '@/lib/firestore';
+import { Container } from '@/infrastructure/di/container';
+import { IAssessmentRepository } from '@/domain/repositories/IAssessmentRepository';
 import { FirestoreAssessmentSession } from '@/types/firestore';
 import { Timestamp } from 'firebase/firestore';
 import { HeroScore } from '@/components/results/HeroScore';
@@ -32,9 +33,22 @@ function ResultsContent() {
         const sessionId = urlSessionId || localSessionId;
         
         if (sessionId) {
-          const data = await getAssessmentSession(sessionId);
-          if (data) {
-            // Data loaded from Firestore
+          // Use Clean Architecture - get repository from DI container
+          const assessmentRepository = Container.getInstance().resolve<IAssessmentRepository>('IAssessmentRepository');
+          const session = await assessmentRepository.findById(sessionId);
+          if (session) {
+            // Convert domain entity to UI format
+            const data: FirestoreAssessmentSession = {
+              id: sessionId,
+              sessionId: session.sessionId,
+              userId: session.userId,
+              responses: session.responses,
+              scores: session.scores,
+              geminiFeedback: session.geminiFeedback,
+              completedAt: session.completedAt ? Timestamp.fromDate(session.completedAt) : Timestamp.now(),
+              createdAt: Timestamp.fromDate(session.createdAt),
+              isAnonymous: !session.userId
+            };
             setSessionData(data);
           } else {
             // Fallback to localStorage data if Firestore data not found
