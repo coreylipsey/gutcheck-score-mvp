@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
-import { getUserAssessmentSessions } from '@/lib/firestore';
+import { Container } from '@/infrastructure/di/container';
+import { IAssessmentRepository } from '@/domain/repositories/IAssessmentRepository';
 
 interface AssessmentHistory {
   sessionId: string;
@@ -20,11 +21,13 @@ function DashboardContent() {
     const fetchUserAssessments = async () => {
       if (user?.uid) {
         try {
-          // Fetch user assessments from Firestore
-          const sessions = await getUserAssessmentSessions(user.uid);
+          // Use Clean Architecture - get repository from DI container
+          const assessmentRepository = Container.getInstance().resolve<IAssessmentRepository>('IAssessmentRepository');
+          const sessions = await assessmentRepository.findByUserId(user.uid);
+          
           const assessments = sessions.map(session => ({
             sessionId: session.sessionId,
-            completedAt: session.completedAt.toDate().toLocaleDateString(),
+            completedAt: session.completedAt?.toLocaleDateString() || new Date().toLocaleDateString(),
             overallScore: session.scores.overall
           }));
           setAssessmentHistory(assessments);
