@@ -36,10 +36,27 @@ The authentication system provides secure user registration, login, and session 
 
 ## Architecture
 
-### Components
+### Clean Architecture Implementation
 
+The authentication system follows Clean Architecture principles with proper separation of concerns:
+
+#### Domain Layer
+- **IAuthRepository**: Authentication repository interface
+- **AuthUser & AuthError**: Domain value objects
+- **IUserRepository**: User data repository interface
+
+#### Application Layer
+- **AuthenticateUser**: Use case orchestrating authentication operations
+- **Business logic**: User creation and session management
+
+#### Infrastructure Layer
+- **FirebaseAuthRepository**: Firebase authentication implementation
+- **FirestoreUserRepository**: Firestore user data implementation
+- **Dependency Injection**: Service registration and resolution
+
+#### Presentation Layer
+- **useAuthClean**: Clean Architecture authentication hook
 - **AuthProvider**: Context provider for authentication state
-- **useAuth**: Custom hook for authentication operations
 - **AuthForm**: Reusable form component for login/register
 - **PasswordResetForm**: Password reset form component
 - **ClaimScoreModal**: Modal for claiming anonymous scores
@@ -49,12 +66,28 @@ The authentication system provides secure user registration, login, and session 
 
 ```
 src/
+├── domain/
+│   └── repositories/
+│       ├── IAuthRepository.ts        # Auth repository interface
+│       └── IUserRepository.ts        # User repository interface
+├── application/
+│   └── use-cases/
+│       └── AuthenticateUser.ts       # Authentication use case
+├── infrastructure/
+│   ├── repositories/
+│   │   ├── FirebaseAuthRepository.ts # Firebase auth implementation
+│   │   └── FirestoreUserRepository.ts # Firestore user implementation
+│   ├── config/
+│   │   └── firebase.ts               # Firebase configuration
+│   └── di/
+│       ├── container.ts              # DI container
+│       └── setup.ts                  # Service registration
 ├── presentation/
 │   ├── providers/
 │   │   ├── AuthProvider.tsx          # Auth context provider
-│   │   └── DependencyProvider.tsx    # DI container setup
+│   │   └── DependencyProvider.tsx    # DI setup
 │   └── hooks/
-│       └── useAuth.ts                # Authentication hook
+│       └── useAuthClean.ts           # Clean auth hook
 ├── components/
 │   └── auth/
 │       ├── AuthForm.tsx              # Login/register form
@@ -70,8 +103,6 @@ src/
 │   │           └── route.ts          # Claim score API
 │   └── dashboard/
 │       └── page.tsx                  # Protected dashboard
-└── lib/
-    └── firebase.ts                   # Firebase configuration
 ```
 
 ## Usage

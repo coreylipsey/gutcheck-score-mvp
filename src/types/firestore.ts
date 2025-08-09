@@ -3,14 +3,10 @@ import { AssessmentResponse } from './assessment';
 
 // Firestore User Model
 export interface FirestoreUser {
-  id: string;
-  email?: string;
+  email: string;
   displayName?: string;
-  createdAt: Timestamp;
-  lastLoginAt: Timestamp;
+  createdAt: Date | Timestamp;
   assessmentCount: number;
-  averageScore?: number;
-  bestScore?: number;
 }
 
 // Firestore Assessment Session Model

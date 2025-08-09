@@ -1,17 +1,14 @@
 'use client';
 
-import { useEffect } from 'react';
 import { setupDependencies } from '../../infrastructure/di/setup';
 
 interface DependencyProviderProps {
   children: React.ReactNode;
 }
 
-export function DependencyProvider({ children }: DependencyProviderProps) {
-  useEffect(() => {
-    // Initialize dependency injection container
-    setupDependencies();
-  }, []);
+// Initialize dependencies immediately when module is loaded
+setupDependencies();
 
+export function DependencyProvider({ children }: DependencyProviderProps) {
   return <>{children}</>;
 } 

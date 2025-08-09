@@ -1,10 +1,13 @@
 import { Container } from './container';
 import { FirestoreAssessmentRepository } from '../repositories/FirestoreAssessmentRepository';
+import { FirestoreUserRepository } from '../repositories/FirestoreUserRepository';
+import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository';
 import { GeminiAIService } from '../services/GeminiAIService';
 import { ScoringService } from '../../application/services/ScoringService';
 import { CalculateAssessmentScore } from '../../application/use-cases/CalculateAssessmentScore';
 import { SaveAssessmentSession } from '../../application/use-cases/SaveAssessmentSession';
 import { GenerateAIFeedback } from '../../application/use-cases/GenerateAIFeedback';
+import { AuthenticateUser } from '../../application/use-cases/AuthenticateUser';
 
 export function setupDependencies(): void {
   const container = Container.getInstance();
@@ -16,6 +19,14 @@ export function setupDependencies(): void {
 
   container.register('IAssessmentRepository', () => 
     new FirestoreAssessmentRepository()
+  );
+
+  container.register('IUserRepository', () => 
+    new FirestoreUserRepository()
+  );
+
+  container.register('IAuthRepository', () => 
+    new FirebaseAuthRepository()
   );
 
   // Register application services
@@ -37,5 +48,12 @@ export function setupDependencies(): void {
 
   container.register('GenerateAIFeedback', () => 
     new GenerateAIFeedback(container.resolve('IAIScoringService'))
+  );
+
+  container.register('AuthenticateUser', () => 
+    new AuthenticateUser(
+      container.resolve('IAuthRepository'),
+      container.resolve('IUserRepository')
+    )
   );
 } 

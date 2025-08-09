@@ -1,16 +1,16 @@
 'use client';
 
 import { createContext, useContext, ReactNode } from 'react';
-import { useAuth, AuthUser, AuthError } from '../hooks/useAuth';
-import { User } from 'firebase/auth';
+import { useAuthClean } from '../hooks/useAuthClean';
+import { AuthUser, AuthError } from '../../domain/repositories/IAuthRepository';
 
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   error: AuthError | null;
-  signUp: (email: string, password: string, displayName?: string) => Promise<User>;
-  signIn: (email: string, password: string) => Promise<User>;
-  signInWithGoogle: () => Promise<User>;
+  signUp: (email: string, password: string, displayName?: string) => Promise<AuthUser>;
+  signIn: (email: string, password: string) => Promise<AuthUser>;
+  signInWithGoogle: () => Promise<AuthUser>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   clearError: () => void;
@@ -19,7 +19,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const auth = useAuth();
+  const auth = useAuthClean();
 
   return (
     <AuthContext.Provider value={auth}>
