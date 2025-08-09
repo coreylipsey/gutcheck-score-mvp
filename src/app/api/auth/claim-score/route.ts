@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { Container } from '@/infrastructure/di/container';
+import { IAssessmentRepository } from '@/domain/repositories/IAssessmentRepository';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,21 +13,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the session document
-    const sessionRef = doc(db, 'assessmentSessions', sessionId);
-    const sessionDoc = await getDoc(sessionRef);
+    // Use Clean Architecture - get repository from DI container
+    const assessmentRepository = Container.getInstance().resolve<IAssessmentRepository>('IAssessmentRepository');
+    
+    // Get the session
+    const session = await assessmentRepository.findById(sessionId);
 
-    if (!sessionDoc.exists()) {
+    if (!session) {
       return NextResponse.json(
         { error: 'Session not found' },
         { status: 404 }
       );
     }
 
-    const sessionData = sessionDoc.data();
-
     // Check if the session is already linked to a user
-    if (sessionData.userId && sessionData.userId !== userId) {
+    if (session.userId && session.userId !== userId) {
       return NextResponse.json(
         { error: 'Session already linked to another user' },
         { status: 409 }
@@ -35,11 +35,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Update the session to link it to the user
-    await updateDoc(sessionRef, {
-      userId: userId,
-      isAnonymous: false,
-      claimedAt: new Date(),
-    });
+    // Note: This would require adding a claimSession method to the repository
+    // For now, we'll need to implement this in the repository layer
+    await assessmentRepository.claimSession(sessionId, userId);
 
     return NextResponse.json(
       { success: true, message: 'Score claimed successfully' },

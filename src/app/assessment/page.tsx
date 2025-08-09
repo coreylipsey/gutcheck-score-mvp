@@ -6,7 +6,6 @@ import AssessmentQuestion from '@/components/AssessmentQuestion';
 import { ASSESSMENT_QUESTIONS } from '@/domain/entities/Assessment';
 import { AssessmentResponse } from '@/domain/entities/Assessment';
 import { useAssessment } from '@/presentation/hooks/useAssessment';
-import { validateOpenEndedResponse } from '@/utils/scoring';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
 
 export default function AssessmentPage() {
@@ -58,9 +57,12 @@ export default function AssessmentPage() {
 
     if (currentQuestion.type === 'openEnded') {
       const textResponse = currentResponse.response as string;
-      return currentQuestion.minCharacters
-        ? validateOpenEndedResponse(textResponse, currentQuestion.minCharacters)
-        : textResponse.trim().length > 0;
+      if (currentQuestion.minCharacters) {
+        // Simple validation: check minimum characters and basic content
+        return textResponse.trim().length >= currentQuestion.minCharacters && 
+               textResponse.trim().split(/\s+/).length >= 15;
+      }
+      return textResponse.trim().length > 0;
     }
 
     if (currentQuestion.type === 'multiSelect') {

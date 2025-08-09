@@ -85,6 +85,26 @@ export class FirestoreAssessmentRepository implements IAssessmentRepository {
     });
   }
 
+  async claimSession(sessionId: string, userId: string): Promise<void> {
+    const q = query(
+      collection(db, 'assessmentSessions'),
+      where('sessionId', '==', sessionId),
+      limit(1)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      throw new Error('Session not found');
+    }
+    
+    const doc = querySnapshot.docs[0];
+    await updateDoc(doc.ref, {
+      userId: userId,
+      isAnonymous: false,
+      claimedAt: serverTimestamp(),
+    });
+  }
+
   async saveOpenEndedScore(
     sessionId: string,
     questionId: string,
