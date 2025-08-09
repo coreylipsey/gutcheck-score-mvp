@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { getAssessmentSession } from '@/lib/firestore';
 import { FirestoreAssessmentSession } from '@/types/firestore';
 import { Timestamp } from 'firebase/firestore';
@@ -13,17 +14,23 @@ import { ClaimScoreModal } from '@/components/auth/ClaimScoreModal';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
 
 
-export default function ResultsPage() {
+function ResultsContent() {
   const [sessionData, setSessionData] = useState<FirestoreAssessmentSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showClaimModal, setShowClaimModal] = useState(false);
   const { user } = useAuthContext();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const loadResults = async () => {
       try {
-        const sessionId = localStorage.getItem('sessionId');
+        // First check for sessionId in URL query params (from dashboard links)
+        const urlSessionId = searchParams.get('sessionId');
+        // Then fallback to localStorage (for current assessment)
+        const localSessionId = localStorage.getItem('sessionId');
+        const sessionId = urlSessionId || localSessionId;
+        
         if (sessionId) {
           const data = await getAssessmentSession(sessionId);
           if (data) {
@@ -110,7 +117,7 @@ export default function ResultsPage() {
     };
 
     loadResults();
-  }, []);
+  }, [searchParams]);
 
   if (loading) {
     return (
@@ -243,5 +250,20 @@ export default function ResultsPage() {
         sessionId={sessionData?.sessionId}
       />
     </div>
+  );
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading results...</p>
+        </div>
+      </div>
+    }>
+      <ResultsContent />
+    </Suspense>
   );
 }

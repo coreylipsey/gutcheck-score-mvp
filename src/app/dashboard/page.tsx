@@ -28,7 +28,7 @@ function DashboardContent() {
           const assessments = sessions.map(session => ({
             sessionId: session.sessionId,
             completedAt: session.completedAt?.toLocaleDateString() || new Date().toLocaleDateString(),
-            overallScore: session.scores.overall
+            overallScore: session.scores.overallScore
           }));
           setAssessmentHistory(assessments);
         } catch (error) {
@@ -146,7 +146,7 @@ function DashboardContent() {
                         {assessment.overallScore}/100
                       </p>
                       <Link
-                        href="/assessment/results"
+                        href={`/assessment/results?sessionId=${assessment.sessionId}`}
                         className="text-sm text-blue-600 hover:underline"
                       >
                         View Results
