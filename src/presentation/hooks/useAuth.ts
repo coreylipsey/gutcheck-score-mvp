@@ -8,6 +8,8 @@ import {
   sendPasswordResetEmail,
   onAuthStateChanged,
   updateProfile,
+  signInWithPopup,
+  GoogleAuthProvider,
   AuthError as FirebaseAuthError
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -125,6 +127,34 @@ export function useAuth() {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      setError(null);
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      
+      // Check if user exists in Firestore, create if not
+      const existingUser = await getUser(userCredential.user.uid);
+      if (!existingUser) {
+        await createUser(
+          userCredential.user.uid, 
+          userCredential.user.email || undefined, 
+          userCredential.user.displayName || undefined
+        );
+      }
+      
+      return userCredential.user;
+    } catch (err: unknown) {
+      const firebaseError = err as FirebaseAuthError;
+      const authError: AuthError = {
+        code: firebaseError.code,
+        message: getErrorMessage(firebaseError.code),
+      };
+      setError(authError);
+      throw authError;
+    }
+  };
+
   const clearError = () => {
     setError(null);
   };
@@ -135,6 +165,7 @@ export function useAuth() {
     error,
     signUp,
     signIn,
+    signInWithGoogle,
     logout,
     resetPassword,
     clearError,

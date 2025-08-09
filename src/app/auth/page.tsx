@@ -25,7 +25,7 @@ export default function AuthPage() {
   const [mode, setMode] = useState<AuthMode>('login');
   const [loading, setLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
-  const { signIn, signUp, resetPassword, error, clearError } = useAuthContext();
+  const { signIn, signUp, signInWithGoogle, resetPassword, error, clearError } = useAuthContext();
   const router = useRouter();
 
   const handleAuthSubmit = async (data: AuthFormData) => {
@@ -42,6 +42,20 @@ export default function AuthPage() {
         await signUp(registerData.email, registerData.password, registerData.displayName);
         router.push('/dashboard');
       }
+    } catch {
+      // Error is handled by the auth context
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    clearError();
+    
+    try {
+      await signInWithGoogle();
+      router.push('/dashboard');
     } catch {
       // Error is handled by the auth context
     } finally {
@@ -100,6 +114,7 @@ export default function AuthPage() {
           onSubmit={handleAuthSubmit}
           onModeChange={handleModeChange}
           onForgotPassword={handleResetMode}
+          onGoogleSignIn={handleGoogleSignIn}
           loading={loading}
           error={error?.message || null}
         />
