@@ -1,4 +1,4 @@
-import { User } from '../entities/User';
+// Domain interfaces for authentication
 
 export interface AuthUser {
   uid: string;

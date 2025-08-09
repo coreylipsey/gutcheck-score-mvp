@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -61,7 +60,7 @@ export function PasswordResetForm({ onSubmit, onBack, loading = false, error, su
               </div>
               <h2 className="text-2xl font-bold text-[#0A1F44] mb-3">Check Your Email</h2>
               <p className="text-gray-600 mb-8 text-lg">
-                We've sent a password reset link to your email address. Please check your inbox and follow the instructions.
+                We&apos;ve sent a password reset link to your email address. Please check your inbox and follow the instructions.
               </p>
               <button
                 onClick={onBack}
@@ -83,7 +82,7 @@ export function PasswordResetForm({ onSubmit, onBack, loading = false, error, su
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-[#0A1F44] mb-3">Reset Password</h2>
             <p className="text-gray-600 text-lg">
-              Enter your email address and we'll send you a link to reset your password.
+              Enter your email address and we&apos;ll send you a link to reset your password.
             </p>
           </div>
 
