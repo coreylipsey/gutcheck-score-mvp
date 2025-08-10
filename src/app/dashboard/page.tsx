@@ -6,6 +6,9 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
 import { Container } from '@/infrastructure/di/container';
 import { IAssessmentRepository } from '@/domain/repositories/IAssessmentRepository';
+import { ProgressGraph } from '@/components/dashboard/ProgressGraph';
+import { MonthlyInsights } from '@/components/dashboard/MonthlyInsights';
+import { AssessmentFrequencyService } from '@/application/services/AssessmentFrequencyService';
 
 interface AssessmentHistory {
   sessionId: string;
@@ -15,6 +18,12 @@ interface AssessmentHistory {
 
 function DashboardContent() {
   const [assessmentHistory, setAssessmentHistory] = useState<AssessmentHistory[]>([]);
+  const [assessmentLimits, setAssessmentLimits] = useState<ReturnType<typeof AssessmentFrequencyService.checkAssessmentLimits>>({
+    canTakeAssessment: true,
+    nextAvailableDate: null,
+    daysUntilNextAssessment: null,
+    lastAssessmentDate: null
+  });
   const { user, logout } = useAuthContext();
 
   useEffect(() => {
@@ -31,6 +40,10 @@ function DashboardContent() {
             overallScore: session.scores.overallScore
           }));
           setAssessmentHistory(assessments);
+          
+          // Check assessment frequency limits
+          const limits = AssessmentFrequencyService.checkAssessmentLimits(assessments);
+          setAssessmentLimits(limits);
         } catch (error) {
           console.error('Error fetching user assessments:', error);
           
@@ -99,64 +112,17 @@ function DashboardContent() {
             Welcome to Your Gutcheck Score™ Dashboard
           </h2>
           <p className="text-gray-600 mb-6">
-            Track your entrepreneurial growth and access your assessment results, insights, and personalized recommendations.
+            Track your entrepreneurial growth with monthly assessments and personalized insights.
           </p>
           
-          {assessmentHistory.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="text-gray-400 mb-4">
-                <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No assessments yet
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Take your first Gutcheck Score™ assessment to get started.
-              </p>
-              <Link
-                href="/assessment"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Start Your First Assessment
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-900">
-                Recent Assessments
-              </h3>
-              {assessmentHistory.map((assessment) => (
-                <div
-                  key={assessment.sessionId}
-                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        Assessment completed on {assessment.completedAt}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Session ID: {assessment.sessionId}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-blue-600">
-                        {assessment.overallScore}/100
-                      </p>
-                      <Link
-                        href={`/assessment/results?sessionId=${assessment.sessionId}`}
-                        className="text-sm text-blue-600 hover:underline"
-                      >
-                        View Results
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <ProgressGraph assessments={assessmentHistory} />
+            <MonthlyInsights 
+              lastAssessment={assessmentHistory[0]}
+              canTakeAssessment={assessmentLimits.canTakeAssessment}
+              daysUntilNextAssessment={assessmentLimits.daysUntilNextAssessment || undefined}
+            />
+          </div>
         </div>
 
         {/* Quick Actions */}
@@ -169,16 +135,24 @@ function DashboardContent() {
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Take Assessment
+                Monthly Assessment
               </h3>
               <p className="text-gray-600 mb-4">
-                Complete the 25-question assessment to get your personalized score.
+                {assessmentLimits.canTakeAssessment 
+                  ? "Take your monthly assessment to track your progress."
+                  : `Next assessment available in ${assessmentLimits.daysUntilNextAssessment} days.`
+                }
               </p>
               <Link
-                href="/assessment"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700"
+                href={assessmentLimits.canTakeAssessment ? "/assessment" : "#"}
+                className={`inline-flex items-center px-4 py-2 border text-sm font-medium rounded-lg ${
+                  assessmentLimits.canTakeAssessment
+                    ? "border-transparent text-white bg-blue-600 hover:bg-blue-700"
+                    : "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
+                }`}
+                onClick={(e) => !assessmentLimits.canTakeAssessment && e.preventDefault()}
               >
-                Start Assessment
+                {assessmentLimits.canTakeAssessment ? "Take Assessment" : "Not Available"}
               </Link>
             </div>
           </div>
