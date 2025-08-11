@@ -12,6 +12,10 @@ import {onRequest} from "firebase-functions/v2/https";
 import {onCall} from "firebase-functions/v2/https";
 import {defineString} from "firebase-functions/params";
 import Stripe from 'stripe';
+import * as admin from 'firebase-admin';
+
+// Initialize Firebase Admin SDK
+admin.initializeApp();
 
 // Define the Gemini API key parameter
 const geminiApiKey = defineString("GEMINI_API_KEY");
