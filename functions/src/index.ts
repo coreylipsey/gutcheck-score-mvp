@@ -654,7 +654,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 // Get user token info
 export const getUserTokenInfo = onCall(async (request) => {
   try {
-    const { userId, includeTransactionHistory, transactionLimit } = request.data;
+    const { userId, includeTransactionHistory } = request.data;
 
     if (!userId) {
       throw new Error('Missing userId parameter');
