@@ -648,3 +648,57 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   console.log('Payment intent failed:', paymentIntent.id);
 }
+
+// Token Management Functions
+
+// Get user token info
+export const getUserTokenInfo = onCall(async (request) => {
+  try {
+    const { userId, includeTransactionHistory, transactionLimit } = request.data;
+
+    if (!userId) {
+      throw new Error('Missing userId parameter');
+    }
+
+    // TODO: Implement actual token service integration
+    // For now, return mock data
+    return {
+      success: true,
+      tokenBalance: 100,
+      featureAccess: {
+        'ai-market-analysis': false,
+        'investor-matching': false,
+        'competitor-report': false,
+        'team-analysis': false,
+        'pitch-deck-ai': false,
+        'growth-projections': false,
+      },
+      transactionHistory: includeTransactionHistory ? [] : undefined
+    };
+  } catch (error) {
+    console.error('Error getting user token info:', error);
+    throw new Error('Failed to get user token info');
+  }
+});
+
+// Spend tokens for feature unlock
+export const spendTokensForFeature = onCall(async (request) => {
+  try {
+    const { userId, featureName } = request.data;
+
+    if (!userId || !featureName) {
+      throw new Error('Missing required fields');
+    }
+
+    // TODO: Implement actual token service integration
+    // For now, return mock success
+    return {
+      success: true,
+      newBalance: 90,
+      featureUnlocked: true
+    };
+  } catch (error) {
+    console.error('Error spending tokens:', error);
+    throw new Error('Failed to unlock feature');
+  }
+});

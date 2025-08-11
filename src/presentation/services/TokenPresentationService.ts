@@ -1,6 +1,4 @@
-import { Container } from '@/infrastructure/di/container';
-import { GetUserTokenInfo } from '@/application/use-cases/GetUserTokenInfo';
-import { SpendTokensForFeature } from '@/application/use-cases/SpendTokensForFeature';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 export interface TokenBalanceData {
   balance: number;
@@ -41,15 +39,18 @@ export class TokenPresentationService {
 
   async getTokenBalance(userId: string): Promise<TokenBalanceData> {
     try {
-      const getUserTokenInfo = Container.getInstance().resolve<GetUserTokenInfo>('GetUserTokenInfo');
-      const result = await getUserTokenInfo.execute({
+      const functions = getFunctions();
+      const getUserTokenInfo = httpsCallable(functions, 'getUserTokenInfo');
+      
+      const result = await getUserTokenInfo({
         userId,
         includeTransactionHistory: false
       });
 
-      if (result.success) {
+      const data = result.data as any;
+      if (data.success) {
         return {
-          balance: result.tokenBalance,
+          balance: data.tokenBalance,
           loading: false,
           error: null
         };
@@ -57,7 +58,7 @@ export class TokenPresentationService {
         return {
           balance: 0,
           loading: false,
-          error: result.error || 'Failed to load token balance'
+          error: data.error || 'Failed to load token balance'
         };
       }
     } catch (error) {
@@ -71,15 +72,18 @@ export class TokenPresentationService {
 
   async getFeatureAccess(userId: string): Promise<FeatureAccessData> {
     try {
-      const getUserTokenInfo = Container.getInstance().resolve<GetUserTokenInfo>('GetUserTokenInfo');
-      const result = await getUserTokenInfo.execute({
+      const functions = getFunctions();
+      const getUserTokenInfo = httpsCallable(functions, 'getUserTokenInfo');
+      
+      const result = await getUserTokenInfo({
         userId,
         includeTransactionHistory: false
       });
 
-      if (result.success) {
+      const data = result.data as any;
+      if (data.success) {
         return {
-          features: result.featureAccess,
+          features: data.featureAccess,
           loading: false,
           error: null
         };
@@ -94,7 +98,7 @@ export class TokenPresentationService {
             'growth-projections': false
           },
           loading: false,
-          error: result.error || 'Failed to load feature access'
+          error: data.error || 'Failed to load feature access'
         };
       }
     } catch (error) {
@@ -115,22 +119,25 @@ export class TokenPresentationService {
 
   async unlockFeature(userId: string, featureName: string): Promise<UnlockFeatureResult> {
     try {
-      const spendTokensForFeature = Container.getInstance().resolve<SpendTokensForFeature>('SpendTokensForFeature');
-      const result = await spendTokensForFeature.execute({
+      const functions = getFunctions();
+      const spendTokensForFeature = httpsCallable(functions, 'spendTokensForFeature');
+      
+      const result = await spendTokensForFeature({
         userId,
         featureName
       });
 
-      if (result.success) {
+      const data = result.data as any;
+      if (data.success) {
         return {
           success: true,
-          newBalance: result.newBalance
+          newBalance: data.newBalance
         };
       } else {
         return {
           success: false,
-          newBalance: result.newBalance,
-          error: result.error || 'Failed to unlock feature'
+          newBalance: data.newBalance,
+          error: data.error || 'Failed to unlock feature'
         };
       }
     } catch (error) {
