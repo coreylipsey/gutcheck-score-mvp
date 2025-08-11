@@ -1,10 +1,45 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { useAuthContext } from '../presentation/providers/AuthProvider';
+import { DashboardService } from './services/DashboardService';
 
 export default function Home() {
   const { user, logout } = useAuthContext();
+  const [assessmentLimits, setAssessmentLimits] = useState<{
+    canTakeAssessment: boolean;
+    nextAvailableDate: string | null;
+    daysUntilNextAssessment: number | null;
+    lastAssessmentDate: string | null;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Check assessment limits for logged-in users
+  useEffect(() => {
+    const checkAssessmentLimits = async () => {
+      if (user) {
+        setIsLoading(true);
+        try {
+          const dashboardService = DashboardService.getInstance();
+          const data = await dashboardService.getDashboardData(user.uid);
+          setAssessmentLimits(data.assessmentLimits);
+        } catch (error) {
+          console.error('Error checking assessment limits:', error);
+          // If there's an error, allow the assessment to proceed
+          setAssessmentLimits({
+            canTakeAssessment: true,
+            nextAvailableDate: null,
+            daysUntilNextAssessment: null,
+            lastAssessmentDate: null
+          });
+        }
+        setIsLoading(false);
+      }
+    };
+
+    checkAssessmentLimits();
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -56,18 +91,29 @@ export default function Home() {
           </p>
           
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/assessment"
-              className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-            >
-              Start Assessment
-            </Link>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center px-8 py-4 border border-gray-300 text-lg font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-            >
-              View Dashboard
-            </Link>
+            {user && assessmentLimits && !assessmentLimits.canTakeAssessment ? (
+              <button
+                disabled
+                className="inline-flex items-center px-8 py-4 border border-gray-300 text-lg font-medium rounded-lg text-gray-400 bg-gray-100 cursor-not-allowed focus:outline-none transition-colors"
+              >
+                {isLoading ? 'Checking...' : `Available in ${assessmentLimits.daysUntilNextAssessment} days`}
+              </button>
+            ) : (
+              <Link
+                href="/assessment"
+                className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                Start Assessment
+              </Link>
+            )}
+            {user && (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center px-8 py-4 border border-gray-300 text-lg font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                View Dashboard
+              </Link>
+            )}
           </div>
         </div>
 

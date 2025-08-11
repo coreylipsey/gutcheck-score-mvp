@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AssessmentQuestion from '@/components/AssessmentQuestion';
 import { ASSESSMENT_QUESTIONS } from '@/domain/entities/Assessment';
 import { AssessmentResponse } from '@/domain/entities/Assessment';
 import { useAssessment } from '@/presentation/hooks/useAssessment';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
+import { DashboardService } from '@/app/services/DashboardService';
 
 export default function AssessmentPage() {
   const router = useRouter();
@@ -17,6 +18,46 @@ export default function AssessmentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [location, setLocation] = useState('');
   const [industry, setIndustry] = useState('');
+  const [assessmentLimits, setAssessmentLimits] = useState<{
+    canTakeAssessment: boolean;
+    nextAvailableDate: string | null;
+    daysUntilNextAssessment: number | null;
+    lastAssessmentDate: string | null;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check assessment frequency limits
+  useEffect(() => {
+    const checkAssessmentLimits = async () => {
+      if (user) {
+        try {
+          const dashboardService = DashboardService.getInstance();
+          const data = await dashboardService.getDashboardData(user.uid);
+          setAssessmentLimits(data.assessmentLimits);
+        } catch (error) {
+          console.error('Error checking assessment limits:', error);
+          // If there's an error, allow the assessment to proceed
+          setAssessmentLimits({
+            canTakeAssessment: true,
+            nextAvailableDate: null,
+            daysUntilNextAssessment: null,
+            lastAssessmentDate: null
+          });
+        }
+      } else {
+        // For anonymous users, allow assessment (they can claim later)
+        setAssessmentLimits({
+          canTakeAssessment: true,
+          nextAvailableDate: null,
+          daysUntilNextAssessment: null,
+          lastAssessmentDate: null
+        });
+      }
+      setIsLoading(false);
+    };
+
+    checkAssessmentLimits();
+  }, [user]);
 
   // Step 0 is location/industry, then questions start at step 1
   const isLocationStep = currentStep === 0;
@@ -284,6 +325,74 @@ export default function AssessmentPage() {
           >
             Try Again
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking assessment availability...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show restriction message if assessment is not available
+  if (assessmentLimits && !assessmentLimits.canTakeAssessment) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl mx-auto">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-6">
+                <svg className="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">
+                Assessment Not Available
+              </h1>
+              <p className="text-gray-600 mb-6">
+                You can only take one assessment per month to ensure meaningful progress tracking and prevent assessment fatigue.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Last Assessment</p>
+                    <p className="font-medium text-gray-900">{assessmentLimits.lastAssessmentDate}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600">Next Available</p>
+                    <p className="font-medium text-blue-600">{assessmentLimits.nextAvailableDate}</p>
+                  </div>
+                </div>
+                <div className="mt-4 text-center">
+                  <p className="text-lg font-medium text-gray-900">
+                    {assessmentLimits.daysUntilNextAssessment} days remaining
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => router.push('/dashboard')}
+                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  View Dashboard
+                </button>
+                <button
+                  onClick={() => router.push('/')}
+                  className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  Back to Home
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
