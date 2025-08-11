@@ -295,7 +295,7 @@ export default function AssessmentPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Gutcheck Score™ Assessment
+            Gutcheck.AI Assessment
           </h1>
           <p className="text-gray-600">
             {isLocationStep ? 'Step 1 of 2: Business Information' : `Question ${currentStep} of ${totalQuestions}`}

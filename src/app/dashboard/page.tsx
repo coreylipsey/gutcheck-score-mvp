@@ -176,7 +176,7 @@ function DashboardContent() {
                 <div className="w-8 h-8 bg-gradient-to-r from-[#147AFF] to-[#19C2A0] rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">G</span>
                 </div>
-                <span className="text-xl font-bold text-[#0A1F44]">Gutcheck Score™</span>
+                <span className="text-xl font-bold text-[#0A1F44]">Gutcheck.AI</span>
               </Link>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
@@ -224,7 +224,7 @@ function DashboardContent() {
         {/* Welcome Section */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Welcome to Your Gutcheck Score™ Dashboard
+            Welcome to Your Gutcheck.AI Dashboard
           </h2>
           <p className="text-gray-600 mb-6">
             Track your entrepreneurial growth with monthly assessments and personalized insights.

@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Gutcheck Score™ - FICO Score for Entrepreneurs",
+  title: "Gutcheck.AI - FICO Score for Entrepreneurs",
   description: "Comprehensive assessment of your entrepreneurial readiness and fundability potential",
 };
 

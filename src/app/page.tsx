@@ -14,7 +14,7 @@ export default function Home() {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <h1 className="text-2xl font-bold text-gray-900">
-                Gutcheck Score™
+                Gutcheck.AI
               </h1>
             </div>
             <nav className="hidden md:flex space-x-8">
@@ -51,7 +51,7 @@ export default function Home() {
             <span className="text-blue-600"> Entrepreneurial Potential</span>
           </h1>
           <p className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto">
-            Take the Gutcheck Score™ assessment to get your personalized entrepreneurial readiness score, 
+            Take the Gutcheck.AI assessment to get your personalized entrepreneurial readiness score, 
             AI-powered insights, and actionable next steps to accelerate your business growth.
           </p>
           
@@ -85,7 +85,7 @@ export default function Home() {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Personalized Score</h3>
               <p className="text-gray-600">
-                Get your Gutcheck Score™ across 5 key entrepreneurial dimensions with detailed breakdowns.
+                Get your Gutcheck.AI score across 5 key entrepreneurial dimensions with detailed breakdowns.
               </p>
             </div>
             
@@ -149,7 +149,7 @@ export default function Home() {
       <footer className="bg-gray-800 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center text-gray-400">
-            <p>&copy; 2025 Gutcheck Score™. All rights reserved.</p>
+            <p>&copy; 2025 Gutcheck.AI. All rights reserved.</p>
           </div>
         </div>
       </footer>
