@@ -1,11 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "export",
+  distDir: "out",
+  trailingSlash: true,
   images: {
     unoptimized: true
   },
   eslint: {
     ignoreDuringBuilds: true,
+  },
+  // Exclude API routes from static export
+  experimental: {
+    excludeDefaultMomentLocales: false,
   },
   // Only include Firebase config in client-side bundle, not during build
   env: {
