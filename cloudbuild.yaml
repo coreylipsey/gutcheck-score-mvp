@@ -35,6 +35,8 @@ steps:
     entrypoint: 'npx'
     args: ['firebase-tools', 'deploy', '--only', 'hosting,functions', '--project', '${_PROJECT_ID}']
     dir: '.'
+    env:
+      - 'GEMINI_API_KEY=${_GEMINI_API_KEY}'
 
 # Build timeout
 timeout: '1800s'
@@ -46,4 +48,5 @@ options:
 
 # Substitutions (will be set in Cloud Build trigger)
 substitutions:
-  _PROJECT_ID: 'gutcheck-score-mvp' 
+  _PROJECT_ID: 'gutcheck-score-mvp'
+  _GEMINI_API_KEY: 'AIzaSyAUq0hEPlGnfkj6MJC-7et_gNim-YTyTzg' 
