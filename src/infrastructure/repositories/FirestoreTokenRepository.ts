@@ -43,7 +43,7 @@ export class FirestoreTokenRepository implements ITokenRepository {
       userId: data.userId,
       balance: data.balance,
       lastUpdated: data.lastUpdated.toDate(),
-      lastPurchaseAt: data.lastPurchaseAt?.toDate()
+      lastPurchaseAt: data.lastPurchaseAt ? data.lastPurchaseAt.toDate() : null
     };
   }
 
@@ -53,7 +53,7 @@ export class FirestoreTokenRepository implements ITokenRepository {
       userId: tokenBalance.userId,
       balance: tokenBalance.balance,
       lastUpdated: Timestamp.fromDate(tokenBalance.lastUpdated),
-      lastPurchaseAt: tokenBalance.lastPurchaseAt ? Timestamp.fromDate(tokenBalance.lastPurchaseAt) : undefined
+      ...(tokenBalance.lastPurchaseAt && { lastPurchaseAt: Timestamp.fromDate(tokenBalance.lastPurchaseAt) })
     };
     
     await setDoc(balanceRef, firestoreBalance, { merge: true });
@@ -65,7 +65,7 @@ export class FirestoreTokenRepository implements ITokenRepository {
       userId: tokenBalance.userId,
       balance: tokenBalance.balance,
       lastUpdated: Timestamp.fromDate(tokenBalance.lastUpdated),
-      lastPurchaseAt: tokenBalance.lastPurchaseAt ? Timestamp.fromDate(tokenBalance.lastPurchaseAt) : undefined
+      ...(tokenBalance.lastPurchaseAt && { lastPurchaseAt: Timestamp.fromDate(tokenBalance.lastPurchaseAt) })
     };
     
     await setDoc(balanceRef, firestoreBalance);
@@ -247,7 +247,7 @@ export class FirestoreTokenRepository implements ITokenRepository {
       userId: tokenBalance.userId,
       balance: tokenBalance.balance,
       lastUpdated: Timestamp.fromDate(tokenBalance.lastUpdated),
-      lastPurchaseAt: tokenBalance.lastPurchaseAt ? Timestamp.fromDate(tokenBalance.lastPurchaseAt) : undefined
+      ...(tokenBalance.lastPurchaseAt && { lastPurchaseAt: Timestamp.fromDate(tokenBalance.lastPurchaseAt) })
     };
     batch.set(balanceRef, firestoreBalance, { merge: true });
     

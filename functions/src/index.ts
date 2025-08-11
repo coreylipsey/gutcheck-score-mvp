@@ -660,20 +660,76 @@ export const getUserTokenInfo = onCall(async (request) => {
       throw new Error('Missing userId parameter');
     }
 
-    // TODO: Implement actual token service integration
-    // For now, return mock data
+    // Get token balance from Firestore
+    const balanceRef = admin.firestore().collection('tokenBalances').doc(userId);
+    const balanceDoc = await balanceRef.get();
+    
+    let tokenBalance = 0;
+    if (balanceDoc.exists) {
+      const data = balanceDoc.data();
+      tokenBalance = data?.balance || 0;
+    } else {
+      // Create initial token balance if it doesn't exist
+      await balanceRef.set({
+        userId: userId,
+        balance: 0,
+        lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    // Get feature access from Firestore
+    const accessRef = admin.firestore().collection('featureAccess').doc(userId);
+    const accessDoc = await accessRef.get();
+    
+    let featureAccess = {
+      'ai-market-analysis': false,
+      'investor-matching': false,
+      'competitor-report': false,
+      'team-analysis': false,
+      'pitch-deck-ai': false,
+      'growth-projections': false,
+    };
+    
+    if (accessDoc.exists) {
+      const data = accessDoc.data();
+      featureAccess = data?.features || featureAccess;
+    } else {
+      // Create initial feature access if it doesn't exist
+      await accessRef.set({
+        userId: userId,
+        features: featureAccess,
+        lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    // Get transaction history if requested
+    let transactionHistory = undefined;
+    if (includeTransactionHistory) {
+      const transactionsRef = admin.firestore().collection('tokenTransactions');
+      const transactionsQuery = transactionsRef
+        .where('userId', '==', userId)
+        .orderBy('timestamp', 'desc')
+        .limit(10);
+      
+      const transactionsSnapshot = await transactionsQuery.get();
+      transactionHistory = transactionsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: data.id,
+          type: data.type,
+          amount: data.amount,
+          description: data.description,
+          timestamp: data.timestamp.toDate(),
+          balanceAfter: data.balanceAfter
+        };
+      });
+    }
+
     return {
       success: true,
-      tokenBalance: 100,
-      featureAccess: {
-        'ai-market-analysis': false,
-        'investor-matching': false,
-        'competitor-report': false,
-        'team-analysis': false,
-        'pitch-deck-ai': false,
-        'growth-projections': false,
-      },
-      transactionHistory: includeTransactionHistory ? [] : undefined
+      tokenBalance,
+      featureAccess,
+      transactionHistory
     };
   } catch (error) {
     console.error('Error getting user token info:', error);
@@ -690,11 +746,72 @@ export const spendTokensForFeature = onCall(async (request) => {
       throw new Error('Missing required fields');
     }
 
-    // TODO: Implement actual token service integration
-    // For now, return mock success
+    const db = admin.firestore();
+    const batch = db.batch();
+
+    // Get current token balance
+    const balanceRef = db.collection('tokenBalances').doc(userId);
+    const balanceDoc = await balanceRef.get();
+    
+    if (!balanceDoc.exists) {
+      throw new Error('User has no token balance');
+    }
+    
+    const balanceData = balanceDoc.data();
+    const currentBalance = balanceData?.balance || 0;
+    
+    // Define feature costs
+    const featureCosts: Record<string, number> = {
+      'ai-market-analysis': 50,
+      'investor-matching': 75,
+      'competitor-report': 60,
+      'team-analysis': 40,
+      'pitch-deck-ai': 80,
+      'growth-projections': 65
+    };
+    
+    const cost = featureCosts[featureName];
+    if (!cost) {
+      throw new Error('Invalid feature name');
+    }
+    
+    if (currentBalance < cost) {
+      throw new Error('Insufficient token balance');
+    }
+    
+    const newBalance = currentBalance - cost;
+    
+    // Update token balance
+    batch.update(balanceRef, {
+      balance: newBalance,
+      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Create transaction record
+    const transactionRef = db.collection('tokenTransactions').doc();
+    batch.set(transactionRef, {
+      id: transactionRef.id,
+      userId: userId,
+      type: 'spend',
+      amount: -cost,
+      featureName: featureName,
+      description: `Unlocked ${featureName}`,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      balanceAfter: newBalance
+    });
+    
+    // Update feature access
+    const accessRef = db.collection('featureAccess').doc(userId);
+    batch.update(accessRef, {
+      [`features.${featureName}`]: true,
+      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+    });
+    
+    await batch.commit();
+    
     return {
       success: true,
-      newBalance: 90,
+      newBalance,
       featureUnlocked: true
     };
   } catch (error) {
