@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Container } from '@/infrastructure/di/container';
 import { SpendTokensForFeature } from '@/application/use-cases/SpendTokensForFeature';
 
-export const dynamic = 'force-dynamic';
-
 export async function POST(request: NextRequest) {
   try {
     const { userId, featureName } = await request.json();

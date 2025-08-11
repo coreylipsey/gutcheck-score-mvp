@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Container } from '@/infrastructure/di/container';
 import { IAssessmentRepository } from '@/domain/repositories/IAssessmentRepository';
 
-export const dynamic = 'force-dynamic';
-
 export async function POST(request: NextRequest) {
   try {
     const { sessionId, userId } = await request.json();
