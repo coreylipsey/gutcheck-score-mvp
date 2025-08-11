@@ -702,3 +702,111 @@ export const spendTokensForFeature = onCall(async (request) => {
     throw new Error('Failed to unlock feature');
   }
 });
+
+// AI Scoring Function
+export const scoreResponse = onCall(async (request) => {
+  try {
+    const { questionType, response } = request.data;
+
+    if (!questionType || !response) {
+      throw new Error('Missing required fields: questionType and response');
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('Gemini API key not configured');
+    }
+
+    // Prompts from the framework
+    const SCORING_PROMPTS = {
+      entrepreneurialJourney: `You are an expert business evaluator assessing a founder's entrepreneurial journey.
+Score this response on a scale of 1-5 where:
+1 = Vague, lacks structure, no clear direction or milestones
+3 = Decent clarity with some evidence of execution and progress
+5 = Well-articulated, structured response with strong execution and clear growth path
+
+Founder's Response:
+{{RESPONSE}}
+
+Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`,
+
+      businessChallenge: `You are an expert business evaluator assessing how a founder navigates business challenges.
+Score this response on a scale of 1-5 where:
+1 = Poor problem definition, reactive approach, no clear solution strategy
+3 = Clear problem definition, reasonable approach, some evidence of execution
+5 = Exceptional problem clarity, strategic solution, strong evidence of execution/learning
+
+Founder's Response:
+{{RESPONSE}}
+
+Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`,
+
+      setbacksResilience: `You are an expert business evaluator assessing a founder's ability to handle setbacks.
+Score this response on a scale of 1-5 where:
+1 = Poor resilience, gives up easily, no clear recovery strategy
+3 = Moderate resilience, recovers but slowly, some adaptation
+5 = Exceptional resilience, adapts quickly, shows growth mindset and clear recovery process
+
+Founder's Response:
+{{RESPONSE}}
+
+Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`,
+
+      finalVision: `You are an expert business evaluator assessing a founder's long-term vision.
+Score this response on a scale of 1-5 where:
+1 = Vague, unrealistic, or very limited vision, no clear roadmap
+3 = Clear vision with reasonable ambition, some future goals
+5 = Compelling, ambitious vision with clear roadmap and long-term impact
+
+Founder's Response:
+{{RESPONSE}}
+
+Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`
+    };
+
+    // Get the appropriate prompt for the question type
+    const promptTemplate = SCORING_PROMPTS[questionType as keyof typeof SCORING_PROMPTS];
+    if (!promptTemplate) {
+      throw new Error('Invalid question type');
+    }
+
+    // Replace placeholder with actual response
+    const prompt = promptTemplate.replace('{{RESPONSE}}', response);
+
+    // Call Gemini API
+    const geminiResponse = await callGemini(prompt, apiKey);
+    
+    // Parse the response
+    const scoringResult = parseGeminiResponse(geminiResponse);
+
+    return {
+      success: true,
+      ...scoringResult
+    };
+
+  } catch (error) {
+    console.error('Error in AI scoring:', error);
+    throw new Error('Failed to score response');
+  }
+});
+
+// Claim Score Function
+export const claimScore = onCall(async (request) => {
+  try {
+    const { sessionId, userId } = request.data;
+
+    if (!sessionId || !userId) {
+      throw new Error('Session ID and User ID are required');
+    }
+
+    // TODO: Implement actual assessment repository integration
+    // For now, return mock success
+    return {
+      success: true,
+      message: 'Score claimed successfully'
+    };
+  } catch (error) {
+    console.error('Error claiming score:', error);
+    throw new Error('Failed to claim score');
+  }
+});

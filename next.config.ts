@@ -10,10 +10,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Exclude API routes from static export
-  experimental: {
-    excludeDefaultMomentLocales: false,
-  },
   // Only include Firebase config in client-side bundle, not during build
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,

@@ -223,25 +223,27 @@ Provide 3-4 specific, actionable next steps in bullet points. Include resources,
     const responseMatch = prompt.match(/Founder's Response:\s*([\s\S]*?)(?=\n\n|Return your evaluation|$)/);
     const response = responseMatch ? responseMatch[1].trim() : '';
 
-    // Call our API route
-    const apiResponse = await fetch('/api/gemini/score', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    // Call Cloud Function instead of API route
+    const { getFunctions, httpsCallable } = await import('firebase/functions');
+    const functions = getFunctions();
+    const scoreResponse = httpsCallable(functions, 'scoreResponse');
+
+    try {
+      const result = await scoreResponse({
         questionType,
-        response,
-        questionText: 'Open-ended question response'
-      })
-    });
+        response
+      });
 
-    if (!apiResponse.ok) {
-      throw new Error(`API error: ${apiResponse.statusText}`);
+      const data = result.data as any;
+      if (data.success) {
+        return data.explanation || 'AI evaluation completed';
+      } else {
+        throw new Error('Failed to score response');
+      }
+    } catch (error) {
+      console.error('Error calling Cloud Function:', error);
+      throw new Error('Failed to score response');
     }
-
-    const data = await apiResponse.json();
-    return data.explanation || 'AI evaluation completed';
   }
 
   private parseResponse(response: string): AIScoringResult {

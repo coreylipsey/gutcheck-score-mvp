@@ -32,19 +32,18 @@ export function ClaimScoreModal({ isOpen, onClose, onClaimSuccess, sessionId }: 
 
     setLoading(true);
     try {
-      // Call API to link the session to the user
-      const response = await fetch('/api/auth/claim-score', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId,
-          userId: user.uid,
-        }),
+      // Call Cloud Function instead of API route
+      const { getFunctions, httpsCallable } = await import('firebase/functions');
+      const functions = getFunctions();
+      const claimScore = httpsCallable(functions, 'claimScore');
+
+      const result = await claimScore({
+        sessionId,
+        userId: user.uid,
       });
 
-      if (response.ok) {
+      const data = result.data as any;
+      if (data.success) {
         setClaimed(true);
         onClaimSuccess();
       } else {
