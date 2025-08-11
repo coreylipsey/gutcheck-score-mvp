@@ -171,26 +171,43 @@ function DashboardContent() {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Dashboard
-              </h1>
-              {user && (
-                <p className="text-sm text-gray-600 mt-1">
-                  Welcome back, {user.displayName || user.email}
-                </p>
-              )}
+            <div className="flex items-center space-x-6">
+              <Link href="/" className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-[#147AFF] to-[#19C2A0] rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">G</span>
+                </div>
+                <span className="text-xl font-bold text-[#0A1F44]">Gutcheck Score™</span>
+              </Link>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Dashboard
+                </h1>
+                {user && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    Welcome back, {user.displayName || user.email}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <TokenBalanceIndicator 
                 onPurchaseClick={() => setShowPurchaseModal(true)}
               />
-              <Link
-                href="/assessment"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Take New Assessment
-              </Link>
+              {assessmentLimits.canTakeAssessment ? (
+                <Link
+                  href="/assessment"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  Take New Assessment
+                </Link>
+              ) : (
+                <button
+                  disabled
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-400 bg-gray-100 cursor-not-allowed"
+                >
+                  Take New Assessment
+                </button>
+              )}
               <button
                 onClick={logout}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50"

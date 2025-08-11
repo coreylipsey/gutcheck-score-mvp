@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { AssessmentHistory } from '@/app/dashboard/page';
 
 interface MonthlyInsightsProps {
@@ -103,7 +104,10 @@ export function MonthlyInsights({ lastAssessment, canTakeAssessment, daysUntilNe
         </div>
 
         {lastAssessment && (
-          <div className="bg-gray-50 rounded-lg p-4">
+          <Link 
+            href={`/assessment/results?sessionId=${lastAssessment.sessionId}`}
+            className="block bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors cursor-pointer"
+          >
             <h5 className="font-medium text-gray-900 mb-2">Your Last Assessment</h5>
             <div className="flex items-center justify-between">
               <div>
@@ -123,7 +127,7 @@ export function MonthlyInsights({ lastAssessment, canTakeAssessment, daysUntilNe
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         )}
 
         {canTakeAssessment && (
