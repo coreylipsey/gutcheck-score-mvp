@@ -9,7 +9,9 @@
 
 import {setGlobalOptions} from "firebase-functions";
 import {onRequest} from "firebase-functions/v2/https";
+import {onCall} from "firebase-functions/v2/https";
 import {defineString} from "firebase-functions/params";
+import Stripe from 'stripe';
 
 // Define the Gemini API key parameter
 const geminiApiKey = defineString("GEMINI_API_KEY");
@@ -514,4 +516,135 @@ async function validateUrlContent(url: string, expectedResource: string): Promis
       reason: error instanceof Error ? error.message : 'Fetch error'
     };
   }
+}
+
+// Token Economy Functions
+
+// Initialize Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2024-12-18.acacia',
+});
+
+// Create Stripe checkout session for token purchase
+export const createTokenCheckoutSession = onCall(async (request) => {
+  try {
+    const { packageId, tokens, price, userId } = request.data;
+
+    if (!packageId || !tokens || !price || !userId) {
+      throw new Error('Missing required fields');
+    }
+
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `${tokens} Gutcheck Tokens`,
+              description: `Token package for Gutcheck.AI features`,
+              metadata: {
+                packageId,
+                tokens: tokens.toString(),
+                userId
+              }
+            },
+            unit_amount: Math.round(price * 100), // Convert to cents
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?canceled=true`,
+      metadata: {
+        packageId,
+        tokens: tokens.toString(),
+        userId,
+        type: 'token_purchase'
+      },
+      customer_email: userId, // You might want to get the actual email from the user
+    });
+
+    return { sessionId: session.id };
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    throw new Error('Failed to create checkout session');
+  }
+});
+
+// Process Stripe webhook for token purchases
+export const processStripeWebhook = onRequest(async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.rawBody, sig as string, endpointSecret);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err);
+    res.status(400).send('Invalid signature');
+    return;
+  }
+
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed':
+        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+        break;
+      
+      case 'payment_intent.succeeded':
+        await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
+        break;
+      
+      case 'payment_intent.payment_failed':
+        await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent);
+        break;
+      
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
+    }
+
+    res.json({ received: true });
+  } catch (error) {
+    console.error('Error processing webhook:', error);
+    res.status(500).send('Webhook processing failed');
+  }
+});
+
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+  console.log('Processing completed checkout session:', session.id);
+
+  // Extract metadata
+  const metadata = session.metadata;
+  if (!metadata || metadata.type !== 'token_purchase') {
+    console.log('Not a token purchase session');
+    return;
+  }
+
+  const userId = metadata.userId;
+  const tokens = parseInt(metadata.tokens || '0');
+  const packageId = metadata.packageId;
+
+  if (!userId || !tokens || !packageId) {
+    console.error('Missing required metadata for token purchase');
+    return;
+  }
+
+  // Here you would integrate with your token service
+  // For now, we'll just log the successful purchase
+  console.log(`Successfully processed token purchase: ${tokens} tokens for user ${userId}`);
+  
+  // TODO: Implement token crediting logic
+  // await tokenService.addTokensToUser(userId, tokens, 'stripe', session.payment_intent as string);
+}
+
+async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+  console.log('Payment intent succeeded:', paymentIntent.id);
+}
+
+async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
+  console.log('Payment intent failed:', paymentIntent.id);
 }

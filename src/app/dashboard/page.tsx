@@ -4,48 +4,121 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
-import { Container } from '@/infrastructure/di/container';
-import { IAssessmentRepository } from '@/domain/repositories/IAssessmentRepository';
+import { DashboardService } from '@/app/services/DashboardService';
 import { ProgressGraph } from '@/components/dashboard/ProgressGraph';
 import { MonthlyInsights } from '@/components/dashboard/MonthlyInsights';
-import { AssessmentFrequencyService } from '@/application/services/AssessmentFrequencyService';
+import { TokenBalanceIndicator } from '@/components/tokens/TokenBalanceIndicator';
+import { TokenPurchaseModal } from '@/components/tokens/TokenPurchaseModal';
+import { FeatureCard } from '@/components/tokens/FeatureCard';
+import { TransactionHistory } from '@/components/tokens/TransactionHistory';
+import { Brain, TrendingUp, Users, FileText, Zap, Target } from 'lucide-react';
 
-interface AssessmentHistory {
-  sessionId: string;
-  completedAt: string;
-  overallScore: number;
-}
+import { AssessmentHistoryDTO } from '@/app/services/DashboardService';
 
 function DashboardContent() {
-  const [assessmentHistory, setAssessmentHistory] = useState<AssessmentHistory[]>([]);
-  const [assessmentLimits, setAssessmentLimits] = useState<ReturnType<typeof AssessmentFrequencyService.checkAssessmentLimits>>({
+  const [assessmentHistory, setAssessmentHistory] = useState<AssessmentHistoryDTO[]>([]);
+  const [assessmentLimits, setAssessmentLimits] = useState<{
+    canTakeAssessment: boolean;
+    nextAvailableDate: string | null;
+    daysUntilNextAssessment: number | null;
+    lastAssessmentDate: string | null;
+  }>({
     canTakeAssessment: true,
     nextAvailableDate: null,
     daysUntilNextAssessment: null,
     lastAssessmentDate: null
   });
+  const [tokenBalance, setTokenBalance] = useState<number>(0);
+  const [featureAccess, setFeatureAccess] = useState<{
+    'ai-market-analysis': boolean;
+    'investor-matching': boolean;
+    'competitor-report': boolean;
+    'team-analysis': boolean;
+    'pitch-deck-ai': boolean;
+    'growth-projections': boolean;
+  }>({
+    'ai-market-analysis': false,
+    'investor-matching': false,
+    'competitor-report': false,
+    'team-analysis': false,
+    'pitch-deck-ai': false,
+    'growth-projections': false
+  });
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const { user, logout } = useAuthContext();
 
+  // Features array matching the design
+  const features = [
+    {
+      id: 'ai-market-analysis',
+      title: 'AI Market Analysis Agent',
+      description: 'Get comprehensive market analysis powered by AI to understand your competitive landscape and opportunities.',
+      cost: 25,
+      icon: <Brain className="w-6 h-6" />,
+      category: 'AI Agent' as const,
+      benefits: ['Market size analysis', 'Competitor mapping', 'Opportunity identification', 'Real-time data'],
+      popular: true
+    },
+    {
+      id: 'investor-matching',
+      title: 'Investor Matching Algorithm',
+      description: 'Advanced algorithm that matches your startup profile with the most suitable investors based on your sector and stage.',
+      cost: 35,
+      icon: <Target className="w-6 h-6" />,
+      category: 'AI Agent' as const,
+      benefits: ['Personalized investor list', 'Match scoring', 'Contact information', 'Investment patterns']
+    },
+    {
+      id: 'competitor-report',
+      title: 'Premium Competitor Report',
+      description: 'Deep dive analysis of your top competitors including funding history, team analysis, and strategic insights.',
+      cost: 15,
+      icon: <TrendingUp className="w-6 h-6" />,
+      category: 'Premium Insights' as const,
+      benefits: ['Funding timeline', 'Team analysis', 'Strategic moves', 'Market positioning']
+    },
+    {
+      id: 'team-analysis',
+      title: 'Team Dynamics Analysis',
+      description: 'Comprehensive analysis of your team composition and recommendations for strengthening key areas.',
+      cost: 20,
+      icon: <Users className="w-6 h-6" />,
+      category: 'Premium Insights' as const,
+      benefits: ['Skill gap analysis', 'Team chemistry', 'Hiring recommendations', 'Role optimization']
+    },
+    {
+      id: 'pitch-deck-ai',
+      title: 'AI Pitch Deck Optimizer',
+      description: 'AI-powered analysis and optimization of your pitch deck with investor feedback simulation.',
+      cost: 30,
+      icon: <FileText className="w-6 h-6" />,
+      category: 'AI Agent' as const,
+      benefits: ['Content analysis', 'Structure optimization', 'Investor simulation', 'Improvement suggestions']
+    },
+    {
+      id: 'growth-projections',
+      title: 'Advanced Growth Projections',
+      description: 'Sophisticated financial modeling and growth projections based on your industry and business model.',
+      cost: 40,
+      icon: <Zap className="w-6 h-6" />,
+      category: 'Advanced Analytics' as const,
+      benefits: ['Revenue modeling', 'Growth scenarios', 'Market validation', 'Funding timeline']
+    }
+  ];
+
   useEffect(() => {
-    const fetchUserAssessments = async () => {
+    const fetchUserData = async () => {
       if (user?.uid) {
         try {
-          // Use Clean Architecture - get repository from DI container
-          const assessmentRepository = Container.getInstance().resolve<IAssessmentRepository>('IAssessmentRepository');
-          const sessions = await assessmentRepository.findByUserId(user.uid);
+          const dashboardService = DashboardService.getInstance();
+          const dashboardData = await dashboardService.getDashboardData(user.uid);
           
-          const assessments = sessions.map(session => ({
-            sessionId: session.sessionId,
-            completedAt: session.completedAt?.toLocaleDateString() || new Date().toLocaleDateString(),
-            overallScore: session.scores.overallScore
-          }));
-          setAssessmentHistory(assessments);
-          
-          // Check assessment frequency limits
-          const limits = AssessmentFrequencyService.checkAssessmentLimits(assessments);
-          setAssessmentLimits(limits);
+          setAssessmentHistory(dashboardData.assessmentHistory);
+          setAssessmentLimits(dashboardData.assessmentLimits);
+          setTokenBalance(dashboardData.tokenBalance);
+          setFeatureAccess(dashboardData.featureAccess);
         } catch (error) {
-          console.error('Error fetching user assessments:', error);
+          console.error('Error fetching user data:', error);
           
           // Fallback to localStorage if Firestore fails
           const sessionId = localStorage.getItem('sessionId');
@@ -67,8 +140,30 @@ function DashboardContent() {
       }
     };
 
-    fetchUserAssessments();
+    fetchUserData();
   }, [user]);
+
+  const handlePurchaseSuccess = () => {
+    // Refresh token balance after successful purchase
+    if (user?.uid) {
+      const dashboardService = DashboardService.getInstance();
+      dashboardService.refreshTokenData(user.uid).then(data => {
+        setTokenBalance(data.tokenBalance);
+        setFeatureAccess(data.featureAccess);
+      });
+    }
+  };
+
+  const handleFeatureUnlock = () => {
+    // Refresh token balance and feature access after unlocking
+    if (user?.uid) {
+      const dashboardService = DashboardService.getInstance();
+      dashboardService.refreshTokenData(user.uid).then(data => {
+        setTokenBalance(data.tokenBalance);
+        setFeatureAccess(data.featureAccess);
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -87,6 +182,9 @@ function DashboardContent() {
               )}
             </div>
             <div className="flex items-center space-x-4">
+              <TokenBalanceIndicator 
+                onPurchaseClick={() => setShowPurchaseModal(true)}
+              />
               <Link
                 href="/assessment"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700"
@@ -125,8 +223,32 @@ function DashboardContent() {
           </div>
         </div>
 
+        {/* Token Features Section */}
+        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl text-[#0A1F44] font-bold">
+              Premium Features
+            </h2>
+            <span className="bg-[#147AFF]/10 text-[#147AFF] border-[#147AFF] px-3 py-1 rounded-full text-sm font-medium">
+              {features.filter(f => tokenBalance >= f.cost).length} Available
+            </span>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {features.map((feature) => (
+              <FeatureCard
+                key={feature.id}
+                feature={feature}
+                tokenBalance={tokenBalance}
+                isUnlocked={featureAccess[feature.id as keyof typeof featureAccess] || false}
+                onUnlockSuccess={handleFeatureUnlock}
+              />
+            ))}
+          </div>
+        </div>
+
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
@@ -179,7 +301,17 @@ function DashboardContent() {
             </div>
           </div>
         </div>
+
+        {/* Transaction History */}
+        <TransactionHistory />
       </main>
+
+      {/* Token Purchase Modal */}
+      <TokenPurchaseModal
+        isOpen={showPurchaseModal}
+        onClose={() => setShowPurchaseModal(false)}
+        onPurchaseSuccess={handlePurchaseSuccess}
+      />
     </div>
   );
 }

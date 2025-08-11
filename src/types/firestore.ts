@@ -64,3 +64,49 @@ export interface FirestoreAssessmentQuestion {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
+
+// Token Economy Firestore Models
+export interface FirestoreTokenBalance {
+  userId: string;
+  balance: number;
+  lastUpdated: Timestamp;
+  lastPurchaseAt?: Timestamp;
+}
+
+export interface FirestoreFeatureAccess {
+  userId: string;
+  features: {
+    'ai-market-analysis': boolean;
+    'investor-matching': boolean;
+    'competitor-report': boolean;
+    'team-analysis': boolean;
+    'pitch-deck-ai': boolean;
+    'growth-projections': boolean;
+  };
+  lastUpdated: Timestamp;
+}
+
+export interface FirestoreTokenTransaction {
+  id: string;
+  userId: string;
+  type: 'purchase' | 'spend' | 'refund' | 'bonus';
+  amount: number;
+  featureName?: string;
+  source?: 'stripe' | 'admin' | 'system';
+  stripePaymentIntentId?: string;
+  description: string;
+  timestamp: Timestamp;
+  balanceAfter: number;
+}
+
+export interface FirestoreTokenPurchase {
+  id: string;
+  userId: string;
+  amount: number;
+  price: number;
+  currency: string;
+  stripePaymentIntentId: string;
+  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  createdAt: Timestamp;
+  completedAt?: Timestamp;
+}

@@ -2,12 +2,17 @@ import { Container } from './container';
 import { FirestoreAssessmentRepository } from '../repositories/FirestoreAssessmentRepository';
 import { FirestoreUserRepository } from '../repositories/FirestoreUserRepository';
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository';
+import { FirestoreTokenRepository } from '../repositories/FirestoreTokenRepository';
 import { GeminiAIService } from '../services/GeminiAIService';
 import { ScoringService } from '../../application/services/ScoringService';
+import { TokenService } from '../../application/services/TokenService';
 import { CalculateAssessmentScore } from '../../application/use-cases/CalculateAssessmentScore';
 import { SaveAssessmentSession } from '../../application/use-cases/SaveAssessmentSession';
 import { GenerateAIFeedback } from '../../application/use-cases/GenerateAIFeedback';
 import { AuthenticateUser } from '../../application/use-cases/AuthenticateUser';
+import { PurchaseTokens } from '../../application/use-cases/PurchaseTokens';
+import { SpendTokensForFeature } from '../../application/use-cases/SpendTokensForFeature';
+import { GetUserTokenInfo } from '../../application/use-cases/GetUserTokenInfo';
 
 export function setupDependencies(): void {
   const container = Container.getInstance();
@@ -29,9 +34,17 @@ export function setupDependencies(): void {
     new FirebaseAuthRepository()
   );
 
+  container.register('ITokenRepository', () => 
+    new FirestoreTokenRepository()
+  );
+
   // Register application services
   container.register('ScoringService', () => 
     new ScoringService(container.resolve('IAIScoringService'))
+  );
+
+  container.register('TokenService', () => 
+    new TokenService(container.resolve('ITokenRepository'))
   );
 
   // Register use cases
@@ -55,5 +68,18 @@ export function setupDependencies(): void {
       container.resolve('IAuthRepository'),
       container.resolve('IUserRepository')
     )
+  );
+
+  // Register token use cases
+  container.register('PurchaseTokens', () => 
+    new PurchaseTokens(container.resolve('TokenService'))
+  );
+
+  container.register('SpendTokensForFeature', () => 
+    new SpendTokensForFeature(container.resolve('TokenService'))
+  );
+
+  container.register('GetUserTokenInfo', () => 
+    new GetUserTokenInfo(container.resolve('TokenService'))
   );
 } 

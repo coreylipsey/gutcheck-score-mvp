@@ -28,5 +28,27 @@ service cloud.firestore {
     match /assessmentQuestions/{questionId} {
       allow read: if true;
     }
+    
+    // Token Balance - Users can only access their own token balance
+    match /tokenBalances/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Token Transactions - Users can only access their own transactions
+    match /tokenTransactions/{transactionId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Token Purchases - Users can only access their own purchases
+    match /tokenPurchases/{purchaseId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Feature Access - Users can only access their own feature access
+    match /featureAccess/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
   }
 }
