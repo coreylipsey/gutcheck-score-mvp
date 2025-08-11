@@ -2,7 +2,7 @@
 
 A Next.js-based entrepreneurial assessment platform that provides AI-powered scoring and insights for entrepreneurs.
 
-<!-- Last updated: 2025-08-11 - IAM permissions fully configured for Cloud Functions -->
+<!-- Last updated: 2025-08-11 - Cloud Billing API enabled -->
 
 ## 🚀 Features
 
