@@ -244,7 +244,7 @@ function DashboardContent() {
         {/* Token Features Section */}
         <ComingSoonOverlay
           title="Premium Features Coming Soon"
-          description="Our advanced AI-powered features are launching soon. Get notified when they're available to unlock your entrepreneurial potential."
+          description="Our advanced AI-powered features are launching soon."
         >
           <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
             <div className="flex items-center justify-between mb-6">
@@ -304,7 +304,7 @@ function DashboardContent() {
 
           <ComingSoonOverlay
             title="Progress Tracking Coming Soon"
-            description="Advanced progress tracking and analytics will be available soon to help you monitor your entrepreneurial journey."
+            description="Advanced progress tracking and analytics will be available soon."
           >
             <div className="bg-white rounded-lg shadow-lg p-6">
               <div className="text-center">
@@ -333,7 +333,7 @@ function DashboardContent() {
         {/* Transaction History */}
         <ComingSoonOverlay
           title="Transaction History Coming Soon"
-          description="View your token purchase history and spending patterns. This feature will be available soon."
+          description="View your token purchase history and spending patterns."
         >
           <TransactionHistory />
         </ComingSoonOverlay>
