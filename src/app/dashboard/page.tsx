@@ -340,11 +340,16 @@ function DashboardContent() {
       </main>
 
       {/* Token Purchase Modal */}
-      <TokenPurchaseModal
-        isOpen={showPurchaseModal}
-        onClose={() => setShowPurchaseModal(false)}
-        onPurchaseSuccess={handlePurchaseSuccess}
-      />
+      <ComingSoonOverlay
+        title="Token Purchase Coming Soon"
+        description="Token purchasing will be available soon. Stay tuned for our launch!"
+      >
+        <TokenPurchaseModal
+          isOpen={showPurchaseModal}
+          onClose={() => setShowPurchaseModal(false)}
+          onPurchaseSuccess={handlePurchaseSuccess}
+        />
+      </ComingSoonOverlay>
     </div>
   );
 }
