@@ -1,4 +1,4 @@
-import { Award, Info, Target } from "lucide-react";
+import { Award, Info, Target, Star, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { FirestoreAssessmentSession } from "@/types/firestore";
 
@@ -12,13 +12,58 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
   const overallScore = Math.round(sessionData.scores.overallScore);
   const maxScore = 100;
   
-  // Star rating thresholds
+  // Updated star rating thresholds with percentile-based tiers and dual labeling
   const starThresholds = [
-    { stars: 1, min: 0, max: 19, label: "Early Spark" },
-    { stars: 2, min: 20, max: 39, label: "Developing Potential" },
-    { stars: 3, min: 40, max: 59, label: "Emerging Traction" },
-    { stars: 4, min: 60, max: 79, label: "Strong Execution" },
-    { stars: 5, min: 80, max: 100, label: "Visionary Leader" }
+    { 
+      stars: 1, 
+      min: 35, 
+      max: 49, 
+      label: "Early Spark",
+      creditLabel: "Poor",
+      color: "#FF6B00",
+      percentile: "Bottom 16%",
+      description: "Getting started - building entrepreneurial foundation"
+    },
+    { 
+      stars: 2, 
+      min: 50, 
+      max: 64, 
+      label: "Developing Potential",
+      creditLabel: "Fair",
+      color: "#FFC700",
+      percentile: "17th-36th percentile",
+      description: "Making progress - developing core business skills"
+    },
+    { 
+      stars: 3, 
+      min: 65, 
+      max: 79, 
+      label: "Emerging Traction",
+      creditLabel: "Good",
+      color: "#147AFF",
+      percentile: "37th-66th percentile",
+      description: "Solid foundation - ready for structured growth"
+    },
+    { 
+      stars: 4, 
+      min: 80, 
+      max: 89, 
+      label: "Investment Ready",
+      creditLabel: "Very Good",
+      color: "#19C2A0",
+      percentile: "67th-86th percentile",
+      description: "Strong execution - attractive to investors"
+    },
+    { 
+      stars: 5, 
+      min: 90, 
+      max: 100, 
+      label: "Visionary Leader",
+      creditLabel: "Excellent",
+      color: "#0A1F44",
+      percentile: "87th-100th percentile",
+      description: "Exceptional readiness - market leader potential"
+    }
   ];
 
   // Calculate current star rating and next threshold
@@ -62,33 +107,14 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
   const circumference = 2 * Math.PI * 90;
   const strokeDashoffset = circumference - (overallScore / maxScore) * circumference;
 
-  const starDefinitions = [
-    {
-      stars: 1,
-      label: "Early Spark",
-      definition: "You've just begun your entrepreneurial journey with initial ideas and motivation."
-    },
-    {
-      stars: 2,
-      label: "Developing Potential", 
-      definition: "You're on your way with some foundational skills and early business concepts."
-    },
-    {
-      stars: 3,
-      label: "Emerging Traction",
-      definition: "You're demonstrating solid progress with measurable business development."
-    },
-    {
-      stars: 4,
-      label: "Strong Execution",
-      definition: "You're exhibiting advanced entrepreneurial capabilities and proven results."
-    },
-    {
-      stars: 5,
-      label: "Visionary Leader",
-      definition: "Exceptional entrepreneurial mastery with innovative leadership and market impact."
-    }
-  ];
+  // Mock data for demonstration (in real app, this would come from user data)
+  const scorePercentile = 72;
+  const averageScore = 52;
+  const lastUpdated = new Date().toLocaleDateString('en-US', { 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric' 
+  });
 
   return (
     <div className="text-center space-y-8">
@@ -144,7 +170,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
 
         {/* Score Insights */}
         <div className="space-y-6 max-w-md">
-          {/* Star Rating Assessment Results */}
+          {/* Star Rating Assessment Results - Updated with dual labeling */}
           <div 
             className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 cursor-pointer hover:shadow-xl transition-all duration-300 relative"
             onMouseEnter={() => setShowStarDefinitions(true)}
@@ -163,11 +189,23 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             
             {/* Star Rating Display */}
             <div className="text-center space-y-2">
-              <div className="text-2xl">
-                {'⭐'.repeat(currentStar.stars)}
+              <div className="flex items-center justify-center space-x-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`w-5 h-5 transition-all duration-300 ${
+                      star <= currentStar.stars 
+                        ? 'fill-current text-yellow-400' 
+                        : 'text-gray-300'
+                    }`}
+                  />
+                ))}
               </div>
               <p className="font-semibold" style={{ color: '#0A1F44' }}>
                 {currentStar.label}
+              </p>
+              <p className="text-sm text-gray-600">
+                {currentStar.creditLabel} • {currentStar.percentile}
               </p>
             </div>
 
@@ -175,18 +213,33 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             {showStarDefinitions && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-10">
                 <h4 className="font-semibold mb-3 text-center" style={{ color: '#0A1F44' }}>
-                  Star Rating Definitions
+                  5-Star Rating System
                 </h4>
                 <div className="space-y-2">
-                  {starDefinitions.map((def, index) => (
+                  {starThresholds.map((def, index) => (
                     <div key={index} className="text-xs">
                       <div className="flex items-center space-x-2 mb-1">
-                        <span>{'⭐'.repeat(def.stars)}</span>
+                        <div className="flex items-center space-x-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-3 h-3 ${
+                                star <= def.stars 
+                                  ? 'fill-current text-yellow-400' 
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
                         <span className="font-medium" style={{ color: '#0A1F44' }}>
                           {def.label}
                         </span>
+                        <span className="text-gray-500">({def.creditLabel})</span>
                       </div>
-                      <p className="text-gray-600 ml-6">{def.definition}</p>
+                      <p className="text-gray-600 ml-6">{def.description}</p>
+                      <p className="text-gray-500 ml-6 text-xs">
+                        Score: {def.min}-{def.max} • {def.percentile}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -227,9 +280,18 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-700">Progress to {nextStar.stars} Stars</span>
-                  <span className="font-semibold" style={{ color: '#19C2A0' }}>
-                    {'⭐'.repeat(nextStar.stars)}
-                  </span>
+                  <div className="flex items-center space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-4 h-4 ${
+                          star <= nextStar.stars 
+                            ? 'fill-current text-yellow-400' 
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div

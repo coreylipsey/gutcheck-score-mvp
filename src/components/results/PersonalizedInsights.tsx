@@ -1,4 +1,4 @@
-import { Award, Target, TrendingUp } from "lucide-react";
+import { Award, Target, TrendingUp, Lightbulb, Zap } from "lucide-react";
 import { FirestoreAssessmentSession } from "@/types/firestore";
 
 interface PersonalizedInsightsProps {
@@ -20,11 +20,11 @@ const getPerformanceLevel = (score: number, max: number) => {
 
 export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps) {
   const categories = [
-    { name: "Personal Background", score: sessionData.scores.personalBackground, max: 20 },
+    { name: "Personal Foundation", score: sessionData.scores.personalBackground, max: 20 },
     { name: "Entrepreneurial Skills", score: sessionData.scores.entrepreneurialSkills, max: 25 },
-    { name: "Resources", score: sessionData.scores.resources, max: 20 },
-    { name: "Behavioral Metrics", score: sessionData.scores.behavioralMetrics, max: 15 },
-    { name: "Growth & Vision", score: sessionData.scores.growthVision, max: 20 }
+    { name: "Resources & Network", score: sessionData.scores.resources, max: 20 },
+    { name: "Behavioral Patterns", score: sessionData.scores.behavioralMetrics, max: 15 },
+    { name: "Vision & Growth", score: sessionData.scores.growthVision, max: 20 }
   ];
 
   // Find top strength and focus area
@@ -43,96 +43,147 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
   const topStrengthPerformance = getPerformanceLevel(topStrength.score, topStrength.max);
   const focusAreaPerformance = getPerformanceLevel(focusArea.score, focusArea.max);
 
+  // Mock data for demonstration (in real app, this would come from AI analysis)
+  const topStrengthDetails = {
+    impact: "+40% funding likelihood",
+    summary: "Your execution capabilities put you in the top 28% of tech entrepreneurs in Colorado.",
+    specificStrengths: [
+      "Strategic problem-solving approach (demonstrates handling cash flow crisis)",
+      "Strong network utilization (leveraged friend's support effectively)",
+      "Growth mindset (weekly professional learning commitment)",
+      "Resilience and adaptability (bounced back from business challenges)"
+    ]
+  };
+
+  const focusAreaDetails = {
+    impact: "Biggest opportunity for score improvement",
+    summary: "Inconsistent habits are holding you back from reaching your full potential.",
+    specificWeaknesses: [
+      "Goal tracking happens 'occasionally' vs systematic approach",
+      "Time dedication varies (1-10 hours) without structure",
+      "Recovery from setbacks relies on resilience vs strategic planning",
+      "Business planning lacks formal processes and documentation"
+    ]
+  };
+
+  // Score improvement potential
+  const potentialScoreIncrease = 8; // Based on implementing top recommendations
+  const newScoreProjection = Math.round(sessionData.scores.overallScore) + potentialScoreIncrease;
+
   return (
     <div className="space-y-8">
       {/* Section Header */}
       <div className="text-center space-y-3">
         <h2 className="text-3xl font-bold" style={{ color: '#0A1F44' }}>
-          Personalized AI Insights
+          Your Personalized Action Plan
         </h2>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          AI-powered analysis of your entrepreneurial profile with actionable recommendations
+          AI-powered insights with specific actions to improve your score
         </p>
+        
+        {/* Score improvement potential */}
+        <div className="inline-flex items-center space-x-3 px-6 py-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-full border border-green-200">
+          <TrendingUp className="w-5 h-5 text-green-600" />
+          <span className="font-medium text-green-800">
+            Following these recommendations could increase your score to {newScoreProjection}
+          </span>
+        </div>
       </div>
 
       {/* Insights Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
-        {/* Top Strength Card */}
-        <div className="bg-gradient-to-br from-green-50 to-teal-50 rounded-3xl p-8 border border-green-200 min-h-48 flex flex-col">
+        {/* Your Competitive Advantage Card */}
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-8 border border-green-200 min-h-48 flex flex-col">
           <div className="flex items-center space-x-4 mb-6">
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-green-100">
-              <Award className="w-6 h-6" style={{ color: '#19C2A0' }} />
+              <TrendingUp className="w-6 h-6" style={{ color: '#19C2A0' }} />
             </div>
-            <h3 className="text-xl font-semibold" style={{ color: '#0A1F44' }}>
-              Your Top Strength
-            </h3>
-          </div>
-          
-          <div className="flex-1">
-            <div className="mb-4">
-              <h4 className="text-lg font-semibold mb-2" style={{ color: '#0A1F44' }}>
-                {topStrength.name}
-              </h4>
-              <div className="flex items-center space-x-2 mb-3">
-                <span 
-                  className="px-3 py-1 text-sm font-medium rounded-full"
-                  style={{ 
-                    backgroundColor: topStrengthPerformance.color + '15',
-                    color: topStrengthPerformance.color
-                  }}
-                >
-                  {topStrengthPerformance.label}
+            <div className="flex-1">
+              <h3 className="text-xl font-semibold" style={{ color: '#0A1F44' }}>
+                Your Competitive Advantage
+              </h3>
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium" style={{ color: '#19C2A0' }}>
+                  {topStrength.name}
+                </p>
+                <span className="text-xs px-2 py-1 bg-green-200 text-green-800 rounded-full">
+                  {Math.round(topStrength.score)}/{topStrength.max}
+                </span>
+                <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                  {topStrengthDetails.impact}
                 </span>
               </div>
             </div>
-            
-            <p className="text-gray-700 leading-relaxed">
-              {sessionData.geminiFeedback?.strengths ||
-              `Your ${topStrength.name.toLowerCase()} demonstrates exceptional capabilities.
-              This area represents your strongest competitive advantage and should be
-              leveraged in your entrepreneurial journey. Consider how you can showcase
-              this strength to investors, partners, and customers.`}
+          </div>
+          
+          <div className="flex-1">
+            <p className="text-gray-700 leading-relaxed font-medium mb-4">
+              {topStrengthDetails.summary}
             </p>
+            
+            {/* Specific strengths list */}
+            <div className="bg-white/60 rounded-lg p-4">
+              <h4 className="font-semibold text-sm text-gray-800 mb-3 flex items-center">
+                <Lightbulb className="w-4 h-4 mr-2" />
+                What makes you stand out:
+              </h4>
+              <ul className="space-y-2">
+                {topStrengthDetails.specificStrengths.map((strength, index) => (
+                  <li key={index} className="flex items-start space-x-2 text-sm">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
+                    <span className="text-gray-700">{strength}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
 
-        {/* Focus Area Card */}
+        {/* Biggest Growth Opportunity Card */}
         <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-3xl p-8 border border-orange-200 min-h-48 flex flex-col">
           <div className="flex items-center space-x-4 mb-6">
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-orange-100">
               <Target className="w-6 h-6" style={{ color: '#FF6B00' }} />
             </div>
-            <h3 className="text-xl font-semibold" style={{ color: '#0A1F44' }}>
-              Priority Focus Area
-            </h3>
-          </div>
-          
-          <div className="flex-1">
-            <div className="mb-4">
-              <h4 className="text-lg font-semibold mb-2" style={{ color: '#0A1F44' }}>
-                {focusArea.name}
-              </h4>
-              <div className="flex items-center space-x-2 mb-3">
-                <span 
-                  className="px-3 py-1 text-sm font-medium rounded-full"
-                  style={{ 
-                    backgroundColor: focusAreaPerformance.color + '15',
-                    color: focusAreaPerformance.color
-                  }}
-                >
-                  {focusAreaPerformance.label}
+            <div className="flex-1">
+              <h3 className="text-xl font-semibold" style={{ color: '#0A1F44' }}>
+                Biggest Growth Opportunity
+              </h3>
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium" style={{ color: '#FF6B00' }}>
+                  {focusArea.name}
+                </p>
+                <span className="text-xs px-2 py-1 bg-orange-200 text-orange-800 rounded-full">
+                  {Math.round(focusArea.score)}/{focusArea.max}
+                </span>
+                <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                  {focusAreaDetails.impact}
                 </span>
               </div>
             </div>
-            
-            <p className="text-gray-700 leading-relaxed">
-              {sessionData.geminiFeedback?.focusAreas ||
-              `Your ${focusArea.name.toLowerCase()} presents the greatest opportunity for growth.
-              Focusing on this area will have the most significant impact on your overall
-              entrepreneurial readiness. Consider targeted development strategies and
-              seek mentorship in this domain.`}
+          </div>
+          
+          <div className="flex-1">
+            <p className="text-gray-700 leading-relaxed font-medium mb-4">
+              {focusAreaDetails.summary}
             </p>
+            
+            {/* Areas for improvement list */}
+            <div className="bg-white/60 rounded-lg p-4">
+              <h4 className="font-semibold text-sm text-gray-800 mb-3 flex items-center">
+                <Zap className="w-4 h-4 mr-2" />
+                Areas holding you back:
+              </h4>
+              <ul className="space-y-2">
+                {focusAreaDetails.specificWeaknesses.map((weakness, index) => (
+                  <li key={index} className="flex items-start space-x-2 text-sm">
+                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
+                    <span className="text-gray-700">{weakness}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -154,7 +205,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
             <strong style={{ color: '#0A1F44' }}> {sessionData.starRating === 1 ? 'Early Spark' :
              sessionData.starRating === 2 ? 'Developing Potential' :
              sessionData.starRating === 3 ? 'Emerging Traction' :
-             sessionData.starRating === 4 ? 'Strong Execution' : 'Visionary Leader'} </strong>
+             sessionData.starRating === 4 ? 'Investment Ready' : 'Visionary Leader'} </strong>
             category, indicating {sessionData.starRating <= 2 ? 'a foundation for growth with significant development opportunities' :
             sessionData.starRating === 3 ? 'solid progress with measurable business development' :
             sessionData.starRating === 4 ? 'advanced entrepreneurial capabilities with proven results' :

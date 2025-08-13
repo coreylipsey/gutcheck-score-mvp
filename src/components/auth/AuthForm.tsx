@@ -56,7 +56,7 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A1F44]/10 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-7xl grid lg:grid-cols-2 gap-8 lg:gap-16 items-start lg:items-center">
         
         {/* Welcome Panel */}

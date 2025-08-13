@@ -1,5 +1,6 @@
-import { User, Brain, DollarSign, TrendingUp, Rocket } from "lucide-react";
+import { User, Brain, DollarSign, TrendingUp, Rocket, HelpCircle } from "lucide-react";
 import { FirestoreAssessmentSession } from "@/types/firestore";
+import { useState } from "react";
 
 interface CategoryBreakdownProps {
   sessionData: FirestoreAssessmentSession;
@@ -10,6 +11,8 @@ interface CategoryData {
   score: number;
   max: number;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  description: string;
+  questions: string[];
 }
 
 // Helper function to determine performance level and color
@@ -26,36 +29,78 @@ const getPerformanceLevel = (score: number, max: number) => {
 };
 
 export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
+  const [showCategoryDetails, setShowCategoryDetails] = useState<string | null>(null);
+
   const categories: CategoryData[] = [
     {
-      name: "Personal Background",
+      name: "Personal Foundation", // Changed from "Personal Background"
       score: sessionData.scores.personalBackground,
       max: 20,
-      icon: User
+      icon: User,
+      description: "Your background, education, and foundational experiences that support entrepreneurship",
+      questions: [
+        "Previous business attempts and learnings",
+        "Educational background and relevant skills",
+        "Family entrepreneurial influence",
+        "Risk tolerance and decision-making style",
+        "Personal motivation and drive factors"
+      ]
     },
     {
       name: "Entrepreneurial Skills",
       score: sessionData.scores.entrepreneurialSkills,
       max: 25,
-      icon: Brain
+      icon: Brain,
+      description: "Core business capabilities, strategic thinking, and execution abilities",
+      questions: [
+        "Problem-solving and critical thinking",
+        "Business acumen and market understanding",
+        "Leadership and communication skills",
+        "Innovation and creative thinking",
+        "Learning agility and adaptability"
+      ]
     },
     {
-      name: "Resources",
+      name: "Resources & Network", // Enhanced naming
       score: sessionData.scores.resources,
       max: 20,
-      icon: DollarSign
+      icon: DollarSign,
+      description: "Available capital, connections, and support systems for business growth",
+      questions: [
+        "Access to startup capital and funding",
+        "Professional network strength",
+        "Mentor and advisor relationships",
+        "Industry connections and partnerships",
+        "Financial management capabilities"
+      ]
     },
     {
-      name: "Behavioral Metrics",
+      name: "Behavioral Patterns", // Clearer than "Behavioral Metrics"
       score: sessionData.scores.behavioralMetrics,
       max: 15,
-      icon: TrendingUp
+      icon: TrendingUp,
+      description: "Habits, consistency, and behavioral traits that drive business success",
+      questions: [
+        "Goal setting and tracking consistency",
+        "Time management and productivity habits",
+        "Resilience and recovery from setbacks",
+        "Self-discipline and follow-through",
+        "Continuous improvement mindset"
+      ]
     },
     {
-      name: "Growth & Vision",
+      name: "Vision & Growth", // More inspiring than "Growth & Vision"
       score: sessionData.scores.growthVision,
       max: 20,
-      icon: Rocket
+      icon: Rocket,
+      description: "Strategic planning, future vision, and scalability potential",
+      questions: [
+        "Long-term vision and strategic planning",
+        "Market opportunity identification",
+        "Scalability and growth planning",
+        "Innovation and differentiation strategy",
+        "Impact and legacy aspirations"
+      ]
     }
   ];
 
@@ -74,7 +119,7 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
           Category Performance Breakdown
         </h2>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Detailed analysis of your performance across key entrepreneurial dimensions
+          Detailed analysis of your performance across five key entrepreneurial dimensions
         </p>
       </div>
 
@@ -84,6 +129,7 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
           const percentage = Math.round((category.score / category.max) * 100);
           const performance = getPerformanceLevel(category.score, category.max);
           const isTopStrength = category.name === topStrength.name;
+          const isShowingDetails = showCategoryDetails === category.name;
 
           return (
             <div
@@ -94,16 +140,43 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
               {/* Category Header */}
               <div className="flex items-center space-x-4 mb-6">
                 <div 
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center border-2"
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center border-2 relative cursor-pointer group"
                   style={{ 
                     backgroundColor: performance.color + '15',
                     borderColor: performance.color
                   }}
+                  onMouseEnter={() => setShowCategoryDetails(category.name)}
+                  onMouseLeave={() => setShowCategoryDetails(null)}
                 >
                   <category.icon 
                     className="w-8 h-8" 
                     style={{ color: performance.color }} 
                   />
+                  <HelpCircle className="w-3 h-3 absolute -top-1 -right-1 opacity-50 group-hover:opacity-100 transition-opacity" 
+                              style={{ color: performance.color }} />
+                  
+                  {/* Hover tooltip with category details */}
+                  {isShowingDetails && (
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-10">
+                      <h4 className="font-semibold mb-2" style={{ color: '#0A1F44' }}>
+                        {category.name}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                        {category.description}
+                      </p>
+                      <div>
+                        <p className="text-xs font-medium text-gray-500 mb-2">Assessment Areas:</p>
+                        <ul className="text-xs text-gray-600 space-y-1">
+                          {category.questions.map((question, qIndex) => (
+                            <li key={qIndex} className="flex items-start space-x-2">
+                              <div className="w-1 h-1 rounded-full bg-gray-400 mt-1.5 flex-shrink-0"></div>
+                              <span>{question}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold" style={{ color: '#0A1F44' }}>
@@ -150,6 +223,13 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
             </div>
           );
         })}
+      </div>
+      
+      {/* Additional context note */}
+      <div className="text-center">
+        <p className="text-sm text-gray-500 italic">
+          Hover over category icons to see detailed assessment areas and explanations
+        </p>
       </div>
     </div>
   );

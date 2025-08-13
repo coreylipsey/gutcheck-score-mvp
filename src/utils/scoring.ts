@@ -251,10 +251,10 @@ export const getStarRating = (overallScore: number): number => {
 // Get category breakdown for display
 export const getCategoryBreakdown = (scores: Record<string, number>) => {
   return [
-    { name: 'Personal Background', score: scores.personalBackground, max: 20 },
+    { name: 'Personal Foundation', score: scores.personalBackground, max: 20 },
     { name: 'Entrepreneurial Skills', score: scores.entrepreneurialSkills, max: 25 },
-    { name: 'Resources', score: scores.resources, max: 20 },
-    { name: 'Behavioral Metrics', score: scores.behavioralMetrics, max: 15 },
-    { name: 'Growth & Vision', score: scores.growthVision, max: 20 },
+    { name: 'Resources & Network', score: scores.resources, max: 20 },
+    { name: 'Behavioral Patterns', score: scores.behavioralMetrics, max: 15 },
+    { name: 'Vision & Growth', score: scores.growthVision, max: 20 },
   ];
 };

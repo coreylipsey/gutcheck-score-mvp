@@ -262,7 +262,7 @@ Response: ${r.response}
 async function generateStrengthsText(scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
       const prompt = `You are an expert business evaluator analyzing Gutcheck.AI results. Your job is to identify a founder's top strength based on their assessment scores and provide a short, actionable insight.
 
-Personal Background Score (0–20): ${scores.personalBackground}
+Personal Foundation Score (0–20): ${scores.personalBackground}
 Entrepreneurial Skills Score (0–25): ${scores.entrepreneurialSkills}
 Resources Score (0–20): ${scores.resources}
 Behavioral Metrics Score (0–15): ${scores.behavioralMetrics}
@@ -288,7 +288,7 @@ If the scores are tied, choose the category most aligned with their listed indus
 async function generateFocusAreasText(scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
       const prompt = `You are an expert business evaluator analyzing Gutcheck.AI results to identify improvement areas.
 
-Personal Background Score (0–20): ${scores.personalBackground}
+Personal Foundation Score (0–20): ${scores.personalBackground}
 Entrepreneurial Skills Score (0–25): ${scores.entrepreneurialSkills}
 Resources Score (0–20): ${scores.resources}
 Behavioral Metrics Score (0–15): ${scores.behavioralMetrics}
@@ -319,7 +319,7 @@ One mentorship program or community
 One funding or grant opportunity
 One learning resource (course, article, or book)
 
-Personal Background Score (0–20): ${scores.personalBackground}
+Personal Foundation Score (0–20): ${scores.personalBackground}
 Entrepreneurial Skills Score (0–25): ${scores.entrepreneurialSkills}
 Resources Score (0–20): ${scores.resources}
 Behavioral Metrics Score (0–15): ${scores.behavioralMetrics}

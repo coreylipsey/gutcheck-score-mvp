@@ -12,6 +12,7 @@ import { TokenPurchaseModal } from '@/components/tokens/TokenPurchaseModal';
 import { FeatureCard } from '@/components/tokens/FeatureCard';
 import { TransactionHistory } from '@/components/tokens/TransactionHistory';
 import { Brain, TrendingUp, Users, FileText, Zap, Target } from 'lucide-react';
+import { ComingSoonOverlay } from '@/components/dashboard/ComingSoonOverlay';
 
 import { AssessmentHistoryDTO } from '@/app/services/DashboardService';
 
@@ -241,28 +242,33 @@ function DashboardContent() {
         </div>
 
         {/* Token Features Section */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl text-[#0A1F44] font-bold">
-              Premium Features
-            </h2>
-            <span className="bg-[#147AFF]/10 text-[#147AFF] border-[#147AFF] px-3 py-1 rounded-full text-sm font-medium">
-              {features.filter(f => tokenBalance >= f.cost).length} Available
-            </span>
+        <ComingSoonOverlay
+          title="Premium Features Coming Soon"
+          description="Our advanced AI-powered features are launching soon. Get notified when they're available to unlock your entrepreneurial potential."
+        >
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl text-[#0A1F44] font-bold">
+                Premium Features
+              </h2>
+              <span className="bg-[#147AFF]/10 text-[#147AFF] border-[#147AFF] px-3 py-1 rounded-full text-sm font-medium">
+                {features.filter(f => tokenBalance >= f.cost).length} Available
+              </span>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              {features.map((feature) => (
+                <FeatureCard
+                  key={feature.id}
+                  feature={feature}
+                  tokenBalance={tokenBalance}
+                  isUnlocked={featureAccess[feature.id as keyof typeof featureAccess] || false}
+                  onUnlockSuccess={handleFeatureUnlock}
+                />
+              ))}
+            </div>
           </div>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            {features.map((feature) => (
-              <FeatureCard
-                key={feature.id}
-                feature={feature}
-                tokenBalance={tokenBalance}
-                isUnlocked={featureAccess[feature.id as keyof typeof featureAccess] || false}
-                onUnlockSuccess={handleFeatureUnlock}
-              />
-            ))}
-          </div>
-        </div>
+        </ComingSoonOverlay>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -296,31 +302,41 @@ function DashboardContent() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 mb-4">
-                <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+          <ComingSoonOverlay
+            title="Progress Tracking Coming Soon"
+            description="Advanced progress tracking and analytics will be available soon to help you monitor your entrepreneurial journey."
+          >
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="text-center">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 mb-4">
+                  <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Track Progress
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Monitor your entrepreneurial growth over time with multiple assessments.
+                </p>
+                <button
+                  disabled
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-400 bg-gray-100 cursor-not-allowed"
+                >
+                  Coming Soon
+                </button>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Track Progress
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Monitor your entrepreneurial growth over time with multiple assessments.
-              </p>
-              <button
-                disabled
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-400 bg-gray-100 cursor-not-allowed"
-              >
-                Coming Soon
-              </button>
             </div>
-          </div>
+          </ComingSoonOverlay>
         </div>
 
         {/* Transaction History */}
-        <TransactionHistory />
+        <ComingSoonOverlay
+          title="Transaction History Coming Soon"
+          description="View your token purchase history and spending patterns. This feature will be available soon."
+        >
+          <TransactionHistory />
+        </ComingSoonOverlay>
       </main>
 
       {/* Token Purchase Modal */}

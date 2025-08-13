@@ -144,15 +144,18 @@ Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanati
   }
 
   private buildFeedbackPrompt(responses: Record<string, unknown>[], scores: Record<AssessmentCategory, number>, industry?: string, location?: string): string {
+    const categoryBreakdown = `
+- Personal Foundation: ${scores.personalBackground}/20
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
+- Resources & Network: ${scores.resources}/20
+- Behavioral Patterns: ${scores.behavioralMetrics}/15
+- Vision & Growth: ${scores.growthVision}/20
+`;
     return `You are an expert business consultant providing personalized feedback to an entrepreneur.
 
 Assessment Scores:
-- Personal Background: ${scores.personalBackground}/20
-- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
-- Resources: ${scores.resources}/20
-- Behavioral Metrics: ${scores.behavioralMetrics}/15
-- Growth & Vision: ${scores.growthVision}/20
-- Overall Score: ${Object.values(scores).reduce((sum, score) => sum + score, 0)}/100
+${categoryBreakdown}
+Overall Score: ${Object.values(scores).reduce((sum, score) => sum + score, 0)}/100
 
 ${industry ? `Industry: ${industry}` : ''}
 ${location ? `Location: ${location}` : ''}
@@ -161,13 +164,16 @@ Provide personalized, actionable feedback in 2-3 paragraphs. Focus on the entrep
   }
 
   private buildStrengthsPrompt(scores: Record<AssessmentCategory, number>, industry?: string, location?: string): string {
+    const categoryBreakdown = `
+- Personal Foundation: ${scores.personalBackground}/20
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
+- Resources & Network: ${scores.resources}/20
+- Behavioral Patterns: ${scores.behavioralMetrics}/15
+- Vision & Growth: ${scores.growthVision}/20
+`;
     return `Based on these assessment scores, identify the entrepreneur's key strengths:
 
-- Personal Background: ${scores.personalBackground}/20
-- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
-- Resources: ${scores.resources}/20
-- Behavioral Metrics: ${scores.behavioralMetrics}/15
-- Growth & Vision: ${scores.growthVision}/20
+${categoryBreakdown}
 
 ${industry ? `Industry: ${industry}` : ''}
 ${location ? `Location: ${location}` : ''}
@@ -176,13 +182,16 @@ List 3-4 specific strengths in bullet points. Be specific and encouraging.`;
   }
 
   private buildFocusAreasPrompt(scores: Record<AssessmentCategory, number>, industry?: string, location?: string): string {
+    const categoryBreakdown = `
+- Personal Foundation: ${scores.personalBackground}/20
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
+- Resources & Network: ${scores.resources}/20
+- Behavioral Patterns: ${scores.behavioralMetrics}/15
+- Vision & Growth: ${scores.growthVision}/20
+`;
     return `Based on these assessment scores, identify areas for improvement:
 
-- Personal Background: ${scores.personalBackground}/20
-- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
-- Resources: ${scores.resources}/20
-- Behavioral Metrics: ${scores.behavioralMetrics}/15
-- Growth & Vision: ${scores.growthVision}/20
+${categoryBreakdown}
 
 ${industry ? `Industry: ${industry}` : ''}
 ${location ? `Location: ${location}` : ''}
@@ -191,13 +200,16 @@ List 3-4 specific focus areas in bullet points. Be constructive and actionable.`
   }
 
   private buildNextStepsPrompt(scores: Record<AssessmentCategory, number>, industry?: string, location?: string): string {
+    const categoryBreakdown = `
+- Personal Foundation: ${scores.personalBackground}/20
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
+- Resources & Network: ${scores.resources}/20
+- Behavioral Patterns: ${scores.behavioralMetrics}/15
+- Vision & Growth: ${scores.growthVision}/20
+`;
     return `Based on these assessment scores, provide specific next steps:
 
-- Personal Background: ${scores.personalBackground}/20
-- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
-- Resources: ${scores.resources}/20
-- Behavioral Metrics: ${scores.behavioralMetrics}/15
-- Growth & Vision: ${scores.growthVision}/20
+${categoryBreakdown}
 
 ${industry ? `Industry: ${industry}` : ''}
 ${location ? `Location: ${location}` : ''}

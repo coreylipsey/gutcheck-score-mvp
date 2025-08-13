@@ -11,6 +11,7 @@ import { HeroScore } from '@/components/results/HeroScore';
 import { CategoryBreakdown } from '@/components/results/CategoryBreakdown';
 import { PersonalizedInsights } from '@/components/results/PersonalizedInsights';
 import { NextSteps } from '@/components/results/NextSteps';
+import { Footer } from '@/components/results/Footer';
 import { ClaimScoreModal } from '@/components/auth/ClaimScoreModal';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
 
@@ -135,7 +136,7 @@ function ResultsContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your results...</p>
@@ -146,7 +147,7 @@ function ResultsContent() {
 
   if (error || !sessionData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Results Not Found</h1>
           <p className="text-gray-600 mb-6">
@@ -164,7 +165,7 @@ function ResultsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 py-12 lg:px-12 lg:py-20">
         <div className="space-y-20">
           
@@ -252,6 +253,9 @@ function ResultsContent() {
         </div>
       </div>
 
+      {/* Footer */}
+      <Footer />
+
       {/* Claim Score Modal */}
       <ClaimScoreModal
         isOpen={showClaimModal}
@@ -270,7 +274,7 @@ function ResultsContent() {
 export default function ResultsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading results...</p>
