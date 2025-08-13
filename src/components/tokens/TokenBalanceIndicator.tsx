@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
 import { TokenPresentationService } from '@/presentation/services/TokenPresentationService';
-import { Coins, Plus } from 'lucide-react';
+import { Coins, Plus, Lock } from 'lucide-react';
 
 interface TokenBalanceIndicatorProps {
   onPurchaseClick?: () => void;
@@ -15,6 +15,7 @@ export function TokenBalanceIndicator({ onPurchaseClick, className = '' }: Token
   const [tokenBalance, setTokenBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showComingSoon, setShowComingSoon] = useState(false);
 
   useEffect(() => {
     if (user?.uid) {
@@ -46,9 +47,11 @@ export function TokenBalanceIndicator({ onPurchaseClick, className = '' }: Token
   };
 
   const handlePurchaseClick = () => {
-    if (onPurchaseClick) {
-      onPurchaseClick();
-    }
+    setShowComingSoon(true);
+    // Hide the overlay after 3 seconds
+    setTimeout(() => {
+      setShowComingSoon(false);
+    }, 3000);
   };
 
   if (!user) {
@@ -56,7 +59,7 @@ export function TokenBalanceIndicator({ onPurchaseClick, className = '' }: Token
   }
 
   return (
-    <div className={`flex items-center space-x-2 ${className}`}>
+    <div className={`flex items-center space-x-2 ${className} relative`}>
       {/* Token Balance Pill - Matching the design */}
       <div className="flex items-center space-x-2 bg-gradient-to-r from-[#147AFF]/10 to-[#19C2A0]/10 rounded-full px-4 py-2 border border-[#147AFF]/20">
         <Coins className="w-4 h-4 text-[#147AFF]" />
@@ -79,6 +82,23 @@ export function TokenBalanceIndicator({ onPurchaseClick, className = '' }: Token
           <Plus className="w-3 h-3" />
         </button>
       </div>
+
+      {/* Coming Soon Overlay */}
+      {showComingSoon && (
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] rounded-full flex items-center justify-center z-10">
+          <div className="text-center p-2">
+            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-gray-100 mb-2">
+              <Lock className="h-4 w-4 text-gray-400" />
+            </div>
+            <h3 className="text-sm font-semibold text-gray-900 mb-1">
+              Coming Soon
+            </h3>
+            <p className="text-xs text-gray-600 max-w-32">
+              Token purchasing will be available soon
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
