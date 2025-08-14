@@ -46,30 +46,30 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex justify-between items-center py-4 sm:py-6">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                 Gutcheck.AI
               </h1>
             </div>
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/assessment" className="text-gray-500 hover:text-gray-900">
+            <nav className="flex space-x-4 sm:space-x-8">
+              <Link href="/assessment" className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
                 Take Assessment
               </Link>
               {user ? (
                 <>
-                  <Link href="/dashboard" className="text-gray-500 hover:text-gray-900">
+                  <Link href="/dashboard" className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
                     Dashboard
                   </Link>
                   <button
                     onClick={logout}
-                    className="text-gray-500 hover:text-gray-900"
+                    className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap"
                   >
                     Sign Out
                   </button>
                 </>
               ) : (
-                <Link href="/auth" className="text-gray-500 hover:text-gray-900">
+                <Link href="/auth" className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
                   Sign In
                 </Link>
               )}
