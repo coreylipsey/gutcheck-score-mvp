@@ -28,6 +28,11 @@ export function FicoStyleGauge({
   starTiers 
 }: FicoStyleGaugeProps) {
   
+  // Safety checks to prevent NaN values
+  const safeScore = isNaN(score) || score === null || score === undefined ? 0 : Math.max(minScore, Math.min(maxScore, score));
+  const safeMaxScore = isNaN(maxScore) || maxScore === null || maxScore === undefined ? 100 : maxScore;
+  const safeMinScore = isNaN(minScore) || minScore === null || minScore === undefined ? 35 : minScore;
+  
   // Calculate proportional segments based on actual score ranges
   const createProportionalSegments = () => {
     const centerX = 200;
@@ -43,7 +48,7 @@ export function FicoStyleGauge({
       endAngle: number;
       score: number;
     }> = [];
-    const totalRange = maxScore - minScore; // 100 - 35 = 65 points
+    const totalRange = safeMaxScore - safeMinScore; // 100 - 35 = 65 points
     const totalArcAngle = 180; // Semicircle
     
     let currentAngle = 0;
@@ -95,8 +100,8 @@ export function FicoStyleGauge({
     const innerRadius = 145; // Start just outside the colored arc
     const outerRadius = 155; // Short needle length like in reference
     
-    const scoreRange = score - minScore;
-    const totalRange = maxScore - minScore;
+    const scoreRange = safeScore - safeMinScore;
+    const totalRange = safeMaxScore - safeMinScore;
     const angle = 180 + (scoreRange / totalRange) * 180; // 180 to 360 degrees
     const angleRad = angle * (Math.PI / 180);
     
@@ -150,7 +155,7 @@ export function FicoStyleGauge({
         
         {/* Score markers - only breakpoint numbers */}
         {starTiers.map((tier, index) => {
-          const tierAngle = 180 + ((tier.min - minScore) / (maxScore - minScore)) * 180;
+          const tierAngle = 180 + ((tier.min - safeMinScore) / (safeMaxScore - safeMinScore)) * 180;
           const tierAngleRad = tierAngle * (Math.PI / 180);
           const markerRadius = 165; // Positioned outside the needle
           const markerX = centerX + markerRadius * Math.cos(tierAngleRad);
@@ -205,10 +210,10 @@ export function FicoStyleGauge({
         
         {/* Scale range labels - just min and max */}
         <text x="70" y="250" textAnchor="middle" className="text-sm font-medium fill-gray-600">
-          {minScore}
+          {safeMinScore}
         </text>
         <text x="330" y="250" textAnchor="middle" className="text-sm font-medium fill-gray-600">
-          {maxScore}
+          {safeMaxScore}
         </text>
       </svg>
       
@@ -223,7 +228,7 @@ export function FicoStyleGauge({
             backgroundClip: 'text'
           }}
         >
-          {score}
+          {safeScore}
         </div>
       </div>
     </div>
