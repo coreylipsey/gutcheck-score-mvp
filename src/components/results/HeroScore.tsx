@@ -1,6 +1,7 @@
 import { Award, Info, Target, Star, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { FirestoreAssessmentSession } from "@/types/firestore";
+import { FicoStyleGauge } from "./FicoStyleGauge";
 
 interface HeroScoreProps {
   sessionData: FirestoreAssessmentSession;
@@ -9,8 +10,9 @@ interface HeroScoreProps {
 export function HeroScore({ sessionData }: HeroScoreProps) {
   const [showStarDefinitions, setShowStarDefinitions] = useState(false);
   
-  const overallScore = Math.round(sessionData.scores.overallScore);
+  const overallScore = Math.round(sessionData.scores.overall);
   const maxScore = 100;
+  const minScore = 35;
   
   // Updated star rating thresholds with percentile-based tiers and dual labeling
   const starThresholds = [
@@ -18,6 +20,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
       stars: 1, 
       min: 35, 
       max: 49, 
+      name: "Early Spark",
       label: "Early Spark",
       creditLabel: "Poor",
       color: "#FF6B00",
@@ -28,6 +31,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
       stars: 2, 
       min: 50, 
       max: 64, 
+      name: "Developing Potential",
       label: "Developing Potential",
       creditLabel: "Fair",
       color: "#FFC700",
@@ -38,6 +42,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
       stars: 3, 
       min: 65, 
       max: 79, 
+      name: "Emerging Traction",
       label: "Emerging Traction",
       creditLabel: "Good",
       color: "#147AFF",
@@ -48,6 +53,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
       stars: 4, 
       min: 80, 
       max: 89, 
+      name: "Investment Ready",
       label: "Investment Ready",
       creditLabel: "Very Good",
       color: "#19C2A0",
@@ -58,6 +64,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
       stars: 5, 
       min: 90, 
       max: 100, 
+      name: "Visionary Leader",
       label: "Visionary Leader",
       creditLabel: "Excellent",
       color: "#0A1F44",
@@ -96,17 +103,6 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
     return Math.min((currentProgress / currentRange) * 100, 100);
   };
 
-  // Dynamic color based on score
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "#19C2A0"; // Green
-    if (score >= 60) return "#FFC700"; // Yellow
-    return "#FF6B00"; // Red
-  };
-  
-  const scoreColor = getScoreColor(overallScore);
-  const circumference = 2 * Math.PI * 90;
-  const strokeDashoffset = circumference - (overallScore / maxScore) * circumference;
-
   // Mock data for demonstration (in real app, this would come from user data)
   const scorePercentile = 72;
   const averageScore = 52;
@@ -130,47 +126,20 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
 
       {/* Score Visualization */}
       <div className="flex flex-col lg:flex-row items-center justify-center gap-12">
-        {/* Main Score Circle */}
-        <div className="relative">
-          <svg className="w-64 h-64 transform -rotate-90" viewBox="0 0 200 200" aria-label={`Gutcheck score: ${overallScore}/100`}>
-            {/* Background circle */}
-            <circle
-              cx="100"
-              cy="100"
-              r="90"
-              stroke="#f3f4f6"
-              strokeWidth="12"
-              fill="transparent"
-            />
-            {/* Progress circle */}
-            <circle
-              cx="100"
-              cy="100"
-              r="90"
-              stroke={scoreColor}
-              strokeWidth="12"
-              fill="transparent"
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              className="transition-all duration-2000 ease-out"
-            />
-          </svg>
-          
-          {/* Score display in center */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="text-5xl font-bold" style={{ color: scoreColor }}>
-              {overallScore}
-            </div>
-            <div className="text-xs text-gray-400 mt-1">
-              /100
-            </div>
-          </div>
+        {/* FICO-Style Speedometer - REPLACED THE CIRCULAR WHEEL */}
+        <div className="flex-shrink-0">
+          <FicoStyleGauge 
+            score={overallScore}
+            maxScore={maxScore}
+            minScore={minScore}
+            currentTier={currentStar}
+            starTiers={starThresholds}
+          />
         </div>
 
-        {/* Score Insights */}
+        {/* Score Insights - COMPLETELY UNTOUCHED */}
         <div className="space-y-6 max-w-md">
-          {/* Star Rating Assessment Results - Updated with dual labeling */}
+          {/* Assessment Results - NO CHANGES */}
           <div 
             className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 cursor-pointer hover:shadow-xl transition-all duration-300 relative"
             onMouseEnter={() => setShowStarDefinitions(true)}
@@ -247,7 +216,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             )}
           </div>
 
-          {/* Key Insights - Executive summary */}
+          {/* Key Insights - NO CHANGES */}
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 min-h-24">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-100">
@@ -265,7 +234,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             </p>
           </div>
 
-          {/* Next Star Goal */}
+          {/* Next Star Goal - NO CHANGES */}
           <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-6 border border-green-200">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 rounded-full flex items-center justify-center bg-green-100">
