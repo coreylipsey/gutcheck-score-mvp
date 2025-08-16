@@ -131,7 +131,7 @@ export default function AssessmentPage() {
       // Calculate scores using the new architecture
       const scores = await calculateScores(responses);
       
-      // Generate AI feedback
+      // Generate enhanced AI feedback with new structure
       const geminiFeedback = await generateAIFeedback({
         responses,
         scores,

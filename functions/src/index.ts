@@ -134,18 +134,20 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
       return;
     }
 
-    // Generate feedback using the same logic as the API route
-    const [feedback, strengths, focusAreas, nextSteps] = await Promise.all([
+    // Generate enhanced feedback using the new AI functions
+    const [feedback, competitiveAdvantage, growthOpportunity, scoreProjection, nextSteps] = await Promise.all([
       generateFeedbackText(responses, scores, apiKey),
-      generateStrengthsText(scores, apiKey, industry, location),
-      generateFocusAreasText(scores, apiKey, industry, location),
+      generateCompetitiveAdvantage(responses, scores, apiKey, industry, location),
+      generateGrowthOpportunity(responses, scores, apiKey, industry, location),
+      generateTruthfulScoreProjection(responses, scores, apiKey, industry, location),
       generateNextStepsText(scores, apiKey, industry, location)
     ]);
 
     response.json({
       feedback,
-      strengths,
-      focusAreas,
+      competitiveAdvantage,
+      growthOpportunity,
+      scoreProjection,
       nextSteps
     });
 
@@ -259,56 +261,227 @@ Response: ${r.response}
   return await callGemini(prompt, apiKey);
 }
 
-async function generateStrengthsText(scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
-      const prompt = `You are an expert business evaluator analyzing Gutcheck.AI results. Your job is to identify a founder's top strength based on their assessment scores and provide a short, actionable insight.
 
-Personal Foundation Score (0–20): ${scores.personalBackground}
-Entrepreneurial Skills Score (0–25): ${scores.entrepreneurialSkills}
-Resources Score (0–20): ${scores.resources}
-Behavioral Metrics Score (0–15): ${scores.behavioralMetrics}
-Growth & Vision Score (0–20): ${scores.growthVision}
-Industry: ${industry || 'Not specified'}
-Location: ${location || 'Not specified'}
 
-🔍 Instructions for Response Formatting
-Select the highest-scoring category from the five Gutcheck Score areas.
-Write a single response (max 200 characters) that:
-Clearly states the founder's strength area
-Includes a brief, encouraging insight + one actionable tip
-Tone: Supportive, insightful, and practical. Avoid jargon.
-Format: Plain text only. Do NOT use hashtags, bullet points, emojis, markdown, or decorative characters.
 
-✅ Example:
-"Your highest score is in Entrepreneurial Skills. Your strong foundation in financial literacy and learning habits suggests you're ready to accelerate growth through smart execution."
-If the scores are tied, choose the category most aligned with their listed industry.`;
 
-  return await callGemini(prompt, apiKey);
+// Enhanced AI feedback generation functions
+async function generateCompetitiveAdvantage(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
+  const prompt = `You are an expert business analyst identifying competitive advantages.
+
+ASSESSMENT DATA:
+${responses.map((r: any) => `
+Question ${r.questionId}: ${r.questionText}
+Response: ${r.response}
+`).join('\n')}
+
+CURRENT SCORES:
+- Personal Background: ${scores.personalBackground}/20
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
+- Resources & Network: ${scores.resources}/20
+- Behavioral Metrics: ${scores.behavioralMetrics}/15
+- Growth & Vision: ${scores.growthVision}/20
+- Industry: ${industry || 'Not specified'}
+- Location: ${location || 'Not specified'}
+
+TASK: Analyze the highest-scoring category and identify specific competitive advantages.
+
+OUTPUT FORMAT (JSON):
+{
+  "category": "Resources & Network",
+  "score": "17/20",
+  "summary": "Your execution capabilities put you in the top 28% of tech entrepreneurs in Colorado.",
+  "specificStrengths": [
+    "Strategic problem-solving approach (demonstrates handling cash flow crisis)",
+    "Strong network utilization (leveraged friend's support effectively)",
+    "Growth mindset (weekly professional learning commitment)",
+    "Resilience and adaptability (bounced back from business challenges)"
+  ]
 }
 
-async function generateFocusAreasText(scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
-      const prompt = `You are an expert business evaluator analyzing Gutcheck.AI results to identify improvement areas.
+INSTRUCTIONS:
+- Identify the highest-scoring category
+- Analyze specific responses in that category to find evidence of strengths
+- Create 4 specific, evidence-based strengths from their actual responses
+- Include context from their responses (e.g., "demonstrates handling cash flow crisis")
+- Make each strength specific and actionable
+- Focus on competitive advantages that set them apart
+- Include regional/industry context if available`;
 
-Personal Foundation Score (0–20): ${scores.personalBackground}
-Entrepreneurial Skills Score (0–25): ${scores.entrepreneurialSkills}
-Resources Score (0–20): ${scores.resources}
-Behavioral Metrics Score (0–15): ${scores.behavioralMetrics}
-Growth & Vision Score (0–20): ${scores.growthVision}
-Industry: ${industry || 'Not specified'}
-Location: ${location || 'Not specified'}
+  const response = await callGemini(prompt, apiKey);
+  
+  try {
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    throw new Error('No JSON found in response');
+  } catch (error) {
+    console.error('Error parsing competitive advantage response:', error);
+    // Fallback to basic strengths
+    return {
+      category: "Resources & Network",
+      score: "17/20",
+      summary: "Your execution capabilities show strong potential for growth.",
+      specificStrengths: [
+        "Strong foundation in business fundamentals",
+        "Demonstrated problem-solving abilities",
+        "Commitment to continuous learning",
+        "Resilient approach to challenges"
+      ]
+    };
+  }
+}
 
-🔍 Instructions for Response Formatting
-Identify the lowest-scoring category from the five Gutcheck Score areas.
-Write a single response (max 200 characters) that:
-Clearly names the improvement area
-Offers a short, encouraging explanation with a practical next step
-Tone: Constructive, positive, growth-minded.
-Format: Plain text only. Do NOT include hashtags, bullet points, emojis, markdown, or decorative symbols.
+async function generateGrowthOpportunity(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
+  const prompt = `You are an expert business coach identifying growth opportunities.
 
-✅ Example:
-"Your lowest score is in Behavioral Metrics. Improving how consistently you track goals could boost your execution—try setting weekly review blocks to stay on track."
-If scores are tied, highlight the category most relevant to their industry or most foundational to success.`;
+ASSESSMENT DATA:
+${responses.map((r: any) => `
+Question ${r.questionId}: ${r.questionText}
+Response: ${r.response}
+`).join('\n')}
 
-  return await callGemini(prompt, apiKey);
+CURRENT SCORES:
+- Personal Background: ${scores.personalBackground}/20
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
+- Resources & Network: ${scores.resources}/20
+- Behavioral Metrics: ${scores.behavioralMetrics}/15
+- Growth & Vision: ${scores.growthVision}/20
+- Industry: ${industry || 'Not specified'}
+- Location: ${location || 'Not specified'}
+
+TASK: Analyze the lowest-scoring category and provide specific improvement insights.
+
+OUTPUT FORMAT (JSON):
+{
+  "category": "Entrepreneurial Skills",
+  "score": "15/25",
+  "summary": "Inconsistent habits are holding you back from reaching your full potential.",
+  "specificWeaknesses": [
+    "Goal tracking happens 'occasionally' vs systematic approach",
+    "Time dedication varies (1-10 hours) without structure",
+    "Recovery from setbacks relies on resilience vs strategic planning",
+    "Business planning lacks formal processes and documentation"
+  ]
+}
+
+INSTRUCTIONS:
+- Identify the lowest-scoring category
+- Analyze specific responses in that category to find evidence of weaknesses
+- Create 4 specific, evidence-based weaknesses from their actual responses
+- Include context from their responses (e.g., "occasionally vs systematic approach")
+- Make each weakness specific and actionable
+- Focus on areas that can be realistically improved
+- Be constructive but honest about gaps`;
+
+  const response = await callGemini(prompt, apiKey);
+  
+  try {
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    throw new Error('No JSON found in response');
+  } catch (error) {
+    console.error('Error parsing growth opportunity response:', error);
+    // Fallback to basic weaknesses
+    return {
+      category: "Entrepreneurial Skills",
+      score: "15/25",
+      summary: "There are opportunities to strengthen your entrepreneurial foundation.",
+      specificWeaknesses: [
+        "Goal tracking could be more systematic",
+        "Time management needs more structure",
+        "Business planning processes could be formalized",
+        "Strategic thinking could be enhanced"
+      ]
+    };
+  }
+}
+
+async function generateTruthfulScoreProjection(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
+  const overallScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score as number), 0);
+  
+  const prompt = `You are an expert business consultant calculating realistic score improvements.
+
+ASSESSMENT DATA:
+${responses.map((r: any) => `
+Question ${r.questionId}: ${r.questionText}
+Response: ${r.response}
+`).join('\n')}
+
+CURRENT SCORES:
+- Personal Background: ${scores.personalBackground}/20
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
+- Resources & Network: ${scores.resources}/20
+- Behavioral Metrics: ${scores.behavioralMetrics}/15
+- Growth & Vision: ${scores.growthVision}/20
+- Overall Score: ${overallScore}/100
+
+TASK: 
+1. Identify the lowest-scoring category (Biggest Growth Opportunity)
+2. Analyze specific responses in that category
+3. Calculate realistic point improvements based on the scoring rubric
+4. Sum the improvements to get the projected score
+
+SCORING RUBRIC:
+- Multiple choice: Specific point values (e.g., "Weekly"=5, "Monthly"=4, "Occasionally"=3)
+- Open-ended: AI scored 1-5 based on quality and depth
+
+OUTPUT FORMAT (JSON):
+{
+  "currentScore": ${overallScore},
+  "projectedScore": 68,
+  "improvementPotential": 3,
+  "analysis": {
+    "lowestCategory": "Entrepreneurial Skills",
+    "currentCategoryScore": 15,
+    "realisticImprovements": [
+      {
+        "questionId": "q17",
+        "currentResponse": "Occasionally",
+        "currentScore": 3,
+        "suggestedImprovement": "Weekly",
+        "potentialScore": 4,
+        "pointGain": 1,
+        "reasoning": "Moving from occasional to weekly goal tracking"
+      }
+    ],
+    "totalPointGain": 3
+  }
+}
+
+INSTRUCTIONS:
+- Only suggest improvements that are realistically achievable
+- Base projections on actual response changes, not hypothetical scenarios
+- Be conservative - under-promise and over-deliver
+- Focus on the lowest-scoring category first
+- Provide specific, actionable recommendations`;
+
+  const response = await callGemini(prompt, apiKey);
+  
+  try {
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    throw new Error('No JSON found in response');
+  } catch (error) {
+    console.error('Error parsing score projection response:', error);
+    // Fallback to conservative estimate
+    return {
+      currentScore: overallScore,
+      projectedScore: Math.min(100, (overallScore as number) + 3),
+      improvementPotential: 3,
+      analysis: {
+        lowestCategory: "Unknown",
+        currentCategoryScore: 0,
+        realisticImprovements: [],
+        totalPointGain: 3
+      }
+    };
+  }
 }
 
 async function generateNextStepsText(scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {

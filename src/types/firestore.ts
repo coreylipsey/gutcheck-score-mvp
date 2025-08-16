@@ -27,8 +27,37 @@ export interface FirestoreAssessmentSession {
   categoryBreakdown: Record<string, number>;
   geminiFeedback?: {
     feedback: string;
-    strengths: string;
-    focusAreas: string;
+    competitiveAdvantage: {
+      category: string;
+      score: string;
+      summary: string;
+      specificStrengths: string[];
+    };
+    growthOpportunity: {
+      category: string;
+      score: string;
+      summary: string;
+      specificWeaknesses: string[];
+    };
+    scoreProjection: {
+      currentScore: number;
+      projectedScore: number;
+      improvementPotential: number;
+      analysis?: {
+        lowestCategory: string;
+        currentCategoryScore: number;
+        realisticImprovements: Array<{
+          questionId: string;
+          currentResponse: string;
+          currentScore: number;
+          suggestedImprovement: string;
+          potentialScore: number;
+          pointGain: number;
+          reasoning: string;
+        }>;
+        totalPointGain: number;
+      };
+    };
     nextSteps: string;
   };
   createdAt: Timestamp;

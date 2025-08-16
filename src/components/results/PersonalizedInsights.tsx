@@ -43,32 +43,37 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
   const topStrengthPerformance = getPerformanceLevel(topStrength.score, topStrength.max);
   const focusAreaPerformance = getPerformanceLevel(focusArea.score, focusArea.max);
 
-  // Mock data for demonstration (in real app, this would come from AI analysis)
-  const topStrengthDetails = {
-    impact: "+40% funding likelihood",
-    summary: "Your execution capabilities put you in the top 28% of tech entrepreneurs in Colorado.",
+  // Use AI-generated data from sessionData or fallback to calculated values
+  const competitiveAdvantage = sessionData.geminiFeedback?.competitiveAdvantage || {
+    category: topStrength.name,
+    score: `${Math.round(topStrength.score)}/${topStrength.max}`,
+    summary: "Your execution capabilities show strong potential for growth.",
     specificStrengths: [
-      "Strategic problem-solving approach (demonstrates handling cash flow crisis)",
-      "Strong network utilization (leveraged friend's support effectively)",
-      "Growth mindset (weekly professional learning commitment)",
-      "Resilience and adaptability (bounced back from business challenges)"
+      "Strong foundation in business fundamentals",
+      "Demonstrated problem-solving abilities",
+      "Commitment to continuous learning",
+      "Resilient approach to challenges"
     ]
   };
 
-  const focusAreaDetails = {
-    impact: "Biggest opportunity for score improvement",
-    summary: "Inconsistent habits are holding you back from reaching your full potential.",
+  const growthOpportunity = sessionData.geminiFeedback?.growthOpportunity || {
+    category: focusArea.name,
+    score: `${Math.round(focusArea.score)}/${focusArea.max}`,
+    summary: "There are opportunities to strengthen your entrepreneurial foundation.",
     specificWeaknesses: [
-      "Goal tracking happens 'occasionally' vs systematic approach",
-      "Time dedication varies (1-10 hours) without structure",
-      "Recovery from setbacks relies on resilience vs strategic planning",
-      "Business planning lacks formal processes and documentation"
+      "Goal tracking could be more systematic",
+      "Time management needs more structure",
+      "Business planning processes could be formalized",
+      "Strategic thinking could be enhanced"
     ]
   };
 
-  // Score improvement potential
-  const potentialScoreIncrease = 8; // Based on implementing top recommendations
-  const newScoreProjection = Math.round(sessionData.scores.overallScore) + potentialScoreIncrease;
+  // Score projection from AI analysis or fallback
+  const scoreProjection = sessionData.geminiFeedback?.scoreProjection || {
+    currentScore: Math.round(sessionData.scores.overallScore),
+    projectedScore: Math.round(sessionData.scores.overallScore) + 3,
+    improvementPotential: 3
+  };
 
   return (
     <div className="space-y-8">
@@ -85,7 +90,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
         <div className="inline-flex items-center space-x-3 px-6 py-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-full border border-green-200">
           <TrendingUp className="w-5 h-5 text-green-600" />
           <span className="font-medium text-green-800">
-            Following these recommendations could increase your score to {newScoreProjection}
+            Following these recommendations could increase your score to {scoreProjection.projectedScore}
           </span>
         </div>
       </div>
@@ -105,13 +110,10 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
               </h3>
               <div className="flex items-center space-x-2">
                 <p className="text-sm font-medium" style={{ color: '#19C2A0' }}>
-                  {topStrength.name}
+                  {competitiveAdvantage.category}
                 </p>
                 <span className="text-xs px-2 py-1 bg-green-200 text-green-800 rounded-full">
-                  {Math.round(topStrength.score)}/{topStrength.max}
-                </span>
-                <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                  {topStrengthDetails.impact}
+                  {competitiveAdvantage.score}
                 </span>
               </div>
             </div>
@@ -119,7 +121,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
           
           <div className="flex-1">
             <p className="text-gray-700 leading-relaxed font-medium mb-4">
-              {topStrengthDetails.summary}
+              {competitiveAdvantage.summary}
             </p>
             
             {/* Specific strengths list */}
@@ -129,7 +131,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
                 What makes you stand out:
               </h4>
               <ul className="space-y-2">
-                {topStrengthDetails.specificStrengths.map((strength, index) => (
+                {competitiveAdvantage.specificStrengths.map((strength, index) => (
                   <li key={index} className="flex items-start space-x-2 text-sm">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
                     <span className="text-gray-700">{strength}</span>
@@ -152,13 +154,10 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
               </h3>
               <div className="flex items-center space-x-2">
                 <p className="text-sm font-medium" style={{ color: '#FF6B00' }}>
-                  {focusArea.name}
+                  {growthOpportunity.category}
                 </p>
                 <span className="text-xs px-2 py-1 bg-orange-200 text-orange-800 rounded-full">
-                  {Math.round(focusArea.score)}/{focusArea.max}
-                </span>
-                <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                  {focusAreaDetails.impact}
+                  {growthOpportunity.score}
                 </span>
               </div>
             </div>
@@ -166,7 +165,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
           
           <div className="flex-1">
             <p className="text-gray-700 leading-relaxed font-medium mb-4">
-              {focusAreaDetails.summary}
+              {growthOpportunity.summary}
             </p>
             
             {/* Areas for improvement list */}
@@ -176,7 +175,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
                 Areas holding you back:
               </h4>
               <ul className="space-y-2">
-                {focusAreaDetails.specificWeaknesses.map((weakness, index) => (
+                {growthOpportunity.specificWeaknesses.map((weakness, index) => (
                   <li key={index} className="flex items-start space-x-2 text-sm">
                     <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
                     <span className="text-gray-700">{weakness}</span>

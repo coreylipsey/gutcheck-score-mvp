@@ -70,8 +70,33 @@ export class GeminiAIService implements IAIScoringService {
     const data = await apiResponse.json();
     return {
       feedback: data.feedback || 'AI feedback generation completed.',
-      strengths: data.strengths || 'Your top strength will be identified based on your assessment scores.',
-      focusAreas: data.focusAreas || 'Your priority focus area will be determined from your assessment results.',
+      competitiveAdvantage: data.competitiveAdvantage || {
+        category: 'Unknown',
+        score: '0/0',
+        summary: 'Your competitive advantages will be identified based on your assessment scores.',
+        specificStrengths: [
+          'Strong foundation in business fundamentals',
+          'Demonstrated problem-solving abilities',
+          'Commitment to continuous learning',
+          'Resilient approach to challenges'
+        ]
+      },
+      growthOpportunity: data.growthOpportunity || {
+        category: 'Unknown',
+        score: '0/0',
+        summary: 'Your growth opportunities will be determined from your assessment results.',
+        specificWeaknesses: [
+          'Goal tracking could be more systematic',
+          'Time management needs more structure',
+          'Business planning processes could be formalized',
+          'Strategic thinking could be enhanced'
+        ]
+      },
+      scoreProjection: data.scoreProjection || {
+        currentScore: 0,
+        projectedScore: 0,
+        improvementPotential: 0
+      },
       nextSteps: data.nextSteps || 'Recommended next steps will be provided based on your profile.'
     };
   }
