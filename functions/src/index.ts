@@ -135,11 +135,12 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     }
 
     // Generate enhanced feedback using the new AI functions
-    const [feedback, competitiveAdvantage, growthOpportunity, scoreProjection, nextSteps] = await Promise.all([
+    const [feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps] = await Promise.all([
       generateFeedbackText(responses, scores, apiKey),
       generateCompetitiveAdvantage(responses, scores, apiKey, industry, location),
       generateGrowthOpportunity(responses, scores, apiKey, industry, location),
       generateTruthfulScoreProjection(responses, scores, apiKey, industry, location),
+      generateComprehensiveAnalysis(responses, scores, apiKey, industry, location),
       generateNextStepsText(scores, apiKey, industry, location)
     ]);
 
@@ -148,6 +149,7 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
       competitiveAdvantage,
       growthOpportunity,
       scoreProjection,
+      comprehensiveAnalysis,
       nextSteps
     });
 
@@ -429,6 +431,57 @@ INSTRUCTIONS:
       ]
     };
   }
+}
+
+async function generateComprehensiveAnalysis(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
+  const overallScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score as number), 0);
+  
+  // Determine star rating and label
+  const starRating = overallScore >= 90 ? 5 : 
+                    overallScore >= 80 ? 4 : 
+                    overallScore >= 65 ? 3 : 
+                    overallScore >= 50 ? 2 : 1;
+  
+  const starLabels = {
+    1: "Early Spark",
+    2: "Forming Potential", 
+    3: "Emerging Traction",
+    4: "Established Signals",
+    5: "Transformative Trajectory"
+  };
+  
+  const starLabel = starLabels[starRating as keyof typeof starLabels];
+
+  const prompt = `You are an expert business analyst providing comprehensive entrepreneurial assessment analysis.
+
+ASSESSMENT DATA:
+${responses.map((r: any) => `
+Question ${r.questionId}: ${r.questionText}
+Response: ${r.response}
+`).join('\n')}
+
+CURRENT SCORES:
+- Overall Score: ${overallScore}/100
+- Personal Background: ${scores.personalBackground}/20
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
+- Resources & Network: ${scores.resources}/20
+- Behavioral Metrics: ${scores.behavioralMetrics}/15
+- Growth & Vision: ${scores.growthVision}/20
+- Star Rating: ${starRating}/5 (${starLabel})
+- Industry: ${industry || 'Not specified'}
+- Location: ${location || 'Not specified'}
+
+TASK: Provide a comprehensive 2-3 paragraph analysis that includes:
+1. Score interpretation and category placement
+2. Key strengths and competitive advantages
+3. Growth opportunities and development areas
+4. Strategic recommendations for improvement
+
+OUTPUT FORMAT: Plain text, 2-3 paragraphs, professional tone
+
+The tone should be encouraging and insightful feedback. Your role is to provide honest, constructive guidance that helps the founder recognize what they're doing well, where they can improve, and what next best actions that light the way and lead them out of a dark tunnel. Use a warm, growth-oriented tone—like a coach who genuinely wants them to win. Be specific, but avoid jargon or over-generalization. Make it feel personalized and authentic.`;
+
+  return await callGemini(prompt, apiKey);
 }
 
 async function generateTruthfulScoreProjection(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {

@@ -54,6 +54,7 @@ export interface AIFeedback {
       totalPointGain: number;
     };
   };
+  comprehensiveAnalysis: string;
   nextSteps: string;
 }
 
@@ -115,6 +116,7 @@ export class GenerateAIFeedback {
           projectedScore: Math.min(100, overallScore + 3),
           improvementPotential: 3
         },
+        comprehensiveAnalysis: `Your Gutcheck Score of ${overallScore}/100 places you in the ${topCategory.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} category, indicating strong potential for growth. Your assessment reveals a balanced entrepreneurial profile with clear strengths and growth areas. The AI analysis suggests focusing on strategic development while leveraging your existing capabilities. Consider how your top strength in ${topCategory.replace(/([A-Z])/g, ' $1').toLowerCase()} can complement your development needs in ${focusCategory.replace(/([A-Z])/g, ' $1').toLowerCase()} to create a more comprehensive entrepreneurial foundation.`,
         nextSteps: "Consider seeking mentorship, exploring funding options, and building your entrepreneurial fundamentals."
       };
     }

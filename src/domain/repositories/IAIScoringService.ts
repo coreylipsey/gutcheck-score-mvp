@@ -38,6 +38,7 @@ export interface AIFeedback {
       totalPointGain: number;
     };
   };
+  comprehensiveAnalysis: string;
   nextSteps: string;
 }
 

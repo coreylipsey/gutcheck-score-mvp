@@ -97,6 +97,7 @@ export class GeminiAIService implements IAIScoringService {
         projectedScore: 0,
         improvementPotential: 0
       },
+      comprehensiveAnalysis: data.comprehensiveAnalysis || 'Your comprehensive analysis will be generated based on your assessment results.',
       nextSteps: data.nextSteps || 'Recommended next steps will be provided based on your profile.'
     };
   }

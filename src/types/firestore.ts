@@ -58,6 +58,7 @@ export interface FirestoreAssessmentSession {
         totalPointGain: number;
       };
     };
+    comprehensiveAnalysis: string;
     nextSteps: string;
   };
   createdAt: Timestamp;

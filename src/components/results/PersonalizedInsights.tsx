@@ -200,23 +200,11 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
         
         <div className="space-y-4 text-gray-700 leading-relaxed">
           <p>
-            Your Gutcheck Score of {Math.round(sessionData.scores.overallScore)}/100 places you in the
-            <strong style={{ color: '#0A1F44' }}> {sessionData.starRating === 1 ? 'Early Spark' :
-             sessionData.starRating === 2 ? 'Developing Potential' :
+            {sessionData.geminiFeedback?.comprehensiveAnalysis ||
+            `Your Gutcheck Score of ${Math.round(sessionData.scores.overallScore)}/100 places you in the ${sessionData.starRating === 1 ? 'Early Spark' :
+             sessionData.starRating === 2 ? 'Forming Potential' :
              sessionData.starRating === 3 ? 'Emerging Traction' :
-             sessionData.starRating === 4 ? 'Investment Ready' : 'Visionary Leader'} </strong>
-            category, indicating {sessionData.starRating <= 2 ? 'a foundation for growth with significant development opportunities' :
-            sessionData.starRating === 3 ? 'solid progress with measurable business development' :
-            sessionData.starRating === 4 ? 'advanced entrepreneurial capabilities with proven results' :
-            'exceptional entrepreneurial mastery with innovative leadership potential'}.
-          </p>
-          
-          <p>
-            {sessionData.geminiFeedback?.feedback ||
-            "Your assessment reveals a balanced entrepreneurial profile with clear strengths and growth areas. " +
-            "The AI analysis suggests focusing on strategic development while leveraging your existing capabilities. " +
-            "Consider how your top strength in " + topStrength.name.toLowerCase() + " can complement your development needs in " +
-            focusArea.name.toLowerCase() + " to create a more comprehensive entrepreneurial foundation."}
+             sessionData.starRating === 4 ? 'Established Signals' : 'Transformative Trajectory'} category, indicating strong potential for growth. Your assessment reveals a balanced entrepreneurial profile with clear strengths and growth areas. The AI analysis suggests focusing on strategic development while leveraging your existing capabilities.`}
           </p>
         </div>
       </div>
