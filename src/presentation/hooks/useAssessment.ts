@@ -58,6 +58,27 @@ export function useAssessment() {
     categoryBreakdown: Record<string, number>;
     geminiFeedback?: {
       feedback: string;
+      competitiveAdvantage: {
+        category: string;
+        score: string;
+        summary: string;
+        specificStrengths: string[];
+      };
+      growthOpportunity: {
+        category: string;
+        score: string;
+        summary: string;
+        specificWeaknesses: string[];
+      };
+      scoreProjection: {
+        currentScore: number;
+        projectedScore: number;
+        improvementPotential: number;
+      };
+      comprehensiveAnalysis: string;
+      nextSteps: string;
+    };
+      feedback: string;
       strengths: string;
       focusAreas: string;
       nextSteps: string;

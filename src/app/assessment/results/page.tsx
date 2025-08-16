@@ -102,6 +102,7 @@ function ResultsContent() {
                     projectedScore: 0,
                     improvementPotential: 0
                   },
+                  comprehensiveAnalysis: "Your comprehensive analysis will be generated based on your assessment results.",
                   nextSteps: "Recommended next steps will be provided based on your profile."
                 },
                 createdAt: Timestamp.fromDate(new Date()),
@@ -166,7 +167,8 @@ function ResultsContent() {
                 projectedScore: 0,
                 improvementPotential: 0
               },
-              nextSteps: "Recommended next steps will be provided based on your profile."
+              comprehensiveAnalysis: "Your comprehensive analysis will be generated based on your assessment results.",
+                  nextSteps: "Recommended next steps will be provided based on your profile."
             },
             createdAt: Timestamp.fromDate(new Date()),
             completedAt: Timestamp.fromDate(new Date()),
