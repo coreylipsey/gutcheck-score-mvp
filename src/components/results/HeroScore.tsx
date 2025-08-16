@@ -174,9 +174,10 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
               <p className="font-semibold text-lg" style={{ color: '#0A1F44' }}>
                 {currentStar.label}
               </p>
-              <p className="text-lg font-semibold" style={{ color: currentStar.color }}>
+              <div className="inline-block px-4 py-2 rounded-full text-lg font-bold text-white shadow-sm"
+                   style={{ backgroundColor: currentStar.color }}>
                 {currentStar.creditLabel}
-              </p>
+              </div>
               <p className="text-sm text-gray-600">
                 Score: {currentStar.min}-{currentStar.max}
               </p>
@@ -207,7 +208,10 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
                         <span className="font-medium" style={{ color: '#0A1F44' }}>
                           {def.label}
                         </span>
-                        <span style={{ color: def.color }}>({def.creditLabel})</span>
+                        <span className="inline-block px-2 py-1 rounded-full text-xs font-bold text-white shadow-sm"
+                              style={{ backgroundColor: def.color }}>
+                          {def.creditLabel}
+                        </span>
                       </div>
                       <p className="text-gray-600 ml-6 text-xs">{def.description}</p>
                       <p className="text-gray-500 ml-6 text-xs">
