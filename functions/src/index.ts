@@ -299,14 +299,29 @@ OUTPUT FORMAT (JSON):
   ]
 }
 
+EXAMPLE SPECIFIC BULLETS:
+- "Strategic problem-solving approach (demonstrates handling cash flow crisis)"
+- "Strong network utilization (leveraged friend's support effectively)"
+- "Growth mindset (weekly professional learning commitment)"
+- "Resilience and adaptability (bounced back from business challenges)"
+
+AVOID GENERIC BULLETS LIKE:
+- "Strong foundation in business fundamentals"
+- "Demonstrated problem-solving abilities"
+- "Commitment to continuous learning"
+- "Resilient approach to challenges"
+
 INSTRUCTIONS:
 - Identify the highest-scoring category
 - Analyze specific responses in that category to find evidence of strengths
 - Create 4 specific, evidence-based strengths from their actual responses
-- Include context from their responses (e.g., "demonstrates handling cash flow crisis")
-- Make each strength specific and actionable
-- Focus on competitive advantages that set them apart
-- Include regional/industry context if available`;
+- Each strength MUST include specific details from their responses (e.g., "Strategic problem-solving approach (demonstrates handling cash flow crisis)")
+- Make each strength specific and actionable with concrete examples
+- Focus on competitive advantages that set them apart from other entrepreneurs
+- Include regional/industry context if available
+- Avoid generic phrases like "strong foundation" or "demonstrated abilities"
+- Use specific examples, numbers, or concrete actions from their responses
+- Each bullet should feel like it came from analyzing their actual answers, not generic advice`;
 
   const response = await callGemini(prompt, apiKey);
   
@@ -324,10 +339,10 @@ INSTRUCTIONS:
       score: "17/20",
       summary: "Your execution capabilities show strong potential for growth.",
       specificStrengths: [
-        "Strong foundation in business fundamentals",
-        "Demonstrated problem-solving abilities",
-        "Commitment to continuous learning",
-        "Resilient approach to challenges"
+        "Business experience (previous attempts show learning mindset)",
+        "Network connections (leveraged support systems effectively)",
+        "Learning commitment (regular professional development activities)",
+        "Adaptability (successfully navigated business challenges)"
       ]
     };
   }
@@ -366,14 +381,30 @@ OUTPUT FORMAT (JSON):
   ]
 }
 
+EXAMPLE SPECIFIC BULLETS:
+- "Goal tracking happens 'occasionally' vs systematic approach"
+- "Time dedication varies (1-10 hours) without structure"
+- "Recovery from setbacks relies on resilience vs strategic planning"
+- "Business planning lacks formal processes and documentation"
+
+AVOID GENERIC BULLETS LIKE:
+- "Goal tracking could be more systematic"
+- "Time management needs more structure"
+- "Business planning processes could be formalized"
+- "Strategic thinking could be enhanced"
+
 INSTRUCTIONS:
 - Identify the lowest-scoring category
 - Analyze specific responses in that category to find evidence of weaknesses
 - Create 4 specific, evidence-based weaknesses from their actual responses
-- Include context from their responses (e.g., "occasionally vs systematic approach")
-- Make each weakness specific and actionable
+- Each weakness MUST include specific details from their responses (e.g., "Goal tracking happens 'occasionally' vs systematic approach")
+- Make each weakness specific and actionable with concrete examples
 - Focus on areas that can be realistically improved
-- Be constructive but honest about gaps`;
+- Be constructive but honest about gaps
+- Avoid generic phrases like "could be more systematic" or "needs more structure"
+- Use specific examples, numbers, or concrete actions from their responses
+- Each bullet should feel like it came from analyzing their actual answers, not generic advice
+- Include the actual words/phrases they used in their responses`;
 
   const response = await callGemini(prompt, apiKey);
   
@@ -391,10 +422,10 @@ INSTRUCTIONS:
       score: "15/25",
       summary: "There are opportunities to strengthen your entrepreneurial foundation.",
       specificWeaknesses: [
-        "Goal tracking could be more systematic",
-        "Time management needs more structure",
-        "Business planning processes could be formalized",
-        "Strategic thinking could be enhanced"
+        "Goal tracking frequency (currently 'occasionally' vs weekly)",
+        "Time allocation (varies without consistent structure)",
+        "Planning processes (informal vs documented approach)",
+        "Strategic execution (reactive vs proactive planning)"
       ]
     };
   }

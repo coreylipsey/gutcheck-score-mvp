@@ -75,10 +75,10 @@ export class GeminiAIService implements IAIScoringService {
         score: '0/0',
         summary: 'Your competitive advantages will be identified based on your assessment scores.',
         specificStrengths: [
-          'Strong foundation in business fundamentals',
-          'Demonstrated problem-solving abilities',
-          'Commitment to continuous learning',
-          'Resilient approach to challenges'
+          'Business experience (previous attempts show learning mindset)',
+          'Network connections (leveraged support systems effectively)',
+          'Learning commitment (regular professional development activities)',
+          'Adaptability (successfully navigated business challenges)'
         ]
       },
       growthOpportunity: data.growthOpportunity || {
@@ -86,10 +86,10 @@ export class GeminiAIService implements IAIScoringService {
         score: '0/0',
         summary: 'Your growth opportunities will be determined from your assessment results.',
         specificWeaknesses: [
-          'Goal tracking could be more systematic',
-          'Time management needs more structure',
-          'Business planning processes could be formalized',
-          'Strategic thinking could be enhanced'
+          'Goal tracking frequency (currently "occasionally" vs weekly)',
+          'Time allocation (varies without consistent structure)',
+          'Planning processes (informal vs documented approach)',
+          'Strategic execution (reactive vs proactive planning)'
         ]
       },
       scoreProjection: data.scoreProjection || {

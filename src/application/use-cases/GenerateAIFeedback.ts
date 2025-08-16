@@ -93,10 +93,10 @@ export class GenerateAIFeedback {
           score: `${request.scores[topCategory as keyof typeof request.scores]}/${getCategoryMax(topCategory)}`,
           summary: `Your ${topCategory.replace(/([A-Z])/g, ' $1').toLowerCase()} shows strong potential for growth.`,
           specificStrengths: [
-            "Strong foundation in business fundamentals",
-            "Demonstrated problem-solving abilities",
-            "Commitment to continuous learning",
-            "Resilient approach to challenges"
+            "Business experience (previous attempts show learning mindset)",
+            "Network connections (leveraged support systems effectively)",
+            "Learning commitment (regular professional development activities)",
+            "Adaptability (successfully navigated business challenges)"
           ]
         },
         growthOpportunity: {
@@ -104,10 +104,10 @@ export class GenerateAIFeedback {
           score: `${request.scores[focusCategory as keyof typeof request.scores]}/${getCategoryMax(focusCategory)}`,
           summary: `There are opportunities to strengthen your ${focusCategory.replace(/([A-Z])/g, ' $1').toLowerCase()}.`,
           specificWeaknesses: [
-            "Goal tracking could be more systematic",
-            "Time management needs more structure",
-            "Business planning processes could be formalized",
-            "Strategic thinking could be enhanced"
+            "Goal tracking frequency (currently 'occasionally' vs weekly)",
+            "Time allocation (varies without consistent structure)",
+            "Planning processes (informal vs documented approach)",
+            "Strategic execution (reactive vs proactive planning)"
           ]
         },
         scoreProjection: {

@@ -49,10 +49,10 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
     score: `${Math.round(topStrength.score)}/${topStrength.max}`,
     summary: "Your execution capabilities show strong potential for growth.",
     specificStrengths: [
-      "Strong foundation in business fundamentals",
-      "Demonstrated problem-solving abilities",
-      "Commitment to continuous learning",
-      "Resilient approach to challenges"
+      "Business experience (previous attempts show learning mindset)",
+      "Network connections (leveraged support systems effectively)",
+      "Learning commitment (regular professional development activities)",
+      "Adaptability (successfully navigated business challenges)"
     ]
   };
 
@@ -61,10 +61,10 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
     score: `${Math.round(focusArea.score)}/${focusArea.max}`,
     summary: "There are opportunities to strengthen your entrepreneurial foundation.",
     specificWeaknesses: [
-      "Goal tracking could be more systematic",
-      "Time management needs more structure",
-      "Business planning processes could be formalized",
-      "Strategic thinking could be enhanced"
+      "Goal tracking frequency (currently 'occasionally' vs weekly)",
+      "Time allocation (varies without consistent structure)",
+      "Planning processes (informal vs documented approach)",
+      "Strategic execution (reactive vs proactive planning)"
     ]
   };
 
