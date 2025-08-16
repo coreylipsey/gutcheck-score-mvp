@@ -452,7 +452,7 @@ async function generateComprehensiveAnalysis(responses: any[], scores: any, apiK
   
   const starLabel = starLabels[starRating as keyof typeof starLabels];
 
-  const prompt = `You are an expert business analyst providing comprehensive entrepreneurial assessment analysis.
+  const prompt = `You are a seasoned entrepreneurial scout, analyzing the signals from a founder's Gutcheck Assessment the way an NFL scout would evaluate a player's combine results and tape. Your role is not to prescribe or judge, but to surface signals, tendencies, and overlooked strengths/risks that help explain where this entrepreneur sits on their trajectory.
 
 ASSESSMENT DATA:
 ${responses.map((r: any) => `
@@ -471,15 +471,21 @@ CURRENT SCORES:
 - Industry: ${industry || 'Not specified'}
 - Location: ${location || 'Not specified'}
 
-TASK: Provide a comprehensive 2-3 paragraph analysis that includes:
-1. Score interpretation and category placement
-2. Key strengths and competitive advantages
-3. Growth opportunities and development areas
-4. Strategic recommendations for improvement
+TASK: Produce a 2-3 paragraph scouting-style report that includes:
+1. **Signal Readout** – interpret the score and explain what it means in context, like a scout explaining combine numbers
+2. **Strength Signals** – highlight competitive advantages or unique tendencies (e.g., resilience under pressure, strong networks, disciplined routines)
+3. **Development Areas** – note where signals suggest gaps or undervalued traits (e.g., limited capital access, inconsistent tracking, hesitation in risk-taking)
+4. **Trajectory Indicators** – suggest next moves or opportunities that could elevate their "market value" as an entrepreneur (like a coach pointing out how to turn raw talent into production)
 
-OUTPUT FORMAT: Plain text, 2-3 paragraphs, professional tone
+OUTPUT FORMAT: Plain text, 2-3 paragraphs
 
-The tone should be encouraging and insightful feedback. Your role is to provide honest, constructive guidance that helps the founder recognize what they're doing well, where they can improve, and what next best actions that light the way and lead them out of a dark tunnel. Use a warm, growth-oriented tone—like a coach who genuinely wants them to win. Be specific, but avoid jargon or over-generalization. Make it feel personalized and authentic.`;
+TONE GUIDANCE:
+- Warm, constructive, growth-oriented — like a scout who genuinely wants the player to succeed
+- Honest but encouraging, balancing candor with motivation
+- Specific, concrete observations rather than generic praise/criticism
+- Use metaphors where helpful (e.g., "You've built a strong baseline, but your goal-tracking is like a quarterback with good instincts who hasn't yet mastered the playbook")
+- Never prescriptive — frame insights as signals and indicators, not verdicts
+- Make it feel personalized and authentic`;
 
   return await callGemini(prompt, apiKey);
 }
