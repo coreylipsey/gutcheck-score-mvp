@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Container } from '@/infrastructure/di/container';
 import { IAssessmentRepository } from '@/domain/repositories/IAssessmentRepository';
-import { FirestoreAssessmentSession } from '@/types/firestore';
-import { Timestamp } from 'firebase/firestore';
+import { AssessmentSessionDTO } from '@/domain/dtos/AssessmentSessionDTO';
 import { HeroScore } from '@/components/results/HeroScore';
 import { CategoryBreakdown } from '@/components/results/CategoryBreakdown';
 import { PersonalizedInsights } from '@/components/results/PersonalizedInsights';
@@ -17,7 +16,7 @@ import { useAuthContext } from '@/presentation/providers/AuthProvider';
 
 
 function ResultsContent() {
-  const [sessionData, setSessionData] = useState<FirestoreAssessmentSession | null>(null);
+  const [sessionData, setSessionData] = useState<AssessmentSessionDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showClaimModal, setShowClaimModal] = useState(false);
@@ -38,16 +37,16 @@ function ResultsContent() {
           const assessmentRepository = Container.getInstance().resolve<IAssessmentRepository>('IAssessmentRepository');
           const session = await assessmentRepository.findById(sessionId);
           if (session) {
-            // Convert domain entity to UI format
-            const data: FirestoreAssessmentSession = {
+            // Convert domain entity to domain DTO
+            const data: AssessmentSessionDTO = {
               id: sessionId,
               sessionId: session.sessionId,
               userId: session.userId,
               responses: session.responses,
               scores: session.scores,
               geminiFeedback: session.geminiFeedback,
-              completedAt: session.completedAt ? Timestamp.fromDate(session.completedAt) : Timestamp.now(),
-              createdAt: Timestamp.fromDate(session.createdAt),
+              completedAt: session.completedAt || new Date(),
+              createdAt: session.createdAt,
               isAnonymous: !session.userId
             };
             setSessionData(data);
@@ -58,13 +57,13 @@ function ResultsContent() {
               const parsedData = JSON.parse(localData);
               // Data loaded from localStorage
               // Create a mock session data object from localStorage
-              const mockSessionData: FirestoreAssessmentSession = {
+              const mockSessionData: AssessmentSessionDTO = {
                 id: sessionId,
                 sessionId: sessionId,
                 userId: undefined,
                 responses: parsedData.responses || [],
                 scores: parsedData.scores || {
-                  overallScore: 0,
+                  overall: 0,
                   personalBackground: 0,
                   entrepreneurialSkills: 0,
                   resources: 0,
@@ -105,8 +104,8 @@ function ResultsContent() {
                   comprehensiveAnalysis: "Your comprehensive analysis will be generated based on your assessment results.",
                   nextSteps: "Recommended next steps will be provided based on your profile."
                 },
-                createdAt: Timestamp.fromDate(new Date()),
-                completedAt: Timestamp.fromDate(new Date()),
+                createdAt: new Date(),
+                completedAt: new Date(),
                 isAnonymous: true,
               };
               setSessionData(mockSessionData);
@@ -123,13 +122,13 @@ function ResultsContent() {
         const localData = localStorage.getItem('responsesData');
         if (localData) {
           const parsedData = JSON.parse(localData);
-          const mockSessionData: FirestoreAssessmentSession = {
+          const mockSessionData: AssessmentSessionDTO = {
             id: 'local-session',
             sessionId: 'local-session',
             userId: undefined,
             responses: parsedData.responses || [],
             scores: parsedData.scores || {
-              overallScore: 0,
+              overall: 0,
               personalBackground: 0,
               entrepreneurialSkills: 0,
               resources: 0,
@@ -168,10 +167,10 @@ function ResultsContent() {
                 improvementPotential: 0
               },
               comprehensiveAnalysis: "Your comprehensive analysis will be generated based on your assessment results.",
-                  nextSteps: "Recommended next steps will be provided based on your profile."
+              nextSteps: "Recommended next steps will be provided based on your profile."
             },
-            createdAt: Timestamp.fromDate(new Date()),
-            completedAt: Timestamp.fromDate(new Date()),
+            createdAt: new Date(),
+            completedAt: new Date(),
             isAnonymous: true,
           };
           setSessionData(mockSessionData);

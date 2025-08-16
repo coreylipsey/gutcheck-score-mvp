@@ -1,9 +1,9 @@
-import { User, Brain, DollarSign, TrendingUp, Rocket, HelpCircle } from "lucide-react";
-import { FirestoreAssessmentSession } from "@/types/firestore";
+import { AssessmentSessionDTO } from "@/domain/dtos/AssessmentSessionDTO";
+import { TrendingUp, Users, Target, Zap, Lightbulb } from "lucide-react";
 import { useState } from "react";
 
 interface CategoryBreakdownProps {
-  sessionData: FirestoreAssessmentSession;
+  sessionData: AssessmentSessionDTO;
 }
 
 interface CategoryData {
@@ -36,7 +36,7 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
       name: "Personal Foundation", // Changed from "Personal Background"
       score: sessionData.scores.personalBackground,
       max: 20,
-      icon: User,
+      icon: Users,
       description: "Your starting point, foundational experience, and initial context for entrepreneurship",
       questions: [
         "Business Size",
@@ -48,7 +48,7 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
       name: "Entrepreneurial Skills",
       score: sessionData.scores.entrepreneurialSkills,
       max: 25,
-      icon: Brain,
+      icon: Lightbulb,
       description: "Key entrepreneurial traits, knowledge, and habits",
       questions: [
         "Business Acumen",
@@ -60,7 +60,7 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
       name: "Resources & Network", // Enhanced naming
       score: sessionData.scores.resources,
       max: 20,
-      icon: DollarSign,
+      icon: Target,
       description: "Available capital, connections, and support systems for business growth",
       questions: [
         "Access to startup capital and funding",
@@ -84,7 +84,7 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
       name: "Vision and Growth",
       score: sessionData.scores.growthVision,
       max: 20,
-      icon: Rocket,
+      icon: Zap,
       description: "Long-term vision, growth mindset, and strategic thinking",
       questions: [
         "Long-term vision and strategic thinking",
@@ -142,8 +142,7 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
                     className="w-8 h-8" 
                     style={{ color: performance.color }} 
                   />
-                  <HelpCircle className="w-3 h-3 absolute -top-1 -right-1 opacity-50 group-hover:opacity-100 transition-opacity" 
-                              style={{ color: performance.color }} />
+                  {/* Removed HelpCircle icon as it's no longer imported */}
                   
                   {/* Hover tooltip with category details */}
                   {isShowingDetails && (

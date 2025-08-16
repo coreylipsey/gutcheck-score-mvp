@@ -9,6 +9,7 @@ import { TokenService } from '../../application/services/TokenService';
 import { CalculateAssessmentScore } from '../../application/use-cases/CalculateAssessmentScore';
 import { SaveAssessmentSession } from '../../application/use-cases/SaveAssessmentSession';
 import { GenerateAIFeedback } from '../../application/use-cases/GenerateAIFeedback';
+import { CalculateQuestionScores } from '../../application/use-cases/CalculateQuestionScores';
 import { AuthenticateUser } from '../../application/use-cases/AuthenticateUser';
 import { PurchaseTokens } from '../../application/use-cases/PurchaseTokens';
 import { SpendTokensForFeature } from '../../application/use-cases/SpendTokensForFeature';
@@ -61,6 +62,10 @@ export function setupDependencies(): void {
 
   container.register('GenerateAIFeedback', () => 
     new GenerateAIFeedback(container.resolve('IAIScoringService'))
+  );
+
+  container.register('CalculateQuestionScores', () => 
+    new CalculateQuestionScores(container.resolve('IAIScoringService'))
   );
 
   container.register('AuthenticateUser', () => 

@@ -1,9 +1,8 @@
-import { BookOpen, Users, DollarSign, ArrowRight } from "lucide-react";
-import { FirestoreAssessmentSession } from "@/types/firestore";
-import Link from "next/link";
+import { AssessmentSessionDTO } from "@/domain/dtos/AssessmentSessionDTO";
+import { ArrowRight, CheckCircle, Clock, Target } from "lucide-react";
 
 interface NextStepsProps {
-  sessionData: FirestoreAssessmentSession;
+  sessionData: AssessmentSessionDTO;
 }
 
 interface ActionItem {
@@ -104,21 +103,21 @@ export function NextSteps({ sessionData }: NextStepsProps) {
 
   const actionItems: ActionItem[] = aiRecommendations ? [
     {
-      icon: Users,
+      icon: CheckCircle,
       category: "Mentorship",
       title: aiRecommendations.mentorship.title || "Find a Business Mentor",
       description: "Connect with experienced entrepreneurs who can guide your journey and provide insights.",
       url: aiRecommendations.mentorship.url || "https://www.score.org"
     },
     {
-      icon: DollarSign,
+      icon: Target,
       category: "Funding",
       title: aiRecommendations.funding.title || "Explore Funding Options", 
       description: "Research grants, accelerators, and early-stage investment opportunities.",
       url: aiRecommendations.funding.url || "https://www.sba.gov/funding-programs"
     },
     {
-      icon: BookOpen,
+      icon: Clock,
       category: "Learning",
       title: aiRecommendations.learning.title || "Entrepreneurship Fundamentals",
       description: "Build core business knowledge through structured learning programs and courses.",
@@ -126,19 +125,19 @@ export function NextSteps({ sessionData }: NextStepsProps) {
     }
   ] : [
     {
-      icon: BookOpen,
+      icon: Clock,
       category: "Learning",
       title: "Entrepreneurship Fundamentals",
       description: "Build core business knowledge through structured learning programs and courses."
     },
     {
-      icon: Users,
+      icon: CheckCircle,
       category: "Mentorship", 
       title: "Find a Business Mentor",
       description: "Connect with experienced entrepreneurs who can guide your journey and provide insights."
     },
     {
-      icon: DollarSign,
+      icon: Target,
       category: "Funding",
       title: "Explore Funding Options",
       description: "Research grants, accelerators, and early-stage investment opportunities."

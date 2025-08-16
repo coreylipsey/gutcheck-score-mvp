@@ -1,17 +1,17 @@
-import { Award, Info, Target, Star, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
-import { FirestoreAssessmentSession } from "@/types/firestore";
+import { Star, Award, Info, Target, ChevronDown, ChevronUp } from "lucide-react";
+import { AssessmentSessionDTO } from "@/domain/dtos/AssessmentSessionDTO";
 import { FicoStyleGauge } from "./FicoStyleGauge";
+import { useState } from "react";
 
 interface HeroScoreProps {
-  sessionData: FirestoreAssessmentSession;
+  sessionData: AssessmentSessionDTO;
 }
 
 export function HeroScore({ sessionData }: HeroScoreProps) {
   const [showStarDefinitions, setShowStarDefinitions] = useState(false);
   const [showFullInsights, setShowFullInsights] = useState(false);
   
-  const overallScore = Math.round(sessionData.scores.overallScore);
+  const overallScore = Math.round(sessionData.scores.overall);
   const maxScore = 100;
   const minScore = 35;
   
