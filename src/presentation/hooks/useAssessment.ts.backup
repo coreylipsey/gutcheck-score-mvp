@@ -78,6 +78,25 @@ export function useAssessment() {
       comprehensiveAnalysis: string;
       nextSteps: string;
     };
+      growthOpportunity: {
+        category: string;
+        score: string;
+        summary: string;
+        specificWeaknesses: string[];
+      };
+      scoreProjection: {
+        currentScore: number;
+        projectedScore: number;
+        improvementPotential: number;
+      };
+      comprehensiveAnalysis: string;
+      nextSteps: string;
+    };
+      feedback: string;
+      strengths: string;
+      focusAreas: string;
+      nextSteps: string;
+    };
     userId?: string;
   }) => {
     setIsLoading(true);
