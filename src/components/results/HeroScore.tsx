@@ -187,7 +187,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             {showStarDefinitions && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-50">
                 <h4 className="font-semibold mb-3 text-center" style={{ color: '#0A1F44' }}>
-                  Proposed 5-Star System (Non-Prescriptive)
+                  5-Star Rating System
                 </h4>
                 <div className="space-y-3">
                   {starThresholds.map((def, index) => (
