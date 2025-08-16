@@ -37,13 +37,11 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
       score: sessionData.scores.personalBackground,
       max: 20,
       icon: User,
-      description: "Your background, education, and foundational experiences that support entrepreneurship",
+      description: "Your starting point, foundational experience, and initial context for entrepreneurship",
       questions: [
-        "Previous business attempts and learnings",
-        "Educational background and relevant skills",
-        "Family entrepreneurial influence",
-        "Risk tolerance and decision-making style",
-        "Personal motivation and drive factors"
+        "Business Size",
+        "Personal Motivation",
+        "Previous Business Attempts"
       ]
     },
     {
@@ -51,13 +49,11 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
       score: sessionData.scores.entrepreneurialSkills,
       max: 25,
       icon: Brain,
-      description: "Core business capabilities, strategic thinking, and execution abilities",
+      description: "Key entrepreneurial traits, knowledge, and habits",
       questions: [
-        "Problem-solving and critical thinking",
-        "Business acumen and market understanding",
-        "Leadership and communication skills",
-        "Innovation and creative thinking",
-        "Learning agility and adaptability"
+        "Business Acumen",
+        "Milestones Achieved",
+        "Resilience and Adaptability"
       ]
     },
     {
@@ -69,37 +65,31 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
       questions: [
         "Access to startup capital and funding",
         "Professional network strength",
-        "Mentor and advisor relationships",
-        "Industry connections and partnerships",
-        "Financial management capabilities"
+        "Mentor and advisor relationships"
       ]
     },
     {
-      name: "Behavioral Patterns", // Clearer than "Behavioral Metrics"
+      name: "Behavioral Patterns",
       score: sessionData.scores.behavioralMetrics,
       max: 15,
       icon: TrendingUp,
-      description: "Habits, consistency, and behavioral traits that drive business success",
+      description: "Patterns in decision-making, risk tolerance, and execution style",
       questions: [
-        "Goal setting and tracking consistency",
-        "Time management and productivity habits",
-        "Resilience and recovery from setbacks",
-        "Self-discipline and follow-through",
-        "Continuous improvement mindset"
+        "Risk tolerance and decision-making style",
+        "Execution patterns and follow-through",
+        "Learning from failures and setbacks"
       ]
     },
     {
-      name: "Vision & Growth", // More inspiring than "Growth & Vision"
+      name: "Vision and Growth",
       score: sessionData.scores.growthVision,
       max: 20,
       icon: Rocket,
-      description: "Strategic planning, future vision, and scalability potential",
+      description: "Long-term vision, growth mindset, and strategic thinking",
       questions: [
-        "Long-term vision and strategic planning",
-        "Market opportunity identification",
-        "Scalability and growth planning",
-        "Innovation and differentiation strategy",
-        "Impact and legacy aspirations"
+        "Long-term vision and strategic thinking",
+        "Growth mindset and scalability focus",
+        "Market opportunity identification"
       ]
     }
   ];
@@ -157,7 +147,7 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
                   
                   {/* Hover tooltip with category details */}
                   {isShowingDetails && (
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-10">
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-50">
                       <h4 className="font-semibold mb-2" style={{ color: '#0A1F44' }}>
                         {category.name}
                       </h4>

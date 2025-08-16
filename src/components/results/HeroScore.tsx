@@ -180,7 +180,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
 
             {/* Hover Overlay with Definitions */}
             {showStarDefinitions && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-10">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-50">
                 <h4 className="font-semibold mb-3 text-center" style={{ color: '#0A1F44' }}>
                   5-Star Rating System
                 </h4>
