@@ -1,5 +1,6 @@
 import { AssessmentSessionDTO } from "@/domain/dtos/AssessmentSessionDTO";
 import { ArrowRight, CheckCircle, Clock, Target } from "lucide-react";
+import Link from "next/link";
 
 interface NextStepsProps {
   sessionData: AssessmentSessionDTO;
