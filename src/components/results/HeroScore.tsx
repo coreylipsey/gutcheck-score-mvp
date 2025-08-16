@@ -1,4 +1,4 @@
-import { Award, Info, Target, Star, TrendingUp } from "lucide-react";
+import { Award, Info, Target, Star, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { FirestoreAssessmentSession } from "@/types/firestore";
 import { FicoStyleGauge } from "./FicoStyleGauge";
@@ -9,6 +9,7 @@ interface HeroScoreProps {
 
 export function HeroScore({ sessionData }: HeroScoreProps) {
   const [showStarDefinitions, setShowStarDefinitions] = useState(false);
+  const [showFullInsights, setShowFullInsights] = useState(false);
   
   const overallScore = Math.round(sessionData.scores.overallScore);
   const maxScore = 100;
@@ -219,8 +220,8 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             )}
           </div>
 
-          {/* Key Insights - NO CHANGES */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 min-h-24">
+          {/* Key Insights - Expandable */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-100">
                 <Info className="w-5 h-5" style={{ color: '#147AFF' }} />
@@ -229,12 +230,37 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
                 Key Insights
               </h3>
             </div>
-            <p className="text-gray-700 leading-relaxed">
-              {sessionData.geminiFeedback?.feedback ? 
-                sessionData.geminiFeedback.feedback.split(' ').slice(0, 8).join(' ') + '...' :
-                "Strong foundation with growth opportunities ahead."
-              }
-            </p>
+            
+            <div className="space-y-3">
+              <p className="text-gray-700 leading-relaxed">
+                {sessionData.geminiFeedback?.feedback ? (
+                  showFullInsights ? (
+                    sessionData.geminiFeedback.feedback
+                  ) : (
+                    <>
+                      {sessionData.geminiFeedback.feedback.split(' ').slice(0, 15).join(' ')}...
+                    </>
+                  )
+                ) : (
+                  "Strong foundation with growth opportunities ahead."
+                )}
+              </p>
+              
+              {sessionData.geminiFeedback?.feedback && (
+                <button
+                  onClick={() => setShowFullInsights(!showFullInsights)}
+                  className="flex items-center space-x-1 text-sm font-medium transition-colors duration-200"
+                  style={{ color: '#147AFF' }}
+                >
+                  <span>{showFullInsights ? 'Show less' : 'Read more'}</span>
+                  {showFullInsights ? (
+                    <ChevronUp className="w-4 h-4" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4" />
+                  )}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Next Star Goal - NO CHANGES */}
