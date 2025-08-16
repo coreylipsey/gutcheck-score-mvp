@@ -97,19 +97,19 @@ export function FicoStyleGauge({
   const getNeedlePosition = () => {
     const centerX = 200;
     const centerY = 220;
-    const innerRadius = 145; // Start just outside the colored arc
-    const outerRadius = 155; // Short needle length like in reference
+    const innerRadius = 140; // Start closer to the colored arc
+    const outerRadius = 170; // Longer needle for more prominence
     
     const scoreRange = safeScore - safeMinScore;
     const totalRange = safeMaxScore - safeMinScore;
     const angle = 180 + (scoreRange / totalRange) * 180; // 180 to 360 degrees
     const angleRad = angle * (Math.PI / 180);
     
-    // Needle starts outside the colored arc
+    // Needle starts closer to the colored arc
     const needleStartX = centerX + innerRadius * Math.cos(angleRad);
     const needleStartY = centerY + innerRadius * Math.sin(angleRad);
     
-    // Needle ends a bit further out
+    // Needle ends further out for more prominence
     const needleEndX = centerX + outerRadius * Math.cos(angleRad);
     const needleEndY = centerY + outerRadius * Math.sin(angleRad);
     
@@ -186,7 +186,7 @@ export function FicoStyleGauge({
           );
         })}
         
-        {/* External needle - smaller and positioned outside */}
+        {/* External needle - more prominent */}
         <g>
           <line
             x1={needlePos.startX}
@@ -194,16 +194,16 @@ export function FicoStyleGauge({
             x2={needlePos.endX}
             y2={needlePos.endY}
             stroke="#1f2937"
-            strokeWidth="2"
+            strokeWidth="4"
             strokeLinecap="round"
             className="drop-shadow-sm transition-all duration-2000 ease-out"
           />
           
-          {/* Small needle tip indicator */}
+          {/* Larger needle tip indicator */}
           <circle
             cx={needlePos.endX}
             cy={needlePos.endY}
-            r="2"
+            r="4"
             fill="#1f2937"
           />
         </g>
