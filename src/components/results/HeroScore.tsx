@@ -14,7 +14,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
   const maxScore = 100;
   const minScore = 35;
   
-  // Updated star rating thresholds with percentile-based tiers and dual labeling
+  // Updated star rating thresholds with new non-prescriptive system
   const starThresholds = [
     { 
       stars: 1, 
@@ -25,18 +25,18 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
       creditLabel: "Poor",
       color: "#FF6B00",
       percentile: "Bottom 16%",
-      description: "Getting started - building entrepreneurial foundation"
+      description: "Initial signals of entrepreneurial intent and foundation."
     },
     { 
       stars: 2, 
       min: 50, 
       max: 64, 
-      name: "Developing Potential",
-      label: "Developing Potential",
+      name: "Forming Potential",
+      label: "Forming Potential",
       creditLabel: "Fair",
       color: "#FFC700",
       percentile: "17th-36th percentile",
-      description: "Making progress - developing core business skills"
+      description: "Building momentum, developing skills, and early traction."
     },
     { 
       stars: 3, 
@@ -47,29 +47,29 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
       creditLabel: "Good",
       color: "#147AFF",
       percentile: "37th-66th percentile",
-      description: "Solid foundation - ready for structured growth"
+      description: "Solid signals of growth and structured progress."
     },
     { 
       stars: 4, 
       min: 80, 
       max: 89, 
-      name: "Investment Ready",
-      label: "Investment Ready",
+      name: "Established Signals",
+      label: "Established Signals",
       creditLabel: "Very Good",
       color: "#19C2A0",
       percentile: "67th-86th percentile",
-      description: "Strong execution - attractive to investors"
+      description: "Strong, consistent execution patterns with clear growth capacity."
     },
     { 
       stars: 5, 
       min: 90, 
       max: 100, 
-      name: "Visionary Leader",
-      label: "Visionary Leader",
+      name: "Transformative Trajectory",
+      label: "Transformative Trajectory",
       creditLabel: "Excellent",
       color: "#0A1F44",
       percentile: "87th-100th percentile",
-      description: "Exceptional readiness - market leader potential"
+      description: "Exceptional indicators of scalability, leadership, and ecosystem impact."
     }
   ];
 
@@ -157,7 +157,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             </div>
             
             {/* Star Rating Display */}
-            <div className="text-center space-y-2">
+            <div className="text-center space-y-3">
               <div className="flex items-center justify-center space-x-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
@@ -170,11 +170,14 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
                   />
                 ))}
               </div>
-              <p className="font-semibold" style={{ color: '#0A1F44' }}>
+              <p className="font-semibold text-lg" style={{ color: '#0A1F44' }}>
                 {currentStar.label}
               </p>
+              <p className="text-lg font-semibold" style={{ color: currentStar.color }}>
+                {currentStar.creditLabel}
+              </p>
               <p className="text-sm text-gray-600">
-                {currentStar.creditLabel} • {currentStar.percentile}
+                Score: {currentStar.min}-{currentStar.max}
               </p>
             </div>
 
@@ -182,11 +185,11 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             {showStarDefinitions && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-50">
                 <h4 className="font-semibold mb-3 text-center" style={{ color: '#0A1F44' }}>
-                  5-Star Rating System
+                  Proposed 5-Star System (Non-Prescriptive)
                 </h4>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {starThresholds.map((def, index) => (
-                    <div key={index} className="text-xs">
+                    <div key={index} className="text-sm">
                       <div className="flex items-center space-x-2 mb-1">
                         <div className="flex items-center space-x-1">
                           {[1, 2, 3, 4, 5].map((star) => (
@@ -205,9 +208,9 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
                         </span>
                         <span className="text-gray-500">({def.creditLabel})</span>
                       </div>
-                      <p className="text-gray-600 ml-6">{def.description}</p>
+                      <p className="text-gray-600 ml-6 text-xs">{def.description}</p>
                       <p className="text-gray-500 ml-6 text-xs">
-                        Score: {def.min}-{def.max} • {def.percentile}
+                        Score: {def.min}–{def.max}
                       </p>
                     </div>
                   ))}
