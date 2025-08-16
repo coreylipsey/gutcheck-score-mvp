@@ -29,7 +29,8 @@ export function FicoStyleGauge({
 }: FicoStyleGaugeProps) {
   
   // Safety checks to prevent NaN values
-  const safeScore = isNaN(score) || score === null || score === undefined ? 0 : Math.max(minScore, Math.min(maxScore, score));
+  const safeScore = isNaN(score) || score === null || score === undefined ? 0 : score;
+  const clampedScore = Math.max(minScore, Math.min(maxScore, safeScore));
   const safeMaxScore = isNaN(maxScore) || maxScore === null || maxScore === undefined ? 100 : maxScore;
   const safeMinScore = isNaN(minScore) || minScore === null || minScore === undefined ? 35 : minScore;
   
@@ -100,7 +101,7 @@ export function FicoStyleGauge({
     const innerRadius = 140; // Start closer to the colored arc
     const outerRadius = 170; // Longer needle for more prominence
     
-    const scoreRange = safeScore - safeMinScore;
+    const scoreRange = clampedScore - safeMinScore;
     const totalRange = safeMaxScore - safeMinScore;
     const angle = 180 + (scoreRange / totalRange) * 180; // 180 to 360 degrees
     const angleRad = angle * (Math.PI / 180);

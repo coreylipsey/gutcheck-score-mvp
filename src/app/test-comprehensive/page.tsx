@@ -11,7 +11,7 @@ export default function TestComprehensivePage() {
     userId: undefined,
     responses: [],
     scores: {
-      overall: 72,
+      overallScore: 72,
       personalBackground: 15,
       entrepreneurialSkills: 18,
       resources: 12,

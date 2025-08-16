@@ -146,10 +146,10 @@ export default function AssessmentPage() {
       localStorage.setItem('sessionId', sessionId);
       
       // Calculate star rating using proper function
-      const starRating = scores.overall >= 80 ? 5 : 
-                        scores.overall >= 60 ? 4 : 
-                        scores.overall >= 40 ? 3 : 
-                        scores.overall >= 20 ? 2 : 1;
+      const starRating = scores.overallScore >= 80 ? 5 : 
+                        scores.overallScore >= 60 ? 4 : 
+                        scores.overallScore >= 40 ? 3 : 
+                        scores.overallScore >= 20 ? 2 : 1;
       
       // Store responses data in localStorage as fallback
       localStorage.setItem('responsesData', JSON.stringify({

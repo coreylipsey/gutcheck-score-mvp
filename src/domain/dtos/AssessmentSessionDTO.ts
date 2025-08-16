@@ -6,7 +6,7 @@ export interface AssessmentSessionDTO {
   sessionId: string;
   responses: AssessmentResponse[];
   scores: {
-    overall: number;
+    overallScore: number;
     personalBackground: number;
     entrepreneurialSkills: number;
     resources: number;

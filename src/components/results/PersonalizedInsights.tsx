@@ -70,8 +70,8 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
 
   // Score projection from AI analysis or fallback
   const scoreProjection = sessionData.geminiFeedback?.scoreProjection || {
-    currentScore: Math.round(sessionData.scores.overall),
-    projectedScore: Math.round(sessionData.scores.overall) + 3,
+    currentScore: Math.round(sessionData.scores.overallScore),
+    projectedScore: Math.round(sessionData.scores.overallScore) + 3,
     improvementPotential: 3
   };
 
@@ -201,7 +201,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
         <div className="space-y-4 text-gray-700 leading-relaxed">
           <p>
             {sessionData.geminiFeedback?.comprehensiveAnalysis ||
-            `Your Gutcheck Score of ${Math.round(sessionData.scores.overall)}/100 places you in the ${sessionData.starRating === 1 ? 'Early Spark' :
+            `Your Gutcheck Score of ${Math.round(sessionData.scores.overallScore)}/100 places you in the ${sessionData.starRating === 1 ? 'Early Spark' :
              sessionData.starRating === 2 ? 'Forming Potential' :
              sessionData.starRating === 3 ? 'Emerging Traction' :
              sessionData.starRating === 4 ? 'Established Signals' : 'Transformative Trajectory'} category, indicating strong potential for growth. Your assessment reveals a balanced entrepreneurial profile with clear strengths and growth areas. The AI analysis suggests focusing on strategic development while leveraging your existing capabilities.`}
