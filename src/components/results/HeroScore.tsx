@@ -206,7 +206,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
                         <span className="font-medium" style={{ color: '#0A1F44' }}>
                           {def.label}
                         </span>
-                        <span className="text-gray-500">({def.creditLabel})</span>
+                        <span style={{ color: def.color }}>({def.creditLabel})</span>
                       </div>
                       <p className="text-gray-600 ml-6 text-xs">{def.description}</p>
                       <p className="text-gray-500 ml-6 text-xs">
