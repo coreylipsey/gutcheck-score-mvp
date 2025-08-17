@@ -436,21 +436,26 @@ INSTRUCTIONS:
 async function generateComprehensiveAnalysis(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
   const overallScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score as number), 0);
   
-  // Determine star rating and label
-  const starRating = overallScore >= 90 ? 5 : 
-                    overallScore >= 80 ? 4 : 
-                    overallScore >= 65 ? 3 : 
-                    overallScore >= 50 ? 2 : 1;
+  // Determine star rating and label based on the correct thresholds
+  let starRating: number;
+  let starLabel: string;
   
-  const starLabels = {
-    1: "Early Spark",
-    2: "Forming Potential", 
-    3: "Emerging Traction",
-    4: "Established Signals",
-    5: "Transformative Trajectory"
-  };
-  
-  const starLabel = starLabels[starRating as keyof typeof starLabels];
+  if (overallScore >= 90) {
+    starRating = 5;
+    starLabel = "Transformative Trajectory";
+  } else if (overallScore >= 80) {
+    starRating = 4;
+    starLabel = "Established Signals";
+  } else if (overallScore >= 65) {
+    starRating = 3;
+    starLabel = "Emerging Traction";
+  } else if (overallScore >= 50) {
+    starRating = 2;
+    starLabel = "Forming Potential";
+  } else {
+    starRating = 1;
+    starLabel = "Early Spark";
+  }
 
   const prompt = `You are a seasoned entrepreneurial scout, analyzing the signals from a founder's Gutcheck Assessment the way an NFL scout would evaluate a player's combine results and tape. Your role is not to prescribe or judge, but to surface signals, tendencies, and overlooked strengths/risks that help explain where this entrepreneur sits on their trajectory.
 
