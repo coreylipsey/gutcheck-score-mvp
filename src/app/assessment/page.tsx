@@ -399,17 +399,30 @@ export default function AssessmentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Gutcheck.AI Assessment
-          </h1>
-          <p className="text-gray-600">
-            {isLocationStep ? 'Step 1 of 2: Business Information' : `Question ${currentStep} of ${totalQuestions}`}
-          </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4 sm:py-6">
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-[#147AFF] to-[#19C2A0] rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xs sm:text-sm">G</span>
+              </div>
+              <span className="text-lg sm:text-xl font-bold text-[#0A1F44]">Gutcheck.AI</span>
+            </Link>
+            <div className="text-right">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900">
+                Assessment
+              </h1>
+              <p className="text-sm text-gray-600">
+                {isLocationStep ? 'Step 1 of 2: Business Information' : `Question ${currentStep} of ${totalQuestions}`}
+              </p>
+            </div>
+          </div>
         </div>
+      </header>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Progress Bar */}
         <div className="mb-8">

@@ -48,9 +48,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4 sm:py-6">
             <div className="flex items-center">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                Gutcheck.AI
-              </h1>
+              <Link href="/" className="flex items-center space-x-2">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-[#147AFF] to-[#19C2A0] rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-xs sm:text-sm">G</span>
+                </div>
+                <span className="text-xl sm:text-2xl font-bold text-[#0A1F44]">Gutcheck.AI</span>
+              </Link>
             </div>
             <nav className="flex space-x-4 sm:space-x-8">
               <Link href="/assessment" className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
@@ -191,14 +194,7 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center text-gray-400">
-            <p>&copy; 2025 Gutcheck.AI. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }

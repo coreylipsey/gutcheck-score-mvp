@@ -9,14 +9,14 @@ export function Footer() {
           
           {/* Company Info */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#147AFF] to-[#19C2A0] flex items-center justify-center">
                 <Target className="w-4 h-4 text-white" />
               </div>
               <span className="text-xl font-bold" style={{ color: '#0A1F44' }}>
                 Gutcheck.AI
               </span>
-            </div>
+            </Link>
             <p className="text-gray-600 text-sm leading-relaxed">
               Empowering entrepreneurs with AI-powered assessments and personalized insights to accelerate their journey to success.
             </p>
