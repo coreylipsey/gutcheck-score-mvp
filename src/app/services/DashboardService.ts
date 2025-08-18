@@ -7,6 +7,28 @@ export interface AssessmentHistoryDTO {
   sessionId: string;
   completedAt: string;
   overallScore: number;
+  geminiFeedback?: {
+    feedback: string;
+    competitiveAdvantage: {
+      category: string;
+      score: string;
+      summary: string;
+      specificStrengths: string[];
+    };
+    growthOpportunity: {
+      category: string;
+      score: string;
+      summary: string;
+      specificWeaknesses: string[];
+    };
+    scoreProjection: {
+      currentScore: number;
+      projectedScore: number;
+      improvementPotential: number;
+    };
+    comprehensiveAnalysis: string;
+    nextSteps: string;
+  };
 }
 
 export interface AssessmentLimitsDTO {
@@ -51,7 +73,8 @@ export class DashboardService {
       const assessmentHistory: AssessmentHistoryDTO[] = sessions.map(session => ({
         sessionId: session.sessionId,
         completedAt: session.completedAt?.toLocaleDateString() || new Date().toLocaleDateString(),
-        overallScore: session.scores.overallScore
+        overallScore: session.scores.overallScore,
+        geminiFeedback: session.geminiFeedback
       }));
       
       // Check assessment frequency limits

@@ -23,6 +23,48 @@ export function MonthlyInsights({ lastAssessment, canTakeAssessment, daysUntilNe
       };
     }
 
+    // Use AI-generated feedback if available, otherwise fall back to static insights
+    if (lastAssessment.geminiFeedback) {
+      const feedback = lastAssessment.geminiFeedback;
+      
+      // Use the growth opportunity summary as the main message
+      const message = feedback.growthOpportunity?.summary || feedback.feedback || "Your personalized insights are ready.";
+      
+      // Use the specific weaknesses as actions, or parse next steps
+      let actions: string[] = [];
+      
+      if (feedback.growthOpportunity?.specificWeaknesses) {
+        actions = feedback.growthOpportunity.specificWeaknesses.slice(0, 3);
+      } else if (feedback.nextSteps) {
+        // Parse next steps text into bullet points
+        const steps = feedback.nextSteps.split('\n').filter(step => 
+          step.trim() && (step.includes('Mentorship:') || step.includes('Funding:') || step.includes('Learning:'))
+        );
+        actions = steps.slice(0, 3).map(step => {
+          if (step.includes('Mentorship:')) return step.replace('Mentorship:', '').trim();
+          if (step.includes('Funding:')) return step.replace('Funding:', '').trim();
+          if (step.includes('Learning:')) return step.replace('Learning:', '').trim();
+          return step.trim();
+        });
+      }
+      
+      // Fallback actions if no specific actions found
+      if (actions.length === 0) {
+        actions = [
+          "Review your assessment results",
+          "Focus on your growth areas",
+          "Implement recommended strategies"
+        ];
+      }
+
+      return {
+        title: `Your Personalized Insights ${feedback.scoreProjection ? `(${feedback.scoreProjection.projectedScore} potential)` : ''}`,
+        message: message,
+        actions: actions
+      };
+    }
+
+    // Fallback to static insights based on score
     const score = lastAssessment.overallScore;
     
     if (score >= 80) {
