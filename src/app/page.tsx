@@ -169,7 +169,7 @@ export default function Home() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
             Assessment Overview
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <div className="text-2xl font-bold text-blue-600">5</div>
               <div className="text-sm text-gray-600">Categories</div>
@@ -181,14 +181,6 @@ export default function Home() {
             <div className="text-center p-4 bg-purple-50 rounded-lg">
               <div className="text-2xl font-bold text-purple-600">15</div>
               <div className="text-sm text-gray-600">Minutes</div>
-            </div>
-            <div className="text-center p-4 bg-yellow-50 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-600">4</div>
-              <div className="text-sm text-gray-600">AI-Evaluated</div>
-            </div>
-            <div className="text-center p-4 bg-red-50 rounded-lg">
-              <div className="text-2xl font-bold text-red-600">100</div>
-              <div className="text-sm text-gray-600">Max Score</div>
             </div>
           </div>
         </div>
