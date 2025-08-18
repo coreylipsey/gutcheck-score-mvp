@@ -229,10 +229,17 @@ function ResultsContent() {
             </Link>
             <div className="text-right">
               <h1 className="text-lg sm:text-xl font-bold text-gray-900">
-                Assessment Results
+                {user?.displayName || 'Your Assessment'}
               </h1>
               <p className="text-sm text-gray-600">
-                Your personalized entrepreneurial score
+                {sessionData?.completedAt ? 
+                  new Date(sessionData.completedAt).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  }) : 
+                  'Assessment Results'
+                }
               </p>
             </div>
           </div>
