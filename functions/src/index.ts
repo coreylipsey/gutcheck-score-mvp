@@ -2,7 +2,6 @@ import {onCall} from "firebase-functions/v2/https";
 import {onRequest} from "firebase-functions/v2/https";
 import {setGlobalOptions} from "firebase-functions/v2";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
-import {onSchedule} from "firebase-functions/v2/scheduler";
 // DEPRECATED: No longer needed as we've switched to ADK agent
 // import {defineString} from "firebase-functions/params";
 import Stripe from 'stripe';
@@ -763,36 +762,36 @@ export const sendResultsEmail = onDocumentCreated(
   }
 );
 
-// Send follow-up sequence
-export const sendFollowUpSequence = onSchedule({
-  schedule: 'every 1 hours',
-  region: 'us-central1'
-}, async (event) => {
-  try {
-    // TODO: Implement follow-up email sequence logic
-    console.log('Follow-up sequence triggered');
-    
-    // Get users who completed assessment in the last 24 hours
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    const sessionsQuery = await db.collection('assessmentSessions')
-      .where('completedAt', '>=', yesterday)
-      .where('isAnonymous', '==', false)
-      .get();
-    
-    console.log(`Found ${sessionsQuery.size} recent sessions for follow-up`);
-    
-    // TODO: Send follow-up emails
-    for (const doc of sessionsQuery.docs) {
-      const sessionData = doc.data();
-      console.log(`Would send follow-up to user ${sessionData.userId}`);
-    }
-    
-  } catch (error) {
-    console.error('Error in follow-up sequence:', error);
-  }
-});
+// DEPRECATED: Cloud Scheduler function temporarily disabled due to IAM permissions
+// export const sendFollowUpSequence = onSchedule({
+//   schedule: 'every 1 hours',
+//   region: 'us-central1'
+// }, async (event) => {
+//   try {
+//     // TODO: Implement follow-up email sequence logic
+//     console.log('Follow-up sequence triggered');
+//     
+//     // Get users who completed assessment in the last 24 hours
+//     const yesterday = new Date();
+//     yesterday.setDate(yesterday.getDate() - 1);
+//     
+//     const sessionsQuery = await db.collection('assessmentSessions')
+//       .where('completedAt', '>=', yesterday)
+//       .where('isAnonymous', '==', false)
+//       .get();
+//     
+//     console.log(`Found ${sessionsQuery.size} recent sessions for follow-up`);
+//     
+//     // TODO: Send follow-up emails
+//     for (const doc of sessionsQuery.docs) {
+//       const sessionData = doc.data();
+//       console.log(`Would send follow-up to user ${sessionData.userId}`);
+//     }
+//     
+//   } catch (error) {
+//     console.error('Error in follow-up sequence:', error);
+//   }
+// });
 
 // Mailchimp webhook for list management
 export const mailchimpWebhook = onRequest(async (req, res) => {
