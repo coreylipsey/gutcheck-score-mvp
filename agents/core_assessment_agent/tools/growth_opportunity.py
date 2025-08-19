@@ -113,24 +113,5 @@ def get_category_max(category: str) -> int:
 
 def call_llm_with_prompt(prompt: str) -> dict:
     """Call LLM with prompt and return structured response."""
-    # This will be implemented with ADK's LLM calling mechanism
-    # For now, analyze the responses and return specific insights based on the data
-    
-    # Analyze the responses to find specific evidence of weaknesses
-    # Based on the test data, we can see areas for improvement:
-    # - The response shows reactive problem-solving rather than proactive planning
-    # - No mention of systematic goal tracking or structured time management
-    # - Recovery process is informal ("try to learn from every setback")
-    # - No mention of formal business planning processes
-    
-    return {
-        "category": "Behavioral Metrics",
-        "score": "12/15",
-        "summary": "Inconsistent habits are holding you back from reaching your full potential.",
-        "specificWeaknesses": [
-            "Goal tracking happens 'occasionally' vs systematic approach (no structured tracking mentioned)",
-            "Time dedication varies (1-10 hours) without structure (no consistent time allocation)",
-            "Recovery from setbacks relies on resilience vs strategic planning (informal 'try to learn' approach)",
-            "Business planning lacks formal processes and documentation (no systematic planning mentioned)"
-        ]
-    }
+    # This should use the actual ADK LLM, not hardcoded data
+    raise NotImplementedError("This function should use ADK's LLM, not hardcoded data")

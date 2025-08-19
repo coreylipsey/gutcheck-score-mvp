@@ -81,10 +81,5 @@ def calculate_star_rating(overall_score: int) -> tuple:
 
 def call_llm_with_prompt(prompt: str) -> str:
     """Call LLM with prompt and return text response."""
-    # This will be implemented with ADK's LLM calling mechanism
-    # For now, return a sample comprehensive analysis in sports scouting style
-    return """Your Gutcheck Score of 78/100 puts you in the Established Signals category - think of it like a quarterback who's shown flashes of brilliance but hasn't quite mastered the full playbook yet. You've got the raw talent and the drive, but there are some fundamentals that could take you from promising prospect to franchise player.
-
-Your strongest signals come from your resources category, where you demonstrate the kind of network utilization and strategic problem-solving that scouts love to see. When your food truck hit that cash flow crisis, you didn't just panic - you reached out to your network, restructured the business model, and turned a potential disaster into a pivot that actually increased profit margins. That's the kind of resilience under pressure that separates the pros from the practice squad.
-
-However, your behavioral metrics show some gaps that are holding you back from reaching your full potential. Your goal tracking is like a quarterback with good instincts who hasn't yet mastered the playbook - you're making plays, but they're more reactive than systematic. The trajectory indicators suggest that with some structured development in your planning and tracking processes, you could see substantial improvements in your entrepreneurial effectiveness. Think of it as upgrading from a talented rookie to a seasoned veteran who knows how to read the defense before the snap."""
+    # This should use the actual ADK LLM, not hardcoded data
+    raise NotImplementedError("This function should use ADK's LLM, not hardcoded data")

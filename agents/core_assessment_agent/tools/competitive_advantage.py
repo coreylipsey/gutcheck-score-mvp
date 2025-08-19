@@ -112,24 +112,5 @@ def get_category_max(category: str) -> int:
 
 def call_llm_with_prompt(prompt: str) -> dict:
     """Call LLM with prompt and return structured response."""
-    # This will be implemented with ADK's LLM calling mechanism
-    # For now, analyze the responses and return specific insights based on the data
-    
-    # Analyze the responses to find specific evidence
-    # Based on the test data, we can see specific examples:
-    # - "cash flow crisis" and "restructured the business model"
-    # - "reached out to a friend who had experience in restaurant management"
-    # - "analyzing what went wrong and documenting the lessons learned"
-    # - "reached out to mentors and other entrepreneurs"
-    
-    return {
-        "category": "Resources",
-        "score": "18/20",
-        "summary": "Your execution capabilities put you in the top 28% of tech entrepreneurs in Austin, TX.",
-        "specificStrengths": [
-            "Strategic problem-solving approach (demonstrates handling cash flow crisis by restructuring business model)",
-            "Strong network utilization (leveraged friend's restaurant management expertise effectively)",
-            "Growth mindset (analyzing failures and documenting lessons learned systematically)",
-            "Resilience and adaptability (bounced back from food truck failure to build successful consulting business)"
-        ]
-    }
+    # This should use the actual ADK LLM, not hardcoded data
+    raise NotImplementedError("This function should use ADK's LLM, not hardcoded data")
