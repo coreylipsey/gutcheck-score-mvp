@@ -3,7 +3,7 @@ import { FirestoreAssessmentRepository } from '../repositories/FirestoreAssessme
 import { FirestoreUserRepository } from '../repositories/FirestoreUserRepository';
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository';
 import { FirestoreTokenRepository } from '../repositories/FirestoreTokenRepository';
-import { GeminiAIService } from '../services/GeminiAIService';
+import { ADKAssessmentService } from '../services/ADKAssessmentService';
 import { ScoringService } from '../../application/services/ScoringService';
 import { TokenService } from '../../application/services/TokenService';
 import { CalculateAssessmentScore } from '../../application/use-cases/CalculateAssessmentScore';
@@ -19,8 +19,9 @@ export function setupDependencies(): void {
   const container = Container.getInstance();
 
   // Register infrastructure services
+  // Use ADK Assessment Service (replacing Gemini completely)
   container.register('IAIScoringService', () => 
-    new GeminiAIService(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '')
+    new ADKAssessmentService()
   );
 
   container.register('IAssessmentRepository', () => 
