@@ -31,9 +31,9 @@ ASSESSMENT DATA:
 
 CURRENT SCORES:
 - Overall Score: {overall_score}/100
-- Personal Background: {scores.get('personalBackground', 0)}/20
+- Personal Foundation: {scores.get('personalBackground', 0)}/20
 - Entrepreneurial Skills: {scores.get('entrepreneurialSkills', 0)}/25
-- Resources & Network: {scores.get('resources', 0)}/20
+- Resources: {scores.get('resources', 0)}/20
 - Behavioral Metrics: {scores.get('behavioralMetrics', 0)}/15
 - Growth & Vision: {scores.get('growthVision', 0)}/20
 - Star Rating: {star_rating}/5 ({star_label})

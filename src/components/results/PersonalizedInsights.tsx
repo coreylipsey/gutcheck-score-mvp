@@ -51,9 +51,9 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
   const categories = [
     { name: "Personal Foundation", score: sessionData.scores.personalBackground, max: 20 },
     { name: "Entrepreneurial Skills", score: sessionData.scores.entrepreneurialSkills, max: 25 },
-    { name: "Resources & Network", score: sessionData.scores.resources, max: 20 },
-    { name: "Behavioral Patterns", score: sessionData.scores.behavioralMetrics, max: 15 },
-    { name: "Vision & Growth", score: sessionData.scores.growthVision, max: 20 }
+    { name: "Resources", score: sessionData.scores.resources, max: 20 },
+    { name: "Behavioral Metrics", score: sessionData.scores.behavioralMetrics, max: 15 },
+    { name: "Growth & Vision", score: sessionData.scores.growthVision, max: 20 }
   ];
 
   // Find top strength and focus area

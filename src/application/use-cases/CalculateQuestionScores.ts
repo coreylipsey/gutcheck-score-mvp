@@ -89,7 +89,7 @@ export class CalculateQuestionScores {
     
     // 🔒 LOCKED SCORING MAPS - DO NOT MODIFY WITHOUT EXPLICIT APPROVAL
     const scoringMaps: Record<string, number[]> = {
-      // SECTION 1: Personal Background
+      // SECTION 1: Personal Foundation
       'q1': [3, 4, 5], // Idea stage=3, Early ops=4, Established=5
       'q2': [3, 4, 5], // Solo=3, Small team=4, Large team=5
       'q4': [5, 4, 3], // Still running=5, Failed=4, First time=3

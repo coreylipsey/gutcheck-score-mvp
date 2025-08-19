@@ -39,9 +39,9 @@ def generate_next_steps(assessment_data: dict) -> str:
 
 ASSESSMENT DATA:
 CURRENT SCORES:
-- Personal Background: {scores.get('personalBackground', 0)}/20
+- Personal Foundation: {scores.get('personalBackground', 0)}/20
 - Entrepreneurial Skills: {scores.get('entrepreneurialSkills', 0)}/25
-- Resources & Network: {scores.get('resources', 0)}/20
+- Resources: {scores.get('resources', 0)}/20
 - Behavioral Metrics: {scores.get('behavioralMetrics', 0)}/15
 - Growth & Vision: {scores.get('growthVision', 0)}/20
 - Industry: {industry or 'Not specified'}

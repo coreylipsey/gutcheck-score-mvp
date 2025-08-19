@@ -38,9 +38,9 @@ ASSESSMENT DATA:
 {format_responses(responses)}
 
 CURRENT SCORES:
-- Personal Background: {scores.get('personalBackground', 0)}/20
+- Personal Foundation: {scores.get('personalBackground', 0)}/20
 - Entrepreneurial Skills: {scores.get('entrepreneurialSkills', 0)}/25
-- Resources & Network: {scores.get('resources', 0)}/20
+- Resources: {scores.get('resources', 0)}/20
 - Behavioral Metrics: {scores.get('behavioralMetrics', 0)}/15
 - Growth & Vision: {scores.get('growthVision', 0)}/20
 - Industry: {industry or 'Not specified'}
@@ -123,7 +123,7 @@ def call_llm_with_prompt(prompt: str) -> dict:
     # - "reached out to mentors and other entrepreneurs"
     
     return {
-        "category": "Resources & Network",
+        "category": "Resources",
         "score": "18/20",
         "summary": "Your execution capabilities put you in the top 28% of tech entrepreneurs in Austin, TX.",
         "specificStrengths": [

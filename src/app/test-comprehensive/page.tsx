@@ -27,7 +27,7 @@ export default function TestComprehensivePage() {
       growthVision: 17,
     },
     geminiFeedback: {
-      feedback: "Based on your assessment, you scored 72 out of 100. Your strongest area is Entrepreneurial Skills, while Resources & Network could use more attention.",
+      feedback: "Based on your assessment, you scored 72 out of 100. Your strongest area is Entrepreneurial Skills, while Resources could use more attention.",
       competitiveAdvantage: {
         category: "Entrepreneurial Skills",
         score: "18/25",
@@ -40,7 +40,7 @@ export default function TestComprehensivePage() {
         ]
       },
       growthOpportunity: {
-        category: "Resources & Network",
+        category: "Resources",
         score: "12/20",
         summary: "There are opportunities to strengthen your resource base and network connections.",
         specificWeaknesses: [

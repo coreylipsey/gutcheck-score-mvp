@@ -18,7 +18,7 @@ export interface ScoreDescriptor {
 
 // Category-specific thresholds based on difficulty and expected performance
 export const CATEGORY_THRESHOLDS: Record<string, CategoryThresholds> = {
-  "Personal Background": {
+  "Personal Foundation": {
     exceptional: 85, // 17/20 points
     strong: 70,      // 14/20 points  
     developing: 45   // 9/20 points

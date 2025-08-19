@@ -15,7 +15,7 @@ A Next.js-based entrepreneurial assessment platform that provides AI-powered sco
 
 ## 📊 Assessment Categories
 
-- **Personal Background** (20% weight)
+- **Personal Foundation** (20% weight)
 - **Entrepreneurial Skills** (25% weight)
 - **Resources** (20% weight)
 - **Behavioral Metrics** (15% weight)

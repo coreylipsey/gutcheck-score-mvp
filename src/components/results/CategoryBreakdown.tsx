@@ -57,7 +57,7 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
       ]
     },
     {
-      name: "Resources & Network", // Enhanced naming
+      name: "Resources", // Official category name
       score: sessionData.scores.resources,
       max: 20,
       icon: Target,
@@ -69,7 +69,7 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
       ]
     },
     {
-      name: "Behavioral Patterns",
+      name: "Behavioral Metrics", // Official category name
       score: sessionData.scores.behavioralMetrics,
       max: 15,
       icon: TrendingUp,
@@ -81,7 +81,7 @@ export function CategoryBreakdown({ sessionData }: CategoryBreakdownProps) {
       ]
     },
     {
-      name: "Vision and Growth",
+      name: "Growth & Vision", // Official category name
       score: sessionData.scores.growthVision,
       max: 20,
       icon: Zap,
