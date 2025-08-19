@@ -68,35 +68,26 @@ export class GeminiAIService implements IAIScoringService {
     }
 
     const data = await apiResponse.json();
+    
+    // Debug logging
+    console.log('GeminiAIService received data:', {
+      feedback: data.feedback ? 'present' : 'missing',
+      competitiveAdvantage: data.competitiveAdvantage ? 'present' : 'missing',
+      growthOpportunity: data.growthOpportunity ? 'present' : 'missing',
+      scoreProjection: data.scoreProjection ? 'present' : 'missing',
+      comprehensiveAnalysis: data.comprehensiveAnalysis ? 'present' : 'missing',
+      nextSteps: data.nextSteps ? 'present' : 'missing'
+    });
+    
+    if (data.comprehensiveAnalysis) {
+      console.log('Comprehensive Analysis received, length:', data.comprehensiveAnalysis.length);
+    }
+    
     return {
-      feedback: data.feedback || 'AI feedback generation completed.',
-      competitiveAdvantage: data.competitiveAdvantage || {
-        category: 'Unknown',
-        score: '0/0',
-        summary: 'Your competitive advantages will be identified based on your assessment scores.',
-        specificStrengths: [
-          'Business experience (previous attempts show learning mindset)',
-          'Network connections (leveraged support systems effectively)',
-          'Learning commitment (regular professional development activities)',
-          'Adaptability (successfully navigated business challenges)'
-        ]
-      },
-      growthOpportunity: data.growthOpportunity || {
-        category: 'Unknown',
-        score: '0/0',
-        summary: 'Your growth opportunities will be determined from your assessment results.',
-        specificWeaknesses: [
-          'Goal tracking frequency (currently "occasionally" vs weekly)',
-          'Time allocation (varies without consistent structure)',
-          'Planning processes (informal vs documented approach)',
-          'Strategic execution (reactive vs proactive planning)'
-        ]
-      },
-      scoreProjection: data.scoreProjection || {
-        currentScore: 0,
-        projectedScore: 0,
-        improvementPotential: 0
-      },
+      feedback: data.feedback,
+      competitiveAdvantage: data.competitiveAdvantage,
+      growthOpportunity: data.growthOpportunity,
+      scoreProjection: data.scoreProjection,
       comprehensiveAnalysis: data.comprehensiveAnalysis,
       nextSteps: data.nextSteps
     };

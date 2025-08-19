@@ -140,15 +140,78 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
       return;
     }
 
-    // Generate enhanced feedback using the new AI functions
-    const [feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps] = await Promise.all([
-      generateFeedbackText(responses, scores, apiKey),
-      generateCompetitiveAdvantage(responses, scores, apiKey, industry, location),
-      generateGrowthOpportunity(responses, scores, apiKey, industry, location),
-      generateTruthfulScoreProjection(responses, scores, apiKey, industry, location),
-      generateComprehensiveAnalysis(responses, scores, apiKey, industry, location),
-      generateNextStepsText(scores, apiKey, industry, location)
-    ]);
+    // Generate enhanced feedback using the new AI functions with individual error handling
+    let feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps;
+    
+    try {
+      [feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps] = await Promise.all([
+        generateFeedbackText(responses, scores, apiKey),
+        generateCompetitiveAdvantage(responses, scores, apiKey, industry, location),
+        generateGrowthOpportunity(responses, scores, apiKey, industry, location),
+        generateTruthfulScoreProjection(responses, scores, apiKey, industry, location),
+        generateComprehensiveAnalysis(responses, scores, apiKey, industry, location),
+        generateNextStepsText(scores, apiKey, industry, location)
+      ]);
+    } catch (error) {
+      console.error('Error in Promise.all:', error);
+      // Fallback to individual calls with error handling
+             try {
+         feedback = await generateFeedbackText(responses, scores, apiKey);
+       } catch (e) {
+         console.error('Error generating feedback:', e);
+         feedback = null;
+       }
+      
+             try {
+         competitiveAdvantage = await generateCompetitiveAdvantage(responses, scores, apiKey, industry, location);
+       } catch (e) {
+         console.error('Error generating competitive advantage:', e);
+         competitiveAdvantage = null;
+       }
+      
+             try {
+         growthOpportunity = await generateGrowthOpportunity(responses, scores, apiKey, industry, location);
+       } catch (e) {
+         console.error('Error generating growth opportunity:', e);
+         growthOpportunity = null;
+       }
+      
+             try {
+         scoreProjection = await generateTruthfulScoreProjection(responses, scores, apiKey, industry, location);
+       } catch (e) {
+         console.error('Error generating score projection:', e);
+         scoreProjection = null;
+       }
+      
+             try {
+         comprehensiveAnalysis = await generateComprehensiveAnalysis(responses, scores, apiKey, industry, location);
+       } catch (e) {
+         console.error('Error generating comprehensive analysis:', e);
+         comprehensiveAnalysis = null;
+       }
+      
+             try {
+         nextSteps = await generateNextStepsText(scores, apiKey, industry, location);
+       } catch (e) {
+         console.error('Error generating next steps:', e);
+         nextSteps = null;
+       }
+    }
+
+    // Debug logging to see what's being returned
+    console.log('Generated AI feedback:', {
+      feedback: feedback ? 'present' : 'missing',
+      competitiveAdvantage: competitiveAdvantage ? 'present' : 'missing',
+      growthOpportunity: growthOpportunity ? 'present' : 'missing',
+      scoreProjection: scoreProjection ? 'present' : 'missing',
+      comprehensiveAnalysis: comprehensiveAnalysis ? 'present' : 'missing',
+      nextSteps: nextSteps ? 'present' : 'missing'
+    });
+    
+    if (comprehensiveAnalysis) {
+      console.log('Comprehensive Analysis length:', comprehensiveAnalysis.length);
+      console.log('Comprehensive Analysis preview:', comprehensiveAnalysis.substring(0, 100) + '...');
+    }
 
     response.json({
       feedback,
@@ -707,45 +770,59 @@ After generating your response, I will test each URL to verify:
 }
 
 async function callGemini(prompt: string, apiKey: string): Promise<string> {
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt
-              }
-            ]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.8,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024,
-        }
-      })
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Gemini API error: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
   
-  if (!responseText) {
-    throw new Error('Invalid response from Gemini API');
-  }
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.8,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 1024,
+          }
+        }),
+        signal: controller.signal
+      }
+    );
+    
+    clearTimeout(timeoutId);
 
-  return responseText.trim();
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!responseText) {
+      throw new Error('Invalid response from Gemini API');
+    }
+
+    return responseText.trim();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Request timed out after 30 seconds');
+    }
+    throw error;
+  }
 }
 
 // Add URL validation function
