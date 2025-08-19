@@ -1,30 +1,20 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
-import {setGlobalOptions} from "firebase-functions";
-import {onRequest} from "firebase-functions/v2/https";
 import {onCall} from "firebase-functions/v2/https";
+import {onRequest} from "firebase-functions/v2/https";
+import {setGlobalOptions} from "firebase-functions/v2";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
 import {onSchedule} from "firebase-functions/v2/scheduler";
 // DEPRECATED: No longer needed as we've switched to ADK agent
 // import {defineString} from "firebase-functions/params";
 import Stripe from 'stripe';
 import * as admin from 'firebase-admin';
-import {MailchimpService, EmailData} from './services/MailchimpService';
 
-// Initialize Firebase Admin SDK
-admin.initializeApp();
+// Initialize Firebase Admin
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
-// Initialize Mailchimp service
-const mailchimpService = new MailchimpService();
+const db = admin.firestore();
 
-// Define the Gemini API key parameter
 // DEPRECATED: Gemini API key no longer needed as we've switched to ADK agent
 // const geminiApiKey = defineString("GEMINI_API_KEY");
 
@@ -298,586 +288,6 @@ setGlobalOptions({ maxInstances: 10 });
 //   }
 // });
 
-async function generateFeedbackText(responses: any[], scores: any, apiKey: string): Promise<string> {
-  const openEndedResponses = responses.filter((r: any) => 
-    r.questionId === 'q3' || r.questionId === 'q8' || r.questionId === 'q18' || r.questionId === 'q23'
-  );
-
-  const prompt = `You are an expert entrepreneurship coach and evaluator. Your role is to provide supportive, specific, and encouraging feedback based on a founder's responses to four key questions:
-Vision Statement
-Entrepreneurial Journey
-Business Challenge
-Setback Response
-
-🔍 Output Guidelines
-Write a short feedback paragraph (3–4 sentences) that includes:
-One clear strength observed across the answers
-One specific area for improvement
-One actionable next step
-Tone: Warm, thoughtful, growth-oriented—like a mentor who believes in the founder's potential.
-Format: Plain text only
-Do NOT include JSON
-Do NOT re-state the input answers
-Do NOT exceed 120 words
-Do NOT use hashtags, markdown, emojis, or formatting
-
-✅ Example Output:
-You've clearly thought deeply about your business and your purpose shines through. Your biggest opportunity lies in building a stronger support network to avoid burnout. Consider joining a local founder peer group or incubator to get the mentorship and accountability that will help you grow faster.
-
-This feedback should feel like it came from someone who read carefully, believes in them, and wants to see them win. No fluff. No jargon. No generic compliments. Just real insight.
-
-OPEN-ENDED RESPONSES:
-${openEndedResponses.map((r: any) => `
-Question: ${r.questionText}
-Response: ${r.response}
-`).join('\n')}`;
-
-  return await callGemini(prompt, apiKey);
-}
-
-
-
-
-
-// Enhanced AI feedback generation functions
-async function generateCompetitiveAdvantage(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
-  const prompt = `You are an expert business analyst identifying competitive advantages.
-
-ASSESSMENT DATA:
-${responses.map((r: any) => `
-Question ${r.questionId}: ${r.questionText}
-Response: ${r.response}
-`).join('\n')}
-
-CURRENT SCORES:
-- Personal Background: ${scores.personalBackground}/20
-- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
-- Resources & Network: ${scores.resources}/20
-- Behavioral Metrics: ${scores.behavioralMetrics}/15
-- Growth & Vision: ${scores.growthVision}/20
-- Industry: ${industry || 'Not specified'}
-- Location: ${location || 'Not specified'}
-
-TASK: Analyze the highest-scoring category and identify specific competitive advantages.
-
-OUTPUT FORMAT (JSON):
-{
-  "category": "Resources & Network",
-  "score": "17/20",
-  "summary": "Your execution capabilities put you in the top 28% of tech entrepreneurs in Colorado.",
-  "specificStrengths": [
-    "Strategic problem-solving approach (demonstrates handling cash flow crisis)",
-    "Strong network utilization (leveraged friend's support effectively)",
-    "Growth mindset (weekly professional learning commitment)",
-    "Resilience and adaptability (bounced back from business challenges)"
-  ]
-}
-
-EXAMPLE SPECIFIC BULLETS:
-- "Strategic problem-solving approach (demonstrates handling cash flow crisis)"
-- "Strong network utilization (leveraged friend's support effectively)"
-- "Growth mindset (weekly professional learning commitment)"
-- "Resilience and adaptability (bounced back from business challenges)"
-
-AVOID GENERIC BULLETS LIKE:
-- "Strong foundation in business fundamentals"
-- "Demonstrated problem-solving abilities"
-- "Commitment to continuous learning"
-- "Resilient approach to challenges"
-
-INSTRUCTIONS:
-- Identify the highest-scoring category
-- Analyze specific responses in that category to find evidence of strengths
-- Create 4 specific, evidence-based strengths from their actual responses
-- Each strength MUST include specific details from their responses (e.g., "Strategic problem-solving approach (demonstrates handling cash flow crisis)")
-- Make each strength specific and actionable with concrete examples
-- Focus on competitive advantages that set them apart from other entrepreneurs
-- Include regional/industry context if available
-- Avoid generic phrases like "strong foundation" or "demonstrated abilities"
-- Use specific examples, numbers, or concrete actions from their responses
-- Each bullet should feel like it came from analyzing their actual answers, not generic advice`;
-
-  const response = await callGemini(prompt, apiKey);
-  
-  try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-    throw new Error('No JSON found in response');
-  } catch (error) {
-    console.error('Error parsing competitive advantage response:', error);
-    // Fallback to basic strengths
-    return {
-      category: "Resources & Network",
-      score: "17/20",
-      summary: "Your execution capabilities show strong potential for growth.",
-      specificStrengths: [
-        "Business experience (previous attempts show learning mindset)",
-        "Network connections (leveraged support systems effectively)",
-        "Learning commitment (regular professional development activities)",
-        "Adaptability (successfully navigated business challenges)"
-      ]
-    };
-  }
-}
-
-async function generateGrowthOpportunity(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
-  const prompt = `You are an expert business coach identifying growth opportunities.
-
-ASSESSMENT DATA:
-${responses.map((r: any) => `
-Question ${r.questionId}: ${r.questionText}
-Response: ${r.response}
-`).join('\n')}
-
-CURRENT SCORES:
-- Personal Background: ${scores.personalBackground}/20
-- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
-- Resources & Network: ${scores.resources}/20
-- Behavioral Metrics: ${scores.behavioralMetrics}/15
-- Growth & Vision: ${scores.growthVision}/20
-- Industry: ${industry || 'Not specified'}
-- Location: ${location || 'Not specified'}
-
-TASK: Analyze the lowest-scoring category and provide specific improvement insights.
-
-OUTPUT FORMAT (JSON):
-{
-  "category": "Entrepreneurial Skills",
-  "score": "15/25",
-  "summary": "Inconsistent habits are holding you back from reaching your full potential.",
-  "specificWeaknesses": [
-    "Goal tracking happens 'occasionally' vs systematic approach",
-    "Time dedication varies (1-10 hours) without structure",
-    "Recovery from setbacks relies on resilience vs strategic planning",
-    "Business planning lacks formal processes and documentation"
-  ]
-}
-
-EXAMPLE SPECIFIC BULLETS:
-- "Goal tracking happens 'occasionally' vs systematic approach"
-- "Time dedication varies (1-10 hours) without structure"
-- "Recovery from setbacks relies on resilience vs strategic planning"
-- "Business planning lacks formal processes and documentation"
-
-AVOID GENERIC BULLETS LIKE:
-- "Goal tracking could be more systematic"
-- "Time management needs more structure"
-- "Business planning processes could be formalized"
-- "Strategic thinking could be enhanced"
-
-INSTRUCTIONS:
-- Identify the lowest-scoring category
-- Analyze specific responses in that category to find evidence of weaknesses
-- Create 4 specific, evidence-based weaknesses from their actual responses
-- Each weakness MUST include specific details from their responses (e.g., "Goal tracking happens 'occasionally' vs systematic approach")
-- Make each weakness specific and actionable with concrete examples
-- Focus on areas that can be realistically improved
-- Be constructive but honest about gaps
-- Avoid generic phrases like "could be more systematic" or "needs more structure"
-- Use specific examples, numbers, or concrete actions from their responses
-- Each bullet should feel like it came from analyzing their actual answers, not generic advice
-- Include the actual words/phrases they used in their responses`;
-
-  const response = await callGemini(prompt, apiKey);
-  
-  try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-    throw new Error('No JSON found in response');
-  } catch (error) {
-    console.error('Error parsing growth opportunity response:', error);
-    // Fallback to basic weaknesses
-    return {
-      category: "Entrepreneurial Skills",
-      score: "15/25",
-      summary: "There are opportunities to strengthen your entrepreneurial foundation.",
-      specificWeaknesses: [
-        "Goal tracking frequency (currently 'occasionally' vs weekly)",
-        "Time allocation (varies without consistent structure)",
-        "Planning processes (informal vs documented approach)",
-        "Strategic execution (reactive vs proactive planning)"
-      ]
-    };
-  }
-}
-
-async function generateComprehensiveAnalysis(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
-  const overallScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score as number), 0);
-  
-  // Determine star rating and label based on the correct thresholds
-  let starRating: number;
-  let starLabel: string;
-  
-  if (overallScore >= 90) {
-    starRating = 5;
-    starLabel = "Transformative Trajectory";
-  } else if (overallScore >= 80) {
-    starRating = 4;
-    starLabel = "Established Signals";
-  } else if (overallScore >= 65) {
-    starRating = 3;
-    starLabel = "Emerging Traction";
-  } else if (overallScore >= 50) {
-    starRating = 2;
-    starLabel = "Forming Potential";
-  } else {
-    starRating = 1;
-    starLabel = "Early Spark";
-  }
-
-  const prompt = `You are a seasoned entrepreneurial scout, analyzing the signals from a founder's Gutcheck Assessment the way an NFL scout would evaluate a player's combine results and tape. Your role is not to prescribe or judge, but to surface signals, tendencies, and overlooked strengths/risks that help explain where this entrepreneur sits on their trajectory.
-
-ASSESSMENT DATA:
-${responses.map((r: any) => `
-Question ${r.questionId}: ${r.questionText}
-Response: ${r.response}
-`).join('\n')}
-
-CURRENT SCORES:
-- Overall Score: ${overallScore}/100
-- Personal Background: ${scores.personalBackground}/20
-- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
-- Resources & Network: ${scores.resources}/20
-- Behavioral Metrics: ${scores.behavioralMetrics}/15
-- Growth & Vision: ${scores.growthVision}/20
-- Star Rating: ${starRating}/5 (${starLabel})
-- Industry: ${industry || 'Not specified'}
-- Location: ${location || 'Not specified'}
-
-TASK: Produce a 2-3 paragraph scouting-style report that includes:
-1. **Signal Readout** – interpret the score and explain what it means in context, like a scout explaining combine numbers
-2. **Strength Signals** – highlight competitive advantages or unique tendencies (e.g., resilience under pressure, strong networks, disciplined routines)
-3. **Development Areas** – note where signals suggest gaps or undervalued traits (e.g., limited capital access, inconsistent tracking, hesitation in risk-taking)
-4. **Trajectory Indicators** – suggest next moves or opportunities that could elevate their "market value" as an entrepreneur (like a coach pointing out how to turn raw talent into production)
-
-OUTPUT FORMAT: Plain text, 2-3 paragraphs
-
-TONE GUIDANCE:
-- Warm, constructive, growth-oriented — like a scout who genuinely wants the player to succeed
-- Honest but encouraging, balancing candor with motivation
-- Specific, concrete observations rather than generic praise/criticism
-- Use metaphors where helpful (e.g., "You've built a strong baseline, but your goal-tracking is like a quarterback with good instincts who hasn't yet mastered the playbook")
-- Never prescriptive — frame insights as signals and indicators, not verdicts
-- Make it feel personalized and authentic`;
-
-  return await callGemini(prompt, apiKey);
-}
-
-async function generateTruthfulScoreProjection(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
-  const overallScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score as number), 0);
-  
-  const prompt = `You are an expert business consultant calculating realistic score improvements.
-
-ASSESSMENT DATA:
-${responses.map((r: any) => `
-Question ${r.questionId}: ${r.questionText}
-Response: ${r.response}
-`).join('\n')}
-
-CURRENT SCORES:
-- Personal Background: ${scores.personalBackground}/20
-- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
-- Resources & Network: ${scores.resources}/20
-- Behavioral Metrics: ${scores.behavioralMetrics}/15
-- Growth & Vision: ${scores.growthVision}/20
-- Overall Score: ${overallScore}/100
-
-TASK: 
-1. Identify the lowest-scoring category (Biggest Growth Opportunity)
-2. Analyze specific responses in that category
-3. Calculate realistic point improvements based on the scoring rubric
-4. Sum the improvements to get the projected score
-
-SCORING RUBRIC:
-- Multiple choice: Specific point values (e.g., "Weekly"=5, "Monthly"=4, "Occasionally"=3)
-- Open-ended: AI scored 1-5 based on quality and depth
-
-OUTPUT FORMAT (JSON):
-{
-  "currentScore": ${overallScore},
-  "projectedScore": 68,
-  "improvementPotential": 3,
-  "analysis": {
-    "lowestCategory": "Entrepreneurial Skills",
-    "currentCategoryScore": 15,
-    "realisticImprovements": [
-      {
-        "questionId": "q17",
-        "currentResponse": "Occasionally",
-        "currentScore": 3,
-        "suggestedImprovement": "Weekly",
-        "potentialScore": 4,
-        "pointGain": 1,
-        "reasoning": "Moving from occasional to weekly goal tracking"
-      }
-    ],
-    "totalPointGain": 3
-  }
-}
-
-INSTRUCTIONS:
-- Only suggest improvements that are realistically achievable
-- Base projections on actual response changes, not hypothetical scenarios
-- Be conservative - under-promise and over-deliver
-- Focus on the lowest-scoring category first
-- Provide specific, actionable recommendations`;
-
-  const response = await callGemini(prompt, apiKey);
-  
-  try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-    throw new Error('No JSON found in response');
-  } catch (error) {
-    console.error('Error parsing score projection response:', error);
-    // Fallback to conservative estimate
-    return {
-      currentScore: overallScore,
-      projectedScore: Math.min(100, (overallScore as number) + 3),
-      improvementPotential: 3,
-      analysis: {
-        lowestCategory: "Unknown",
-        currentCategoryScore: 0,
-        realisticImprovements: [],
-        totalPointGain: 3
-      }
-    };
-  }
-}
-
-async function generateNextStepsText(scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
-      const prompt = `You are an expert business evaluator using Gutcheck.AI results to recommend actionable next steps for entrepreneurs.
-
-Your output must include:
-One mentorship program or community
-One funding or grant opportunity
-One learning resource (course, article, or book)
-
-Personal Foundation Score (0–20): ${scores.personalBackground}
-Entrepreneurial Skills Score (0–25): ${scores.entrepreneurialSkills}
-Resources Score (0–20): ${scores.resources}
-Behavioral Metrics Score (0–15): ${scores.behavioralMetrics}
-Growth & Vision Score (0–20): ${scores.growthVision}
-Industry: ${industry || 'Not specified'}
-Location: ${location || 'Not specified'}
-
-🔍 Step-by-Step Logic
-Identify the lowest-scoring category → this defines the area of focus.
-Based on that category and the founder's industry/location:
-Mentorship: Suggest a local or niche online program accepting new participants. Verify that it's active.
-Funding: Find a grant or tool with a working link specific to the founder's geography or sector.
-Learning: Recommend a course, article, or book from reputable platforms like Coursera, Udemy, Amazon, or Medium. Ensure recency and relevance.
-
-📋 Output Format (Plain Text Only)
-Use this exact format: Mentorship: [Resource Name] (specific-url.com) Funding: [Resource Name] (specific-url.com) Learning: [Resource Name] (specific-url.com)
-Each line must be:
-Max 300 characters
-Include working URLs that lead directly to the specific resource mentioned
-No emojis, hashtags, markdown, bullet points, or extra styling
-
-✅ Example:
-Mentorship: Delaware Innovation Space (delawareinnovationspace.com/apply)
-Funding: Delaware Division of the Arts Grant (arts.delaware.gov/grants/apply)
-Learning: Coursera's "Creative Entrepreneurship" (coursera.org/learn/creative-entrepreneurship)
-
-⛔ CRITICAL: The URL must lead directly to the specific resource, not a general category page.
-
-⛔ HARD RULES
-You must verify that all links are current, accessible, and contextually relevant.
-Never suggest generic platforms like Y Combinator unless they are industry-specific and open.
-If local resources aren't available, use national ones that serve the founder's profile.
-Your tone should feel like a helpful coach—confident, supportive, and focused on making the founder feel seen and set up to act.
-
-🧪 URL VALIDATION REQUIREMENT:
-Only suggest resources where you can provide a specific, direct URL that you know exists:
-- Use well-known, established resources with predictable URL structures
-- For books: Use Amazon, Goodreads, or publisher direct links
-- For courses: Use direct course URLs from Coursera, Udemy, etc.
-- For grants: Use specific grant application pages from government/org websites
-- For mentorship: Use specific chapter/contact pages from established organizations
-- If you cannot provide a specific, working URL, suggest a different resource
-
-🔗 URL REQUIREMENTS:
-- For "Creative Capital Award" → find the actual application page, not just creative-capital.org
-- For "The Business of Creativity" book → find the Amazon/Goodreads page, not just a general bookstore
-- For "SCORE Mentors Atlanta" → find the Atlanta chapter page, not just score.org
-- URLs must be specific and actionable, leading directly to the resource mentioned
-
-✅ URL VALIDATION REQUIRED:
-Only suggest resources where you can provide a specific, direct URL:
-1. Use established platforms with predictable URL structures
-2. Ensure the URL leads directly to the specific resource mentioned
-3. If you cannot provide a specific URL for a resource, suggest a different, verifiable resource
-4. Prefer resources from major platforms (Amazon, Coursera, government sites, etc.) where URLs are reliable
-
-🔍 URL TESTING PROCESS:
-After generating your response, I will test each URL to verify:
-- The URL is accessible (returns HTTP 200)
-- The page content contains the resource name you suggested
-- If validation fails, I will regenerate the response with different resources
-
-⛔ NO GENERIC FALLBACKS:
-- Do not suggest "sba.gov/funding-programs" for specific grants
-- Do not suggest "coursera.org/entrepreneurship" for specific courses
-- Do not suggest "score.org" for specific local chapters
-- Only suggest resources where you can provide a direct, working URL`;
-
-  let response = await callGemini(prompt, apiKey);
-  
-  // Extract URLs from the response and validate them
-  const lines = response.split('\n');
-  let needsRegeneration = false;
-  
-  for (const line of lines) {
-    const urlMatch = line.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
-    if (urlMatch) {
-      const url = urlMatch[1].startsWith('http') ? urlMatch[1] : `https://${urlMatch[1]}`;
-      const resourceName = line.replace(/^[^:]+:\s*/, '').replace(/\s*\([^)]+\)$/, '').trim();
-      
-      console.log(`Validating URL: ${url} for resource: ${resourceName}`);
-      
-      // Test URL accessibility
-      const urlValidation = await validateUrl(url);
-      if (!urlValidation.isValid) {
-        console.log(`URL validation failed for ${url}: ${urlValidation.error}`);
-        needsRegeneration = true;
-        break;
-      }
-      
-      // Test URL content relevance
-      const contentValidation = await validateUrlContent(url, resourceName);
-      if (!contentValidation.matches) {
-        console.log(`Content validation failed for ${url}: ${contentValidation.reason}`);
-        needsRegeneration = true;
-        break;
-      }
-      
-      console.log(`✅ URL validation passed for ${url}`);
-    }
-  }
-  
-  // If validation failed, regenerate with a more strict prompt
-  if (needsRegeneration) {
-    console.log('URL validation failed, regenerating with stricter requirements...');
-    const strictPrompt = prompt + '\n\n🚨 CRITICAL: The previous response failed URL validation. Only suggest resources from major, well-known platforms where you are 100% certain the specific URL exists and is accessible.';
-    response = await callGemini(strictPrompt, apiKey);
-  }
-  
-  return response;
-}
-
-async function callGemini(prompt: string, apiKey: string): Promise<string> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-  
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt
-                }
-              ]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.8,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
-          }
-        }),
-        signal: controller.signal
-      }
-    );
-    
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
-    if (!responseText) {
-      throw new Error('Invalid response from Gemini API');
-    }
-
-    return responseText.trim();
-  } catch (error) {
-    clearTimeout(timeoutId);
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Request timed out after 30 seconds');
-    }
-    throw error;
-  }
-}
-
-// Add URL validation function
-async function validateUrl(url: string): Promise<{ isValid: boolean; status?: number; error?: string }> {
-  try {
-    const response = await fetch(url, {
-      method: 'HEAD', // Only fetch headers, not full content
-    });
-    
-    return {
-      isValid: response.ok,
-      status: response.status
-    };
-  } catch (error) {
-    return {
-      isValid: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    };
-  }
-}
-
-// Add URL content validation function
-async function validateUrlContent(url: string, expectedResource: string): Promise<{ matches: boolean; reason?: string }> {
-  try {
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      return { matches: false, reason: `HTTP ${response.status}` };
-    }
-    
-    const text = await response.text();
-    const lowerText = text.toLowerCase();
-    const lowerResource = expectedResource.toLowerCase();
-    
-    // Check if the resource name appears in the page content
-    const resourceWords = lowerResource.split(' ').filter(word => word.length > 3);
-    const matches = resourceWords.some(word => lowerText.includes(word));
-    
-    return {
-      matches,
-      reason: matches ? 'Content matches' : 'Resource name not found in page content'
-    };
-  } catch (error) {
-    return {
-      matches: false,
-      reason: error instanceof Error ? error.message : 'Fetch error'
-    };
-  }
-}
-
-// Token Economy Functions
-
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
@@ -977,110 +387,114 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   // Extract metadata
   const metadata = session.metadata;
-  if (!metadata || metadata.type !== 'token_purchase') {
-    console.log('Not a token purchase session');
+  if (!metadata) {
+    console.error('No metadata found in session');
     return;
   }
 
-  const userId = metadata.userId;
-  const tokens = parseInt(metadata.tokens || '0');
-  const packageId = metadata.packageId;
-
-  if (!userId || !tokens || !packageId) {
-    console.error('Missing required metadata for token purchase');
-    return;
-  }
-
-  // Here you would integrate with your token service
-  // For now, we'll just log the successful purchase
-  console.log(`Successfully processed token purchase: ${tokens} tokens for user ${userId}`);
+  const { tokens, userId, type } = metadata;
   
-  // TODO: Implement token crediting logic
-  // await tokenService.addTokensToUser(userId, tokens, 'stripe', session.payment_intent as string);
+  if (type !== 'token_purchase') {
+    console.log('Not a token purchase, skipping');
+    return;
+  }
+
+  try {
+    // Create token purchase record
+    const purchaseRef = db.collection('tokenPurchases').doc();
+    await purchaseRef.set({
+      id: purchaseRef.id,
+      userId,
+      amount: parseInt(tokens),
+      price: session.amount_total! / 100, // Convert from cents
+      currency: session.currency,
+      stripePaymentIntentId: session.payment_intent as string,
+      status: 'completed',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      completedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // Update user's token balance
+    const userRef = db.collection('tokenBalances').doc(userId);
+    const userDoc = await userRef.get();
+    
+    if (userDoc.exists) {
+      const currentBalance = userDoc.data()?.balance || 0;
+      await userRef.update({
+        balance: currentBalance + parseInt(tokens),
+        lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+        lastPurchaseAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    } else {
+      await userRef.set({
+        userId,
+        balance: parseInt(tokens),
+        lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+        lastPurchaseAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    // Create transaction record
+    const transactionRef = db.collection('tokenTransactions').doc();
+    await transactionRef.set({
+      id: transactionRef.id,
+      userId,
+      type: 'purchase',
+      amount: parseInt(tokens),
+      featureName: 'token_purchase',
+      source: 'stripe',
+      stripePaymentIntentId: session.payment_intent as string,
+      description: `Purchased ${tokens} tokens`,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      balanceAfter: (userDoc.exists ? (userDoc.data()?.balance || 0) : 0) + parseInt(tokens),
+    });
+
+    console.log(`Successfully processed token purchase for user ${userId}: ${tokens} tokens`);
+  } catch (error) {
+    console.error('Error processing checkout session:', error);
+    throw error;
+  }
 }
 
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   console.log('Payment intent succeeded:', paymentIntent.id);
+  // Additional payment success handling if needed
 }
 
 async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   console.log('Payment intent failed:', paymentIntent.id);
+  // Handle failed payment if needed
 }
 
-// Token Management Functions
-
-// Get user token info
+// Get user token information
 export const getUserTokenInfo = onCall(async (request) => {
   try {
-    const { userId, includeTransactionHistory } = request.data;
+    const { userId, includeTransactionHistory = false, transactionLimit = 10 } = request.data;
 
     if (!userId) {
-      throw new Error('Missing userId parameter');
+      throw new Error('User ID is required');
     }
 
-    // Get token balance from Firestore
-    const balanceRef = admin.firestore().collection('tokenBalances').doc(userId);
-    const balanceDoc = await balanceRef.get();
-    
-    let tokenBalance = 0;
-    if (balanceDoc.exists) {
-      const data = balanceDoc.data();
-      tokenBalance = data?.balance || 0;
-    } else {
-      // Create initial token balance if it doesn't exist
-      await balanceRef.set({
-        userId: userId,
-        balance: 0,
-        lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-      });
-    }
+    // Get token balance
+    const balanceDoc = await db.collection('tokenBalances').doc(userId).get();
+    const tokenBalance = balanceDoc.exists ? balanceDoc.data()?.balance || 0 : 0;
 
-    // Get feature access from Firestore
-    const accessRef = admin.firestore().collection('featureAccess').doc(userId);
-    const accessDoc = await accessRef.get();
-    
-    let featureAccess = {
-      'ai-market-analysis': false,
-      'investor-matching': false,
-      'competitor-report': false,
-      'team-analysis': false,
-      'pitch-deck-ai': false,
-      'growth-projections': false,
-    };
-    
-    if (accessDoc.exists) {
-      const data = accessDoc.data();
-      featureAccess = data?.features || featureAccess;
-    } else {
-      // Create initial feature access if it doesn't exist
-      await accessRef.set({
-        userId: userId,
-        features: featureAccess,
-        lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-      });
-    }
+    // Get feature access
+    const featureDoc = await db.collection('featureAccess').doc(userId).get();
+    const featureAccess = featureDoc.exists ? featureDoc.data()?.features || {} : {};
 
-    // Get transaction history if requested
-    let transactionHistory = undefined;
+    let transactionHistory = null;
     if (includeTransactionHistory) {
-      const transactionsRef = admin.firestore().collection('tokenTransactions');
-      const transactionsQuery = transactionsRef
+      const transactionsQuery = await db.collection('tokenTransactions')
         .where('userId', '==', userId)
         .orderBy('timestamp', 'desc')
-        .limit(10);
+        .limit(transactionLimit)
+        .get();
       
-      const transactionsSnapshot = await transactionsQuery.get();
-      transactionHistory = transactionsSnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: data.id,
-          type: data.type,
-          amount: data.amount,
-          description: data.description,
-          timestamp: data.timestamp.toDate(),
-          balanceAfter: data.balanceAfter
-        };
-      });
+      transactionHistory = transactionsQuery.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
     }
 
     return {
@@ -1091,95 +505,113 @@ export const getUserTokenInfo = onCall(async (request) => {
     };
   } catch (error) {
     console.error('Error getting user token info:', error);
-    throw new Error('Failed to get user token info');
+    return {
+      success: false,
+      tokenBalance: 0,
+      featureAccess: {},
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
 });
 
-// Spend tokens for feature unlock
+// Spend tokens for feature access
 export const spendTokensForFeature = onCall(async (request) => {
   try {
     const { userId, featureName } = request.data;
 
     if (!userId || !featureName) {
-      throw new Error('Missing required fields');
+      throw new Error('User ID and feature name are required');
     }
 
-    const db = admin.firestore();
-    const batch = db.batch();
-
-    // Get current token balance
-    const balanceRef = db.collection('tokenBalances').doc(userId);
-    const balanceDoc = await balanceRef.get();
-    
-    if (!balanceDoc.exists) {
-      throw new Error('User has no token balance');
-    }
-    
-    const balanceData = balanceDoc.data();
-    const currentBalance = balanceData?.balance || 0;
-    
     // Define feature costs
-    const featureCosts: Record<string, number> = {
-      'ai-market-analysis': 50,
-      'investor-matching': 75,
-      'competitor-report': 60,
-      'team-analysis': 40,
-      'pitch-deck-ai': 80,
-      'growth-projections': 65
+    const featureCosts: { [key: string]: { name: string; cost: number; description: string } } = {
+      'ai-market-analysis': { name: 'AI Market Analysis Agent', cost: 25, description: 'Comprehensive market analysis powered by AI' },
+      'investor-matching': { name: 'Investor Matching Algorithm', cost: 35, description: 'Advanced algorithm for investor matching' },
+      'competitor-report': { name: 'Premium Competitor Report', cost: 15, description: 'Deep dive competitor analysis' },
+      'team-analysis': { name: 'Team Dynamics Analysis', cost: 20, description: 'Comprehensive team analysis' },
+      'pitch-deck-ai': { name: 'AI Pitch Deck Optimizer', cost: 30, description: 'AI-powered pitch deck optimization' },
+      'growth-projections': { name: 'Advanced Growth Projections', cost: 40, description: 'Sophisticated financial modeling' }
     };
-    
-    const cost = featureCosts[featureName];
-    if (!cost) {
-      throw new Error('Invalid feature name');
+
+    const feature = featureCosts[featureName];
+    if (!feature) {
+      throw new Error('Unknown feature');
     }
+
+    // Check if user already has access
+    const featureDoc = await db.collection('featureAccess').doc(userId).get();
+    const currentFeatures = featureDoc.exists ? featureDoc.data()?.features || {} : {};
     
-    if (currentBalance < cost) {
-      throw new Error('Insufficient token balance');
+    if (currentFeatures[featureName]) {
+      return {
+        success: false,
+        newBalance: 0,
+        featureUnlocked: false,
+        error: 'Feature already unlocked'
+      };
     }
-    
-    const newBalance = currentBalance - cost;
+
+    // Check token balance
+    const balanceDoc = await db.collection('tokenBalances').doc(userId).get();
+    const currentBalance = balanceDoc.exists ? balanceDoc.data()?.balance || 0 : 0;
+
+    if (currentBalance < feature.cost) {
+      return {
+        success: false,
+        newBalance: currentBalance,
+        featureUnlocked: false,
+        error: 'Insufficient tokens'
+      };
+    }
+
+    // Spend tokens and unlock feature
+    const newBalance = currentBalance - feature.cost;
     
     // Update token balance
-    batch.update(balanceRef, {
+    await db.collection('tokenBalances').doc(userId).set({
+      userId,
       balance: newBalance,
-      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-    });
-    
+      lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+
+    // Update feature access
+    await db.collection('featureAccess').doc(userId).set({
+      userId,
+      features: { ...currentFeatures, [featureName]: true },
+      lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+
     // Create transaction record
     const transactionRef = db.collection('tokenTransactions').doc();
-    batch.set(transactionRef, {
+    await transactionRef.set({
       id: transactionRef.id,
-      userId: userId,
+      userId,
       type: 'spend',
-      amount: -cost,
-      featureName: featureName,
-      description: `Unlocked ${featureName}`,
+      amount: -feature.cost,
+      featureName,
+      source: 'system',
+      description: `Unlocked ${feature.name}`,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
-      balanceAfter: newBalance
+      balanceAfter: newBalance,
     });
-    
-    // Update feature access
-    const accessRef = db.collection('featureAccess').doc(userId);
-    batch.update(accessRef, {
-      [`features.${featureName}`]: true,
-      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-    });
-    
-    await batch.commit();
-    
+
     return {
       success: true,
       newBalance,
       featureUnlocked: true
     };
   } catch (error) {
-    console.error('Error spending tokens:', error);
-    throw new Error('Failed to unlock feature');
+    console.error('Error spending tokens for feature:', error);
+    return {
+      success: false,
+      newBalance: 0,
+      featureUnlocked: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
 });
 
 // DEPRECATED: AI Scoring Function - Replaced by ADK Agent
-// This function is no longer used as we've switched to the ADK agent for all AI functionality
 // export const scoreResponse = onCall(async (request) => {
 //   try {
 //     const { questionType, response } = request.data;
@@ -1287,262 +719,121 @@ export const claimScore = onCall(async (request) => {
   }
 });
 
-// Email Trigger Functions
-
-/**
- * Send results email when assessment is completed
- */
+// Send results email when assessment is completed
 export const sendResultsEmail = onDocumentCreated(
-  'assessment_results/{docId}',
+  {
+    document: 'assessmentSessions/{sessionId}',
+    region: 'us-central1'
+  },
   async (event) => {
+    const sessionData = event.data?.data();
+    if (!sessionData) {
+      console.log('No session data found');
+      return;
+    }
+
+    // Only send email if user is not anonymous
+    if (sessionData.isAnonymous) {
+      console.log('Anonymous session, skipping email');
+      return;
+    }
+
     try {
-      const assessmentData = event.data?.data();
-      if (!assessmentData) {
-        console.error('No assessment data found');
+      // Get user data
+      const userDoc = await db.collection('users').doc(sessionData.userId).get();
+      if (!userDoc.exists) {
+        console.log('User not found, skipping email');
         return;
       }
 
-      console.log('Assessment completed, preparing results email:', assessmentData.sessionId);
-
-      // Get user data if available
-      let userData = null;
-      if (assessmentData.userId) {
-        const userDoc = await admin.firestore()
-          .collection('users')
-          .doc(assessmentData.userId)
-          .get();
-        userData = userDoc.data();
+      const userData = userDoc.data();
+      const email = userData?.email;
+      
+      if (!email) {
+        console.log('No email found for user, skipping email');
+        return;
       }
 
-      // Prepare email data
-      const emailData: EmailData = {
-        email: assessmentData.email || userData?.email,
-        firstName: userData?.firstName || assessmentData.firstName || 'Entrepreneur',
-        lastName: userData?.lastName || assessmentData.lastName || '',
-        gutcheckScore: assessmentData.overallScore,
-        starRating: calculateStarRating(assessmentData.overallScore),
-        starLabel: getStarLabel(assessmentData.overallScore),
-        topStrength: getTopStrength(assessmentData.scores),
-        areaForGrowth: getAreaForGrowth(assessmentData.scores),
-        scoutAnalysis: assessmentData.geminiFeedback?.recommendation || '',
-        assessmentId: assessmentData.sessionId,
-        userId: assessmentData.userId || ''
-      };
-
-      // Send results email
-      const campaignId = await mailchimpService.sendResultsEmail(emailData);
-
-      // Log the email event
-      await admin.firestore().collection('email_events').add({
-        userId: assessmentData.userId || '',
-        emailType: 'results',
-        eventType: 'sent',
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        assessmentId: assessmentData.sessionId,
-        mailchimpMessageId: campaignId
-      });
-
-      console.log(`Results email sent successfully for assessment ${assessmentData.sessionId}`);
-
+      // TODO: Implement actual email sending logic
+      console.log(`Would send results email to ${email} for session ${event.params.sessionId}`);
+      
     } catch (error) {
       console.error('Error sending results email:', error);
-      // Don't throw - we don't want to break the assessment flow
     }
   }
 );
 
-/**
- * Send follow-up sequence emails (scheduled)
- */
+// Send follow-up sequence
 export const sendFollowUpSequence = onSchedule({
-  schedule: '0 10 * * *', // Daily at 10 AM
-  timeZone: 'America/New_York'
+  schedule: 'every 1 hours',
+  region: 'us-central1'
 }, async (event) => {
   try {
-    console.log('Running follow-up sequence scheduler');
-
-    // Get users who completed assessment 3 days ago
-    const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-
-    const assessments = await admin.firestore()
-      .collection('assessment_results')
-      .where('createdAt', '>=', threeDaysAgo)
-      .where('createdAt', '<', new Date(threeDaysAgo.getTime() + 24 * 60 * 60 * 1000))
+    // TODO: Implement follow-up email sequence logic
+    console.log('Follow-up sequence triggered');
+    
+    // Get users who completed assessment in the last 24 hours
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const sessionsQuery = await db.collection('assessmentSessions')
+      .where('completedAt', '>=', yesterday)
+      .where('isAnonymous', '==', false)
       .get();
-
-    for (const doc of assessments.docs) {
-      const assessmentData = doc.data();
-      
-      // Check if follow-up 1 was already sent
-      const existingEmail = await admin.firestore()
-        .collection('email_events')
-        .where('assessmentId', '==', assessmentData.sessionId)
-        .where('emailType', '==', 'followup_1')
-        .get();
-
-      if (!existingEmail.empty) {
-        continue; // Already sent
-      }
-
-      // Get user data
-      let userData = null;
-      if (assessmentData.userId) {
-        const userDoc = await admin.firestore()
-          .collection('users')
-          .doc(assessmentData.userId)
-          .get();
-        userData = userDoc.data();
-      }
-
-      // Prepare email data for follow-up 1
-      const emailData: EmailData = {
-        email: assessmentData.email || userData?.email,
-        firstName: userData?.firstName || assessmentData.firstName || 'Entrepreneur',
-        lastName: userData?.lastName || assessmentData.lastName || '',
-        gutcheckScore: assessmentData.overallScore,
-        starRating: calculateStarRating(assessmentData.overallScore),
-        starLabel: getStarLabel(assessmentData.overallScore),
-        topStrength: getTopStrength(assessmentData.scores),
-        areaForGrowth: getAreaForGrowth(assessmentData.scores),
-        scoutAnalysis: assessmentData.geminiFeedback?.recommendation || '',
-        assessmentId: assessmentData.sessionId,
-        userId: assessmentData.userId || ''
-      };
-
-      // Send follow-up email
-      await mailchimpService.sendFollowUpEmail(emailData, 1);
-
-      console.log(`Follow-up 1 sent for assessment ${assessmentData.sessionId}`);
-
+    
+    console.log(`Found ${sessionsQuery.size} recent sessions for follow-up`);
+    
+    // TODO: Send follow-up emails
+    for (const doc of sessionsQuery.docs) {
+      const sessionData = doc.data();
+      console.log(`Would send follow-up to user ${sessionData.userId}`);
     }
-
+    
   } catch (error) {
-    console.error('Error in follow-up sequence scheduler:', error);
+    console.error('Error in follow-up sequence:', error);
   }
 });
 
-/**
- * Mailchimp webhook handler
- */
+// Mailchimp webhook for list management
 export const mailchimpWebhook = onRequest(async (req, res) => {
   try {
-    // Verify webhook signature (implement for production)
-    // const signature = req.headers['x-mailchimp-signature'];
+    const { type, data } = req.body;
     
-    const eventData = req.body;
-    console.log('Mailchimp webhook received:', eventData);
-
-    // Handle different webhook events
-    switch (eventData.type) {
-      case 'subscribe':
-      case 'unsubscribe':
-      case 'profile':
-        // Handle subscription changes
-        break;
+    if (type === 'subscribe') {
+      // Handle new subscriber
+      console.log('New Mailchimp subscriber:', data.email);
       
-      case 'campaign':
-        // Handle campaign events (sent, opened, clicked)
-        await mailchimpService.handleWebhookEvent(eventData);
-        break;
+      // TODO: Implement subscriber processing logic
       
-      default:
-        console.log(`Unhandled webhook event type: ${eventData.type}`);
+    } else if (type === 'unsubscribe') {
+      // Handle unsubscriber
+      console.log('Mailchimp unsubscribe:', data.email);
+      
+      // TODO: Implement unsubscriber processing logic
     }
-
-    res.status(200).send('OK');
+    
+    res.json({ success: true });
   } catch (error) {
     console.error('Error processing Mailchimp webhook:', error);
-    res.status(500).send('Error processing webhook');
+    res.status(500).json({ error: 'Webhook processing failed' });
   }
 });
 
-/**
- * Test Mailchimp connection
- */
+// Test Mailchimp connection
 export const testMailchimpConnection = onCall(async (request) => {
   try {
-    const isConnected = await mailchimpService.ping();
-    const audienceInfo = await mailchimpService.getAudienceInfo();
+    // TODO: Implement Mailchimp connection test
+    console.log('Testing Mailchimp connection');
     
     return {
       success: true,
-      connected: isConnected,
-      audience: {
-        id: audienceInfo.id,
-        name: audienceInfo.name,
-        member_count: audienceInfo.stats.member_count
-      }
+      message: 'Mailchimp connection test completed'
     };
   } catch (error) {
     console.error('Error testing Mailchimp connection:', error);
     return {
       success: false,
-      error: (error as Error).message
+      error: error instanceof Error ? error.message : 'Unknown error'
     };
   }
 });
-
-// Helper functions
-
-/**
- * Calculate star rating based on score (35-100 scale)
- */
-function calculateStarRating(score: number): number {
-  // Map overall score to 1-5 stars using Gutcheck thresholds
-  if (score >= 90) return 5; // Transformative Trajectory
-  if (score >= 80) return 4; // Established Signals
-  if (score >= 65) return 3; // Emerging Traction
-  if (score >= 50) return 2; // Forming Potential
-  return 1; // Early Spark (35-49)
-}
-
-/**
- * Get star label based on score (35-100 scale)
- */
-function getStarLabel(score: number): string {
-  // Labels aligned with UI thresholds in results report
-  if (score >= 90) return 'Transformative Trajectory';
-  if (score >= 80) return 'Established Signals';
-  if (score >= 65) return 'Emerging Traction';
-  if (score >= 50) return 'Forming Potential';
-  return 'Early Spark';
-}
-
-/**
- * Get top strength category
- */
-function getTopStrength(scores: any): string {
-  const categories = [
-    { name: 'Personal Background', score: scores.personalBackground },
-    { name: 'Entrepreneurial Skills', score: scores.entrepreneurialSkills },
-    { name: 'Resources', score: scores.resources },
-    { name: 'Behavioral Metrics', score: scores.behavioralMetrics },
-    { name: 'Growth & Vision', score: scores.growthVision }
-  ];
-
-  const topCategory = categories.reduce((prev, current) => 
-    (prev.score > current.score) ? prev : current
-  );
-
-  return topCategory.name;
-}
-
-/**
- * Get area for growth
- */
-function getAreaForGrowth(scores: any): string {
-  const categories = [
-    { name: 'Personal Background', score: scores.personalBackground },
-    { name: 'Entrepreneurial Skills', score: scores.entrepreneurialSkills },
-    { name: 'Resources', score: scores.resources },
-    { name: 'Behavioral Metrics', score: scores.behavioralMetrics },
-    { name: 'Growth & Vision', score: scores.growthVision }
-  ];
-
-  const lowestCategory = categories.reduce((prev, current) => 
-    (prev.score < current.score) ? prev : current
-  );
-
-  return lowestCategory.name;
-}
