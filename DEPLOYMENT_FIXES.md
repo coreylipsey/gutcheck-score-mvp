@@ -9,14 +9,22 @@ Request to https://cloudscheduler.googleapis.com/v1/projects/gutcheck-score-mvp/
 ```
 
 ### Root Cause
-The Firebase service account `firebase-adminsdk-fbsvc@gutcheck-score-mvp.iam.gserviceaccount.com` lacked the necessary Cloud Scheduler permissions to create and manage scheduled jobs.
+Both the Firebase service account and the Cloud Build service account lacked the necessary Cloud Scheduler permissions to create and manage scheduled jobs during deployment.
 
 ### Solution Applied
-Added the `roles/cloudscheduler.admin` role to the Firebase service account:
+Added the `roles/cloudscheduler.admin` role to both service accounts:
 
+#### 1. Firebase Service Account
 ```bash
 gcloud projects add-iam-policy-binding gutcheck-score-mvp \
   --member="serviceAccount:firebase-adminsdk-fbsvc@gutcheck-score-mvp.iam.gserviceaccount.com" \
+  --role="roles/cloudscheduler.admin"
+```
+
+#### 2. Cloud Build Service Account (CI/CD Pipeline)
+```bash
+gcloud projects add-iam-policy-binding gutcheck-score-mvp \
+  --member="serviceAccount:286731768309@cloudbuild.gserviceaccount.com" \
   --role="roles/cloudscheduler.admin"
 ```
 
@@ -25,15 +33,25 @@ After applying the fix:
 - ✅ All functions deployed successfully
 - ✅ `sendFollowUpSequence` function now works with Cloud Scheduler
 - ✅ No more IAM permission errors during deployment
+- ✅ CI/CD pipeline can now deploy scheduled functions
 
 ### Current Service Account Permissions
-The Firebase service account now has the following roles:
+
+#### Firebase Service Account (`firebase-adminsdk-fbsvc@gutcheck-score-mvp.iam.gserviceaccount.com`)
 - `roles/firebase.sdkAdminServiceAgent`
 - `roles/firebaseappcheck.admin`
 - `roles/firebaseauth.admin`
 - `roles/iam.serviceAccountTokenCreator`
 - `roles/iam.serviceAccountUser`
 - `roles/storage.admin`
+- `roles/cloudscheduler.admin` ✅ **NEW**
+
+#### Cloud Build Service Account (`286731768309@cloudbuild.gserviceaccount.com`)
+- `roles/cloudbuild.builds.builder`
+- `roles/cloudfunctions.developer`
+- `roles/iam.serviceAccountTokenCreator`
+- `roles/iam.serviceAccountUser`
+- `roles/logging.logWriter`
 - `roles/cloudscheduler.admin` ✅ **NEW**
 
 ## Deployment Status
@@ -63,11 +81,13 @@ The Firebase service account now has the following roles:
 1. **Principle of Least Privilege**: Only grant necessary permissions
 2. **Regular Audits**: Review service account permissions periodically
 3. **Documentation**: Keep track of all IAM changes for troubleshooting
+4. **CI/CD Considerations**: Ensure Cloud Build service account has necessary permissions
 
 ### Monitoring
 - Monitor Cloud Scheduler job execution logs
 - Set up alerts for failed scheduled functions
 - Track IAM permission changes in audit logs
+- Monitor CI/CD pipeline deployment success rates
 
 ## Related Documentation
 - [DEPLOYMENT.md](./DEPLOYMENT.md) - Main deployment guide
