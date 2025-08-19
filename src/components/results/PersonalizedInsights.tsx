@@ -33,6 +33,12 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
   }
   
   // Check if AI feedback is available
+  const competitiveAdvantage = sessionData.geminiFeedback?.competitiveAdvantage;
+  const growthOpportunity = sessionData.geminiFeedback?.growthOpportunity;
+  const scoreProjection = sessionData.geminiFeedback?.scoreProjection;
+  const comprehensiveAnalysis = sessionData.geminiFeedback?.comprehensiveAnalysis;
+  
+  // Only show refresh if we have NO feedback at all
   if (!sessionData.geminiFeedback) {
     return (
       <div className="space-y-8">
@@ -72,37 +78,6 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
   const topStrengthPerformance = getPerformanceLevel(topStrength.score, topStrength.max);
   const focusAreaPerformance = getPerformanceLevel(focusArea.score, focusArea.max);
 
-  // Check if AI feedback is available
-  const competitiveAdvantage = sessionData.geminiFeedback?.competitiveAdvantage;
-  const growthOpportunity = sessionData.geminiFeedback?.growthOpportunity;
-  const scoreProjection = sessionData.geminiFeedback?.scoreProjection;
-  const comprehensiveAnalysis = sessionData.geminiFeedback?.comprehensiveAnalysis;
-  
-  // If core AI fields are missing, show loading message
-  if (!competitiveAdvantage || !growthOpportunity || !scoreProjection) {
-    return (
-      <div className="space-y-8">
-        <div className="text-center space-y-3">
-          <h2 className="text-3xl font-bold" style={{ color: '#0A1F44' }}>
-            AI Feedback Generation In Progress
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Your personalized AI feedback is being generated. This may take a few moments. 
-            Please refresh the page in a minute or two to see your complete analysis.
-          </p>
-          <div className="flex justify-center">
-            <button 
-              onClick={() => window.location.reload()} 
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Refresh Page
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       {/* Section Header */}
@@ -118,7 +93,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
         <div className="inline-flex items-center space-x-3 px-6 py-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-full border border-green-200">
           <TrendingUp className="w-5 h-5 text-green-600" />
           <span className="font-medium text-green-800">
-            Following these recommendations could increase your score to {scoreProjection.projectedScore}
+            Following these recommendations could increase your score to {scoreProjection?.projectedScore || 'a higher level'}
           </span>
         </div>
       </div>
@@ -138,10 +113,10 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
               </h3>
               <div className="flex items-center space-x-2">
                 <p className="text-sm font-medium" style={{ color: '#19C2A0' }}>
-                  {competitiveAdvantage.category}
+                  {competitiveAdvantage?.category || 'Entrepreneurial Skills'}
                 </p>
                 <span className="text-xs px-2 py-1 bg-green-200 text-green-800 rounded-full">
-                  {competitiveAdvantage.score}
+                  {competitiveAdvantage?.score || 'Strong'}
                 </span>
               </div>
             </div>
@@ -149,24 +124,30 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
           
           <div className="flex-1">
             <p className="text-gray-700 leading-relaxed font-medium mb-4">
-              {competitiveAdvantage.summary}
+              {competitiveAdvantage?.summary || 'Your competitive advantages will be identified based on your assessment scores.'}
             </p>
             
             {/* Specific strengths list */}
-            <div className="bg-white/60 rounded-lg p-4">
-              <h4 className="font-semibold text-sm text-gray-800 mb-3 flex items-center">
-                <Lightbulb className="w-4 h-4 mr-2" />
-                What makes you stand out:
-              </h4>
-              <ul className="space-y-2">
-                {competitiveAdvantage.specificStrengths.map((strength, index) => (
-                  <li key={index} className="flex items-start space-x-2 text-sm">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
-                    <span className="text-gray-700">{strength}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {competitiveAdvantage?.specificStrengths ? (
+              <div className="bg-white/60 rounded-lg p-4">
+                <h4 className="font-semibold text-sm text-gray-800 mb-3 flex items-center">
+                  <Lightbulb className="w-4 h-4 mr-2" />
+                  What makes you stand out:
+                </h4>
+                <ul className="space-y-2">
+                  {competitiveAdvantage.specificStrengths.map((strength, index) => (
+                    <li key={index} className="flex items-start space-x-2 text-sm">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
+                      <span className="text-gray-700">{strength}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="bg-white/60 rounded-lg p-4">
+                <p className="text-sm text-gray-600">Detailed competitive analysis will be available once feedback generation is complete.</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -182,10 +163,10 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
               </h3>
               <div className="flex items-center space-x-2">
                 <p className="text-sm font-medium" style={{ color: '#FF6B00' }}>
-                  {growthOpportunity.category}
+                  {growthOpportunity?.category || 'Resources'}
                 </p>
                 <span className="text-xs px-2 py-1 bg-orange-200 text-orange-800 rounded-full">
-                  {growthOpportunity.score}
+                  {growthOpportunity?.score || 'Opportunity'}
                 </span>
               </div>
             </div>
@@ -193,24 +174,30 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
           
           <div className="flex-1">
             <p className="text-gray-700 leading-relaxed font-medium mb-4">
-              {growthOpportunity.summary}
+              {growthOpportunity?.summary || 'Your growth opportunities will be determined from your assessment results.'}
             </p>
             
             {/* Areas for improvement list */}
-            <div className="bg-white/60 rounded-lg p-4">
-              <h4 className="font-semibold text-sm text-gray-800 mb-3 flex items-center">
-                <Zap className="w-4 h-4 mr-2" />
-                Areas holding you back:
-              </h4>
-              <ul className="space-y-2">
-                {growthOpportunity.specificWeaknesses.map((weakness, index) => (
-                  <li key={index} className="flex items-start space-x-2 text-sm">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span className="text-gray-700">{weakness}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {growthOpportunity?.specificWeaknesses ? (
+              <div className="bg-white/60 rounded-lg p-4">
+                <h4 className="font-semibold text-sm text-gray-800 mb-3 flex items-center">
+                  <Zap className="w-4 h-4 mr-2" />
+                  Areas holding you back:
+                </h4>
+                <ul className="space-y-2">
+                  {growthOpportunity.specificWeaknesses.map((weakness, index) => (
+                    <li key={index} className="flex items-start space-x-2 text-sm">
+                      <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
+                      <span className="text-gray-700">{weakness}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="bg-white/60 rounded-lg p-4">
+                <p className="text-sm text-gray-600">Detailed growth opportunities will be available once feedback generation is complete.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

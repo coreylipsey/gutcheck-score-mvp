@@ -40,11 +40,12 @@ class AssessmentRequest(BaseModel):
     location: Optional[str] = None
 
 class AssessmentResponse(BaseModel):
-    competitiveAdvantage: str
-    growthOpportunity: str
+    competitiveAdvantage: dict  # Object with category, score, summary, specificStrengths
+    growthOpportunity: dict     # Object with category, score, summary, specificWeaknesses
     comprehensiveAnalysis: str
     nextSteps: str
     feedback: str
+    scoreProjection: dict       # Object with currentScore, projectedScore, improvementPotential
 
 @app.get("/")
 async def root():
