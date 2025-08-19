@@ -204,13 +204,8 @@ export class TokenService {
   }
 
   // Create token purchase record
-  async createTokenPurchase(purchase: Omit<TokenPurchase, 'id'>): Promise<void> {
-    const tokenPurchase: TokenPurchase = {
-      ...purchase,
-      id: `purchase_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    };
-    
-    await this.tokenRepository.createPurchase(tokenPurchase);
+  async createTokenPurchase(purchase: TokenPurchase): Promise<void> {
+    await this.tokenRepository.createPurchase(purchase);
   }
 
   // Update purchase status

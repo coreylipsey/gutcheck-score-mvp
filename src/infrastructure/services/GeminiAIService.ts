@@ -97,8 +97,8 @@ export class GeminiAIService implements IAIScoringService {
         projectedScore: 0,
         improvementPotential: 0
       },
-      comprehensiveAnalysis: data.comprehensiveAnalysis || 'Your comprehensive analysis will be generated based on your assessment results.',
-      nextSteps: data.nextSteps || 'Recommended next steps will be provided based on your profile.'
+      comprehensiveAnalysis: data.comprehensiveAnalysis,
+      nextSteps: data.nextSteps
     };
   }
 
@@ -296,9 +296,12 @@ Provide 3-4 specific, actionable next steps in bullet points. Include resources,
         };
       }
 
-      // Fallback: extract score from text
+      // Extract score from text
       const scoreMatch = response.match(/score["\s:]*(\d+)/i);
-      const score = scoreMatch ? parseInt(scoreMatch[1]) : 3;
+      if (!scoreMatch) {
+        throw new Error('Unable to extract score from AI response. Please ensure AI scoring is working properly.');
+      }
+      const score = parseInt(scoreMatch[1]);
       
       return {
         score: Math.max(1, Math.min(5, score)),
@@ -306,10 +309,7 @@ Provide 3-4 specific, actionable next steps in bullet points. Include resources,
       };
     } catch (error) {
       console.error('Error parsing Gemini response:', error);
-      return {
-        score: 3,
-        explanation: 'AI evaluation completed with fallback score'
-      };
+      throw new Error('AI scoring failed. Please ensure AI scoring is working properly.');
     }
   }
 } 

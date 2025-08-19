@@ -1,5 +1,6 @@
 import { IAuthRepository, AuthUser } from '../../domain/repositories/IAuthRepository';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
+import { User } from '../../domain/entities/User';
 
 export class AuthenticateUser {
   constructor(
@@ -13,13 +14,17 @@ export class AuthenticateUser {
     // Create user in Firestore if they don't exist
     const existingUser = await this.userRepository.findById(authUser.uid);
     if (!existingUser) {
-      await this.userRepository.create({
+      const user: User & { id: string } = {
+        userId: authUser.uid,
         id: authUser.uid,
-        email: authUser.email || '',
-        name: authUser.displayName || '',
+        email: authUser.email || undefined,
         createdAt: new Date(),
-        assessmentHistory: []
-      });
+        assessments: [],
+        profile: {
+          name: authUser.displayName || undefined
+        }
+      };
+      await this.userRepository.create(user);
     }
     
     return authUser;
@@ -31,13 +36,17 @@ export class AuthenticateUser {
     // Ensure user exists in Firestore
     const existingUser = await this.userRepository.findById(authUser.uid);
     if (!existingUser) {
-      await this.userRepository.create({
+      const user: User & { id: string } = {
+        userId: authUser.uid,
         id: authUser.uid,
-        email: authUser.email || '',
-        name: authUser.displayName || '',
+        email: authUser.email || undefined,
         createdAt: new Date(),
-        assessmentHistory: []
-      });
+        assessments: [],
+        profile: {
+          name: authUser.displayName || undefined
+        }
+      };
+      await this.userRepository.create(user);
     }
     
     return authUser;
@@ -49,13 +58,17 @@ export class AuthenticateUser {
     // Ensure user exists in Firestore
     const existingUser = await this.userRepository.findById(authUser.uid);
     if (!existingUser) {
-      await this.userRepository.create({
+      const user: User & { id: string } = {
+        userId: authUser.uid,
         id: authUser.uid,
-        email: authUser.email || '',
-        name: authUser.displayName || '',
+        email: authUser.email || undefined,
         createdAt: new Date(),
-        assessmentHistory: []
-      });
+        assessments: [],
+        profile: {
+          name: authUser.displayName || undefined
+        }
+      };
+      await this.userRepository.create(user);
     }
     
     return authUser;

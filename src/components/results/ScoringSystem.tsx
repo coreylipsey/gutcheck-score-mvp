@@ -65,8 +65,8 @@ export function getCategorySpecificDescriptor(
   const thresholds = CATEGORY_THRESHOLDS[categoryName];
   
   if (!thresholds) {
-    // Fallback to generic thresholds if category not found
-    return getGenericDescriptor(percentage);
+    // Show error if category not found
+    throw new Error(`Category thresholds not found for: ${categoryName}. Please ensure scoring configuration is complete.`);
   }
   
   let label: ScoreDescriptor['label'];

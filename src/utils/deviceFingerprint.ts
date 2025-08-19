@@ -17,15 +17,10 @@ export function generateDeviceFingerprint(): string {
   const fingerprint = [
     navigator.userAgent,
     navigator.language,
+    (navigator as any).deviceMemory || 'unknown',
     screen.width + 'x' + screen.height,
-    screen.colorDepth,
     new Date().getTimezoneOffset(),
-    navigator.hardwareConcurrency || 'unknown',
-    navigator.deviceMemory || 'unknown',
-    navigator.platform,
-    navigator.cookieEnabled ? 'cookies-enabled' : 'cookies-disabled',
-    navigator.doNotTrack || 'no-dnt',
-    'webgl-' + (ctx.getParameter(ctx.VENDOR) + ctx.getParameter(ctx.RENDERER)).slice(0, 50)
+    'webgl-' + ((ctx as any).getParameter((ctx as any).VENDOR) + (ctx as any).getParameter((ctx as any).RENDERER)).slice(0, 50)
   ].join('|');
 
   // Simple hash function

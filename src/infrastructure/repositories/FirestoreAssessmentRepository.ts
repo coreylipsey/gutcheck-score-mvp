@@ -1,12 +1,15 @@
 import { 
   collection, 
-  addDoc, 
+  doc, 
+  getDoc, 
   getDocs, 
   query, 
   where, 
   orderBy, 
-  limit,
-  serverTimestamp 
+  limit, 
+  addDoc, 
+  updateDoc,
+  Timestamp 
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { IAssessmentRepository } from '../../domain/repositories/IAssessmentRepository';
@@ -18,8 +21,8 @@ export class FirestoreAssessmentRepository implements IAssessmentRepository {
       sessionId: session.sessionId,
       responses: session.responses,
       scores: session.scores,
-      createdAt: serverTimestamp(),
-      completedAt: serverTimestamp(),
+      createdAt: Timestamp.now(),
+      completedAt: Timestamp.now(),
       isAnonymous: !session.userId,
     };
 
@@ -55,6 +58,8 @@ export class FirestoreAssessmentRepository implements IAssessmentRepository {
       completedAt: data.completedAt?.toDate(),
       responses: data.responses || [],
       scores: data.scores,
+      starRating: data.starRating || 1,
+      categoryBreakdown: data.categoryBreakdown || {},
       geminiFeedback: data.geminiFeedback,
       outcomeTrackingReady: data.outcomeTrackingReady || false,
       consentForML: data.consentForML || false,
@@ -78,6 +83,8 @@ export class FirestoreAssessmentRepository implements IAssessmentRepository {
         completedAt: data.completedAt?.toDate(),
         responses: data.responses || [],
         scores: data.scores,
+        starRating: data.starRating || 1,
+        categoryBreakdown: data.categoryBreakdown || {},
         geminiFeedback: data.geminiFeedback,
         outcomeTrackingReady: data.outcomeTrackingReady || false,
         consentForML: data.consentForML || false,
@@ -101,7 +108,7 @@ export class FirestoreAssessmentRepository implements IAssessmentRepository {
     await updateDoc(doc.ref, {
       userId: userId,
       isAnonymous: false,
-      claimedAt: serverTimestamp(),
+      claimedAt: Timestamp.now(),
     });
   }
 
@@ -121,7 +128,7 @@ export class FirestoreAssessmentRepository implements IAssessmentRepository {
       response,
       aiScore,
       aiExplanation,
-      createdAt: serverTimestamp(),
+      createdAt: Timestamp.now(),
     };
 
     if (userId) {

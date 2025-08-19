@@ -10,12 +10,18 @@
 import {setGlobalOptions} from "firebase-functions";
 import {onRequest} from "firebase-functions/v2/https";
 import {onCall} from "firebase-functions/v2/https";
+import {onDocumentCreated} from "firebase-functions/v2/firestore";
+import {onSchedule} from "firebase-functions/v2/scheduler";
 import {defineString} from "firebase-functions/params";
 import Stripe from 'stripe';
 import * as admin from 'firebase-admin';
+import {MailchimpService, EmailData} from './services/MailchimpService';
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
+
+// Initialize Mailchimp service
+const mailchimpService = new MailchimpService();
 
 // Define the Gemini API key parameter
 const geminiApiKey = defineString("GEMINI_API_KEY");
@@ -81,7 +87,10 @@ function parseGeminiResponse(response: string): { score: number; explanation: st
 
     // Fallback: extract score from text
     const scoreMatch = response.match(/score["\s:]*(\d+)/i);
-    const score = scoreMatch ? parseInt(scoreMatch[1]) : 3;
+    if (!scoreMatch) {
+      throw new Error('Unable to extract score from AI response. Please ensure AI scoring is working properly.');
+    }
+    const score = parseInt(scoreMatch[1]);
     
     return {
       score: Math.max(1, Math.min(5, score)),
@@ -89,10 +98,7 @@ function parseGeminiResponse(response: string): { score: number; explanation: st
     };
   } catch (error) {
     console.error('Error parsing Gemini response:', error);
-    return {
-      score: 3,
-      explanation: 'AI evaluation completed with fallback score'
-    };
+    throw new Error('AI scoring failed. Please ensure AI scoring is working properly.');
   }
 }
 
@@ -1199,3 +1205,263 @@ export const claimScore = onCall(async (request) => {
     throw new Error('Failed to claim score');
   }
 });
+
+// Email Trigger Functions
+
+/**
+ * Send results email when assessment is completed
+ */
+export const sendResultsEmail = onDocumentCreated(
+  'assessment_results/{docId}',
+  async (event) => {
+    try {
+      const assessmentData = event.data?.data();
+      if (!assessmentData) {
+        console.error('No assessment data found');
+        return;
+      }
+
+      console.log('Assessment completed, preparing results email:', assessmentData.sessionId);
+
+      // Get user data if available
+      let userData = null;
+      if (assessmentData.userId) {
+        const userDoc = await admin.firestore()
+          .collection('users')
+          .doc(assessmentData.userId)
+          .get();
+        userData = userDoc.data();
+      }
+
+      // Prepare email data
+      const emailData: EmailData = {
+        email: assessmentData.email || userData?.email,
+        firstName: userData?.firstName || assessmentData.firstName || 'Entrepreneur',
+        lastName: userData?.lastName || assessmentData.lastName || '',
+        gutcheckScore: assessmentData.overallScore,
+        starRating: calculateStarRating(assessmentData.overallScore),
+        starLabel: getStarLabel(assessmentData.overallScore),
+        topStrength: getTopStrength(assessmentData.scores),
+        areaForGrowth: getAreaForGrowth(assessmentData.scores),
+        scoutAnalysis: assessmentData.geminiFeedback?.recommendation || '',
+        assessmentId: assessmentData.sessionId,
+        userId: assessmentData.userId || ''
+      };
+
+      // Send results email
+      const campaignId = await mailchimpService.sendResultsEmail(emailData);
+
+      // Log the email event
+      await admin.firestore().collection('email_events').add({
+        userId: assessmentData.userId || '',
+        emailType: 'results',
+        eventType: 'sent',
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        assessmentId: assessmentData.sessionId,
+        mailchimpMessageId: campaignId
+      });
+
+      console.log(`Results email sent successfully for assessment ${assessmentData.sessionId}`);
+
+    } catch (error) {
+      console.error('Error sending results email:', error);
+      // Don't throw - we don't want to break the assessment flow
+    }
+  }
+);
+
+/**
+ * Send follow-up sequence emails (scheduled)
+ */
+export const sendFollowUpSequence = onSchedule({
+  schedule: '0 10 * * *', // Daily at 10 AM
+  timeZone: 'America/New_York'
+}, async (event) => {
+  try {
+    console.log('Running follow-up sequence scheduler');
+
+    // Get users who completed assessment 3 days ago
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+    const assessments = await admin.firestore()
+      .collection('assessment_results')
+      .where('createdAt', '>=', threeDaysAgo)
+      .where('createdAt', '<', new Date(threeDaysAgo.getTime() + 24 * 60 * 60 * 1000))
+      .get();
+
+    for (const doc of assessments.docs) {
+      const assessmentData = doc.data();
+      
+      // Check if follow-up 1 was already sent
+      const existingEmail = await admin.firestore()
+        .collection('email_events')
+        .where('assessmentId', '==', assessmentData.sessionId)
+        .where('emailType', '==', 'followup_1')
+        .get();
+
+      if (!existingEmail.empty) {
+        continue; // Already sent
+      }
+
+      // Get user data
+      let userData = null;
+      if (assessmentData.userId) {
+        const userDoc = await admin.firestore()
+          .collection('users')
+          .doc(assessmentData.userId)
+          .get();
+        userData = userDoc.data();
+      }
+
+      // Prepare email data for follow-up 1
+      const emailData: EmailData = {
+        email: assessmentData.email || userData?.email,
+        firstName: userData?.firstName || assessmentData.firstName || 'Entrepreneur',
+        lastName: userData?.lastName || assessmentData.lastName || '',
+        gutcheckScore: assessmentData.overallScore,
+        starRating: calculateStarRating(assessmentData.overallScore),
+        starLabel: getStarLabel(assessmentData.overallScore),
+        topStrength: getTopStrength(assessmentData.scores),
+        areaForGrowth: getAreaForGrowth(assessmentData.scores),
+        scoutAnalysis: assessmentData.geminiFeedback?.recommendation || '',
+        assessmentId: assessmentData.sessionId,
+        userId: assessmentData.userId || ''
+      };
+
+      // Send follow-up email
+      await mailchimpService.sendFollowUpEmail(emailData, 1);
+
+      console.log(`Follow-up 1 sent for assessment ${assessmentData.sessionId}`);
+
+    }
+
+  } catch (error) {
+    console.error('Error in follow-up sequence scheduler:', error);
+  }
+});
+
+/**
+ * Mailchimp webhook handler
+ */
+export const mailchimpWebhook = onRequest(async (req, res) => {
+  try {
+    // Verify webhook signature (implement for production)
+    // const signature = req.headers['x-mailchimp-signature'];
+    
+    const eventData = req.body;
+    console.log('Mailchimp webhook received:', eventData);
+
+    // Handle different webhook events
+    switch (eventData.type) {
+      case 'subscribe':
+      case 'unsubscribe':
+      case 'profile':
+        // Handle subscription changes
+        break;
+      
+      case 'campaign':
+        // Handle campaign events (sent, opened, clicked)
+        await mailchimpService.handleWebhookEvent(eventData);
+        break;
+      
+      default:
+        console.log(`Unhandled webhook event type: ${eventData.type}`);
+    }
+
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('Error processing Mailchimp webhook:', error);
+    res.status(500).send('Error processing webhook');
+  }
+});
+
+/**
+ * Test Mailchimp connection
+ */
+export const testMailchimpConnection = onCall(async (request) => {
+  try {
+    const isConnected = await mailchimpService.ping();
+    const audienceInfo = await mailchimpService.getAudienceInfo();
+    
+    return {
+      success: true,
+      connected: isConnected,
+      audience: {
+        id: audienceInfo.id,
+        name: audienceInfo.name,
+        member_count: audienceInfo.stats.member_count
+      }
+    };
+  } catch (error) {
+    console.error('Error testing Mailchimp connection:', error);
+    return {
+      success: false,
+      error: (error as Error).message
+    };
+  }
+});
+
+// Helper functions
+
+/**
+ * Calculate star rating based on score (35-100 scale)
+ */
+function calculateStarRating(score: number): number {
+  // Map overall score to 1-5 stars using Gutcheck thresholds
+  if (score >= 90) return 5; // Transformative Trajectory
+  if (score >= 80) return 4; // Established Signals
+  if (score >= 65) return 3; // Emerging Traction
+  if (score >= 50) return 2; // Forming Potential
+  return 1; // Early Spark (35-49)
+}
+
+/**
+ * Get star label based on score (35-100 scale)
+ */
+function getStarLabel(score: number): string {
+  // Labels aligned with UI thresholds in results report
+  if (score >= 90) return 'Transformative Trajectory';
+  if (score >= 80) return 'Established Signals';
+  if (score >= 65) return 'Emerging Traction';
+  if (score >= 50) return 'Forming Potential';
+  return 'Early Spark';
+}
+
+/**
+ * Get top strength category
+ */
+function getTopStrength(scores: any): string {
+  const categories = [
+    { name: 'Personal Background', score: scores.personalBackground },
+    { name: 'Entrepreneurial Skills', score: scores.entrepreneurialSkills },
+    { name: 'Resources', score: scores.resources },
+    { name: 'Behavioral Metrics', score: scores.behavioralMetrics },
+    { name: 'Growth & Vision', score: scores.growthVision }
+  ];
+
+  const topCategory = categories.reduce((prev, current) => 
+    (prev.score > current.score) ? prev : current
+  );
+
+  return topCategory.name;
+}
+
+/**
+ * Get area for growth
+ */
+function getAreaForGrowth(scores: any): string {
+  const categories = [
+    { name: 'Personal Background', score: scores.personalBackground },
+    { name: 'Entrepreneurial Skills', score: scores.entrepreneurialSkills },
+    { name: 'Resources', score: scores.resources },
+    { name: 'Behavioral Metrics', score: scores.behavioralMetrics },
+    { name: 'Growth & Vision', score: scores.growthVision }
+  ];
+
+  const lowestCategory = categories.reduce((prev, current) => 
+    (prev.score < current.score) ? prev : current
+  );
+
+  return lowestCategory.name;
+}

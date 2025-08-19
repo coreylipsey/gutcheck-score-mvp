@@ -236,7 +236,7 @@ function DashboardContent() {
             <MonthlyInsights 
               lastAssessment={assessmentHistory[0]}
               canTakeAssessment={assessmentLimits.canTakeAssessment}
-              daysUntilNextAssessment={assessmentLimits.daysUntilNextAssessment || undefined}
+              daysUntilNextAssessment={assessmentLimits.daysUntilNextAssessment || 0}
             />
           </div>
         </div>

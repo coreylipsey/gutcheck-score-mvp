@@ -81,7 +81,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
         return threshold;
       }
     }
-    return starThresholds[0]; // fallback
+    return null; // No threshold found
   };
 
   const getNextStarInfo = (score: number) => {
@@ -99,8 +99,8 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
   // Calculate progress to next star (proportional meter)
   const getProgressToNextStar = () => {
     if (!nextStar) return 100; // Already at max
-    const currentRange = nextStar.min - currentStar.min;
-    const currentProgress = overallScore - currentStar.min;
+    const currentRange = nextStar.min - (currentStar?.min || 0);
+    const currentProgress = overallScore - (currentStar?.min || 0);
     return Math.min((currentProgress / currentRange) * 100, 100);
   };
 
@@ -129,11 +129,16 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
       <div className="flex flex-col lg:flex-row items-center justify-center gap-12">
         {/* FICO-Style Speedometer - REPLACED THE CIRCULAR WHEEL */}
         <div className="flex-shrink-0">
-          <FicoStyleGauge 
+          <FicoStyleGauge
             score={overallScore}
-            maxScore={maxScore}
-            minScore={minScore}
-            currentTier={currentStar}
+            currentTier={currentStar || {
+              stars: 1,
+              name: 'Developing',
+              creditLabel: 'Limited',
+              color: '#EF4444',
+              percentile: '0-20%'
+            }}
+            maxScore={100}
             starTiers={starThresholds}
           />
         </div>
@@ -145,7 +150,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 cursor-pointer hover:shadow-xl transition-all duration-300 relative"
             onMouseEnter={() => setShowStarDefinitions(true)}
             onMouseLeave={() => setShowStarDefinitions(false)}
-            aria-label={`${currentStar.stars} out of 5 stars: ${currentStar.label}`}
+            aria-label={`${currentStar?.stars || 0} out of 5 stars: ${currentStar?.label || 'N/A'}`}
           >
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 rounded-full flex items-center justify-center"
@@ -160,26 +165,28 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             {/* Star Rating Display */}
             <div className="text-center space-y-3">
               <div className="flex items-center justify-center space-x-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`w-5 h-5 transition-all duration-300 ${
-                      star <= currentStar.stars 
-                        ? 'fill-current text-yellow-400' 
-                        : 'text-gray-300'
+                {starThresholds.map((star, index) => (
+                  <div
+                    key={index}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+                      currentStar?.stars && currentStar.stars >= star.stars
+                        ? 'bg-yellow-400 text-yellow-900 shadow-lg'
+                        : 'bg-gray-200 text-gray-400'
                     }`}
-                  />
+                  >
+                    ★
+                  </div>
                 ))}
               </div>
               <p className="font-semibold text-lg" style={{ color: '#0A1F44' }}>
-                {currentStar.label}
+                {currentStar?.label || 'N/A'}
               </p>
               <div className="inline-block px-4 py-2 rounded-full text-lg font-bold text-white shadow-sm"
-                   style={{ backgroundColor: currentStar.color }}>
-                {currentStar.creditLabel}
+                   style={{ backgroundColor: currentStar?.color || '#FFC700' }}>
+                {currentStar?.creditLabel || 'N/A'}
               </div>
               <p className="text-sm text-gray-600">
-                Score: {currentStar.min}-{currentStar.max}
+                Score: {currentStar?.min || 0}-{currentStar?.max || 0}
               </p>
             </div>
 

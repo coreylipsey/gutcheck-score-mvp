@@ -7,14 +7,14 @@ import { FirestoreUser } from '../../types/firestore';
 export class FirestoreUserRepository implements IUserRepository {
   async create(userData: Omit<User, 'id'> & { id: string }): Promise<void> {
     const userRef = doc(db, 'users', userData.id);
-    const firestoreUser: FirestoreUser = {
-      email: userData.email,
-      displayName: userData.name,
+    const user: FirestoreUser = {
+      email: userData.email || '',
+      displayName: userData.profile?.name || '',
       createdAt: userData.createdAt,
-      assessmentCount: userData.assessmentHistory.length
+      assessmentCount: userData.assessments.length
     };
     
-    await setDoc(userRef, firestoreUser);
+    await setDoc(userRef, user);
   }
 
   async findById(userId: string): Promise<User | null> {
@@ -27,11 +27,11 @@ export class FirestoreUserRepository implements IUserRepository {
     
     const data = userDoc.data() as FirestoreUser;
     return {
-      id: userId,
+      userId: userId,
       email: data.email,
-      name: data.displayName || '',
-      createdAt: data.createdAt,
-      assessmentHistory: [] // Would need to load separately if needed
+      createdAt: data.createdAt instanceof Date ? data.createdAt : data.createdAt.toDate(),
+      assessments: [], // Would need to load separately if needed
+      profile: data.displayName ? { name: data.displayName } : undefined
     };
   }
 

@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { AssessmentHistory } from '@/app/dashboard/page';
+import { AssessmentHistoryDTO } from '@/app/services/DashboardService';
 
 interface MonthlyInsightsProps {
-  lastAssessment?: AssessmentHistory;
+  lastAssessment: AssessmentHistoryDTO | null;
   canTakeAssessment: boolean;
-  daysUntilNextAssessment?: number;
+  daysUntilNextAssessment: number;
 }
 
 export function MonthlyInsights({ lastAssessment, canTakeAssessment, daysUntilNextAssessment }: MonthlyInsightsProps) {
@@ -23,12 +23,13 @@ export function MonthlyInsights({ lastAssessment, canTakeAssessment, daysUntilNe
       };
     }
 
-    // Use AI-generated feedback if available, otherwise fall back to static insights
+    // Use AI-generated feedback if available, otherwise show error
     if (lastAssessment.geminiFeedback) {
       const feedback = lastAssessment.geminiFeedback;
       
       // Use the growth opportunity summary as the main message
-      const message = feedback.growthOpportunity?.summary || feedback.feedback || "Your personalized insights are ready.";
+      const message = feedback.growthOpportunity?.summary || feedback.feedback || 
+        "AI feedback is missing. Please ensure AI feedback was generated properly.";
       
       // Use the specific weaknesses as actions, or parse next steps
       let actions: string[] = [];
@@ -36,25 +37,22 @@ export function MonthlyInsights({ lastAssessment, canTakeAssessment, daysUntilNe
       if (feedback.growthOpportunity?.specificWeaknesses) {
         actions = feedback.growthOpportunity.specificWeaknesses.slice(0, 3);
       } else if (feedback.nextSteps) {
-        // Parse next steps text into bullet points
-        const steps = feedback.nextSteps.split('\n').filter(step => 
-          step.trim() && (step.includes('Mentorship:') || step.includes('Funding:') || step.includes('Learning:'))
-        );
-        actions = steps.slice(0, 3).map(step => {
-          if (step.includes('Mentorship:')) return step.replace('Mentorship:', '').trim();
-          if (step.includes('Funding:')) return step.replace('Funding:', '').trim();
-          if (step.includes('Learning:')) return step.replace('Learning:', '').trim();
-          return step.trim();
-        });
+        // Parse next steps if available
+        if (feedback.nextSteps) {
+          const steps = feedback.nextSteps.split('\n').filter((step: string) =>
+            step.trim().length > 0
+          );
+          
+          actions = steps.slice(0, 3).map((step: string) => {
+            // Remove bullet points and clean up
+            return step.replace(/^[-•*]\s*/, '').trim();
+          });
+        }
       }
       
-      // Fallback actions if no specific actions found
+      // Show error if no specific actions found
       if (actions.length === 0) {
-        actions = [
-          "Review your assessment results",
-          "Focus on your growth areas",
-          "Implement recommended strategies"
-        ];
+        actions = ["AI feedback is incomplete. Please ensure AI feedback was generated properly."];
       }
 
       return {
@@ -64,50 +62,16 @@ export function MonthlyInsights({ lastAssessment, canTakeAssessment, daysUntilNe
       };
     }
 
-    // Fallback to static insights based on score
-    const score = lastAssessment.overallScore;
-    
-    if (score >= 80) {
-      return {
-        title: "Excellent Performance! 🎉",
-        message: "You're demonstrating strong entrepreneurial readiness. Keep building on your strengths while addressing any remaining areas.",
-        actions: [
-          "Focus on scaling your business",
-          "Mentor other entrepreneurs",
-          "Consider advanced business strategies"
-        ]
-      };
-    } else if (score >= 60) {
-      return {
-        title: "Strong Foundation! 💪",
-        message: "You have a solid entrepreneurial foundation. Focus on the areas below to reach the next level.",
-        actions: [
-          "Strengthen financial literacy",
-          "Build your professional network",
-          "Develop strategic planning skills"
-        ]
-      };
-    } else if (score >= 40) {
-      return {
-        title: "Good Progress! 📈",
-        message: "You're making progress in your entrepreneurial journey. Here are key areas to focus on for improvement.",
-        actions: [
-          "Improve business fundamentals",
-          "Seek mentorship and guidance",
-          "Develop core entrepreneurial skills"
-        ]
-      };
-    } else {
-      return {
-        title: "Building Your Foundation 🏗️",
-        message: "Every successful entrepreneur starts somewhere. Focus on these fundamentals to build a strong foundation.",
-        actions: [
-          "Learn basic business concepts",
-          "Find a mentor or advisor",
-          "Start with small business projects"
-        ]
-      };
-    }
+    // Show error if no AI feedback available
+    return {
+      title: "AI Feedback Missing",
+      message: "AI feedback is missing. Please ensure AI feedback was generated properly for this assessment.",
+      actions: [
+        "Contact support to regenerate AI feedback",
+        "Take a new assessment to get fresh insights",
+        "Check your assessment completion status"
+      ]
+    };
   };
 
   const insights = getInsights();

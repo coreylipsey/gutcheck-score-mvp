@@ -1,10 +1,10 @@
 'use client';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { AssessmentHistory } from '@/app/dashboard/page';
+import { AssessmentHistoryDTO } from '@/app/services/DashboardService';
 
 interface ProgressGraphProps {
-  assessments: AssessmentHistory[];
+  assessments: AssessmentHistoryDTO[];
 }
 
 export function ProgressGraph({ assessments }: ProgressGraphProps) {

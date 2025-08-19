@@ -92,21 +92,29 @@ export class TokenDTOMapper {
     };
   }
 
-  static toTokenPackageDTO(package: {
+  static toTokenPackageDTO(tokenPackage: {
     id: string;
     name: string;
     tokens: number;
     price: number;
     savings?: number;
     popular?: boolean;
+    category: 'starter' | 'growth' | 'enterprise';
     features: string[];
     description: string;
   }): TokenPackageDTO {
     return {
-      ...package,
-      formattedTokens: package.tokens.toLocaleString(),
-      formattedPrice: `$${package.price}`,
-      formattedSavings: package.savings ? `$${package.savings}` : undefined
+      id: tokenPackage.id,
+      name: tokenPackage.name,
+      tokens: tokenPackage.tokens,
+      price: tokenPackage.price,
+      formattedTokens: tokenPackage.tokens.toLocaleString(),
+      formattedPrice: `$${tokenPackage.price}`,
+      formattedSavings: tokenPackage.savings ? `$${tokenPackage.savings}` : undefined,
+      savings: tokenPackage.savings,
+      popular: tokenPackage.popular,
+      features: tokenPackage.features,
+      description: tokenPackage.description,
     };
   }
 } 

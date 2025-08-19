@@ -60,8 +60,9 @@ export class CalculateQuestionScores {
               question.text
             );
             rawScore = result.score;
-          } catch {
-            rawScore = -1; // Error indicator
+          } catch (error) {
+            console.error(`AI scoring failed for question ${question.id}:`, error);
+            throw new Error(`AI scoring failed for question ${question.id}. Please ensure AI scoring is working properly.`);
           }
           break;
       }
@@ -122,9 +123,8 @@ export class CalculateQuestionScores {
       return scoringMap[optionIndex];
     }
     
-    // Fallback: reverse the current logic (last option = highest score)
-    const score = optionIndex + 1;
-    return Math.max(1, Math.min(5, score));
+    // Show error if scoring map not found
+    throw new Error(`Scoring map not found for question ${question.id}. Please ensure scoring configuration is complete.`);
   }
 
   private scoreLikert(response: number): number {

@@ -43,7 +43,7 @@ export class FirestoreTokenRepository implements ITokenRepository {
       userId: data.userId,
       balance: data.balance,
       lastUpdated: data.lastUpdated.toDate(),
-      lastPurchaseAt: data.lastPurchaseAt ? data.lastPurchaseAt.toDate() : null
+      lastPurchaseAt: data.lastPurchaseAt ? data.lastPurchaseAt.toDate() : undefined
     };
   }
 

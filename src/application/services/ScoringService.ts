@@ -193,9 +193,8 @@ export class ScoringService {
       return scoringMap[optionIndex];
     }
     
-    // Fallback: reverse the current logic (last option = highest score)
-    const score = optionIndex + 1;
-    return Math.max(1, Math.min(5, score));
+    // Show error if scoring map not found
+    throw new Error(`Scoring map not found for question ${question.id}. Please ensure scoring configuration is complete.`);
   }
 
   private scoreLikert(response: number): number {
@@ -227,8 +226,8 @@ export class ScoringService {
       );
       return result.score;
     } catch (error) {
-      console.error(`Question ${question.id}: AI scoring failed, returning fallback score 3`, error);
-      return 3; // Fallback score
+      console.error(`Question ${question.id}: AI scoring failed`, error);
+      throw new Error(`AI scoring failed for question ${question.id}. Please ensure AI scoring is working properly.`);
     }
   }
 

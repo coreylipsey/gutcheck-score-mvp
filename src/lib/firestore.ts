@@ -154,7 +154,7 @@ export const getUser = async (userId: string): Promise<FirestoreUser | null> => 
   if (querySnapshot.empty) return null;
   
   const doc = querySnapshot.docs[0];
-  return { id: doc.id, ...doc.data() } as FirestoreUser;
+  return { id: doc.id, ...doc.data() } as unknown as FirestoreUser;
 };
 
 export const updateUserAssessmentCount = async (userId: string, newCount: number): Promise<void> => {

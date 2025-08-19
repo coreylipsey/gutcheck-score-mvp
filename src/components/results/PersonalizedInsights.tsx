@@ -19,6 +19,22 @@ const getPerformanceLevel = (score: number, max: number) => {
 };
 
 export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps) {
+  // Check if AI feedback is available
+  if (!sessionData.geminiFeedback) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl font-bold" style={{ color: '#0A1F44' }}>
+            AI Feedback Not Available
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            AI feedback is missing. Please ensure AI feedback was generated properly for this assessment.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const categories = [
     { name: "Personal Foundation", score: sessionData.scores.personalBackground, max: 20 },
     { name: "Entrepreneurial Skills", score: sessionData.scores.entrepreneurialSkills, max: 25 },
@@ -43,37 +59,22 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
   const topStrengthPerformance = getPerformanceLevel(topStrength.score, topStrength.max);
   const focusAreaPerformance = getPerformanceLevel(focusArea.score, focusArea.max);
 
-  // Use AI-generated data from sessionData or fallback to calculated values
-  const competitiveAdvantage = sessionData.geminiFeedback?.competitiveAdvantage || {
-    category: topStrength.name,
-    score: `${Math.round(topStrength.score)}/${topStrength.max}`,
-    summary: "Your execution capabilities show strong potential for growth.",
-    specificStrengths: [
-      "Business experience (previous attempts show learning mindset)",
-      "Network connections (leveraged support systems effectively)",
-      "Learning commitment (regular professional development activities)",
-      "Adaptability (successfully navigated business challenges)"
-    ]
-  };
+  // Use AI-generated data from sessionData or show error if missing
+  const competitiveAdvantage = sessionData.geminiFeedback?.competitiveAdvantage;
+  if (!competitiveAdvantage) {
+    throw new Error('Competitive advantage data is missing. Please ensure AI feedback was generated properly.');
+  }
 
-  const growthOpportunity = sessionData.geminiFeedback?.growthOpportunity || {
-    category: focusArea.name,
-    score: `${Math.round(focusArea.score)}/${focusArea.max}`,
-    summary: "There are opportunities to strengthen your entrepreneurial foundation.",
-    specificWeaknesses: [
-      "Goal tracking frequency (currently 'occasionally' vs weekly)",
-      "Time allocation (varies without consistent structure)",
-      "Planning processes (informal vs documented approach)",
-      "Strategic execution (reactive vs proactive planning)"
-    ]
-  };
+  const growthOpportunity = sessionData.geminiFeedback?.growthOpportunity;
+  if (!growthOpportunity) {
+    throw new Error('Growth opportunity data is missing. Please ensure AI feedback was generated properly.');
+  }
 
-  // Score projection from AI analysis or fallback
-  const scoreProjection = sessionData.geminiFeedback?.scoreProjection || {
-    currentScore: Math.round(sessionData.scores.overallScore),
-    projectedScore: Math.round(sessionData.scores.overallScore) + 3,
-    improvementPotential: 3
-  };
+  // Score projection from AI analysis - show error if missing
+  const scoreProjection = sessionData.geminiFeedback?.scoreProjection;
+  if (!scoreProjection) {
+    throw new Error('Score projection data is missing. Please ensure AI feedback was generated properly.');
+  }
 
   return (
     <div className="space-y-8">
@@ -200,11 +201,8 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
         
         <div className="space-y-4 text-gray-700 leading-relaxed">
           <p>
-            {sessionData.geminiFeedback?.comprehensiveAnalysis ||
-            `Your Gutcheck Score of ${Math.round(sessionData.scores.overallScore)}/100 places you in the ${sessionData.starRating === 1 ? 'Early Spark' :
-             sessionData.starRating === 2 ? 'Forming Potential' :
-             sessionData.starRating === 3 ? 'Emerging Traction' :
-             sessionData.starRating === 4 ? 'Established Signals' : 'Transformative Trajectory'} category, indicating strong potential for growth. Your assessment reveals a balanced entrepreneurial profile with clear strengths and growth areas. The AI analysis suggests focusing on strategic development while leveraging your existing capabilities.`}
+            {sessionData.geminiFeedback?.comprehensiveAnalysis || 
+             "Comprehensive analysis is missing. Please ensure AI feedback was generated properly."}
           </p>
         </div>
       </div>

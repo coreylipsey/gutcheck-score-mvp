@@ -5,23 +5,18 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-const loginSchema = z.object({
+const signUpSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-const registerSchema = z.object({
+const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string(),
-  displayName: z.string().min(2, 'Name must be at least 2 characters').optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
+  password: z.string().min(1, 'Password is required'),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
-type RegisterFormData = z.infer<typeof registerSchema>;
+type RegisterFormData = z.infer<typeof signUpSchema>;
 
 interface AuthFormProps {
   mode: 'login' | 'register';
@@ -35,7 +30,7 @@ interface AuthFormProps {
 
 export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoogleSignIn, loading = false, error }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
@@ -43,7 +38,7 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
     formState: { errors },
     reset,
   } = useForm<LoginFormData | RegisterFormData>({
-    resolver: zodResolver(mode === 'login' ? loginSchema : registerSchema),
+    resolver: zodResolver(mode === 'login' ? loginSchema : signUpSchema),
   });
 
   const handleFormSubmit = async (data: LoginFormData | RegisterFormData) => {
@@ -130,24 +125,6 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
             </div>
 
             <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-              {mode === 'register' && (
-                <div className="space-y-2">
-                  <label htmlFor="displayName" className="block text-sm font-semibold text-[#0A1F44]">
-                    Full Name
-                  </label>
-                  <input
-                    {...register('displayName')}
-                    type="text"
-                    id="displayName"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-[#147AFF] focus:border-transparent transition-all"
-                    placeholder="Enter your full name"
-                  />
-                  {errors.displayName && (
-                    <p className="text-sm text-red-600">{errors.displayName.message}</p>
-                  )}
-                </div>
-              )}
-
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-semibold text-[#0A1F44]">
                   Email Address
@@ -164,84 +141,21 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
                 )}
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="block text-sm font-semibold text-[#0A1F44]">
-                    Password
-                  </label>
-                  {mode === 'login' && onForgotPassword && (
-                    <button
-                      type="button"
-                      onClick={onForgotPassword}
-                      className="text-sm text-[#147AFF] hover:text-[#147AFF]/80 font-semibold"
-                    >
-                      Forgot password?
-                    </button>
-                  )}
-                </div>
-                <div className="relative">
-                  <input
-                    {...register('password')}
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-[#147AFF] focus:border-transparent transition-all pr-12"
-                    placeholder="Enter your password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    {showPassword ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  {...register('password')}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter your password"
+                />
                 {errors.password && (
                   <p className="text-sm text-red-600">{errors.password.message}</p>
                 )}
               </div>
-
-              {mode === 'register' && (
-                <div className="space-y-2">
-                  <label htmlFor="confirmPassword" className="block text-sm font-semibold text-[#0A1F44]">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      {...register('confirmPassword')}
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      id="confirmPassword"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-[#147AFF] focus:border-transparent transition-all pr-12"
-                      placeholder="Confirm your password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      {showConfirmPassword ? (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                        </svg>
-                      ) : (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && (
-                    <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
-                  )}
-                </div>
-              )}
 
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4">

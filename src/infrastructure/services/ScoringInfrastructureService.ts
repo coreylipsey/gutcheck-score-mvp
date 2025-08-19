@@ -28,12 +28,12 @@ export class ScoringInfrastructureService {
         const data = await scoringResponse.json();
         return data.score;
       } else {
-        console.error('AI scoring failed, using fallback');
-        return 3; // Fallback score
+        console.error('AI scoring failed');
+        throw new Error('AI scoring service returned an error. Please ensure AI scoring is working properly.');
       }
     } catch (error) {
       console.error('Error in AI scoring:', error);
-      return 3; // Fallback score
+      throw new Error('AI scoring failed. Please ensure AI scoring is working properly.');
     }
   }
 }

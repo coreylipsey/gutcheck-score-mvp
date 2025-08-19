@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Gutcheck Game Plan</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #0A1F44;
+            background-color: #f8fafc;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0A1F44 0%, #147AFF 50%, #19C2A0 100%);
+            color: white;
+            padding: 32px 24px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><g fill="white" fill-opacity="0.1"><circle cx="5" cy="5" r="1"/></g></svg>');
+            opacity: 0.3;
+        }
+        
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .logo svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+        
+        .brand-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .brand-tagline {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 16px;
+        }
+        
+        /* Content */
+        .content {
+            padding: 32px 24px;
+        }
+        
+        .greeting {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .greeting h1 {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #0A1F44;
+        }
+        
+        .greeting p {
+            font-size: 16px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+        
+        .score-reminder {
+            background: linear-gradient(135deg, rgba(20, 122, 255, 0.05) 0%, rgba(25, 194, 160, 0.05) 100%);
+            border: 1px solid #147AFF;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .score-reminder h2 {
+            font-size: 18px;
+            color: #0A1F44;
+            margin-bottom: 8px;
+        }
+        
+        .score-reminder .score {
+            font-size: 32px;
+            font-weight: bold;
+            color: #147AFF;
+            margin-bottom: 8px;
+        }
+        
+        .score-reminder .strength {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        /* Action Plan */
+        .action-plan {
+            background: linear-gradient(135deg, #f0f9ff 0%, #f0fdf4 100%);
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .action-plan h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #0A1F44;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .action-plan ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .action-plan li {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(186, 230, 253, 0.3);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .action-plan li:last-child {
+            border-bottom: none;
+        }
+        
+        .action-plan .checkmark {
+            width: 20px;
+            height: 20px;
+            background: #19C2A0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .action-plan .checkmark svg {
+            width: 12px;
+            height: 12px;
+            fill: white;
+        }
+        
+        .action-plan .text {
+            flex: 1;
+        }
+        
+        .action-plan .text h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0A1F44;
+            margin-bottom: 4px;
+        }
+        
+        .action-plan .text p {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, #147AFF 0%, #19C2A0 100%);
+            color: white;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(20, 122, 255, 0.3);
+            transition: transform 0.2s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Quote Section */
+        .quote-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fef2f2 100%);
+            border: 1px solid #fbbf24;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        
+        .quote-section blockquote {
+            font-size: 18px;
+            font-style: italic;
+            color: #92400e;
+            margin-bottom: 12px;
+        }
+        
+        .quote-section cite {
+            font-size: 14px;
+            color: #a16207;
+            font-style: normal;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #f8fafc;
+            padding: 24px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .footer p {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .footer-links a {
+            color: #147AFF;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .unsubscribe {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        
+        .unsubscribe a {
+            color: #94a3b8;
+            text-decoration: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 24px 16px;
+            }
+            
+            .content {
+                padding: 24px 16px;
+            }
+            
+            .greeting h1 {
+                font-size: 24px;
+            }
+            
+            .action-plan li {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                </svg>
+            </div>
+            <div class="brand-name">Gutcheck.AI</div>
+            <div class="brand-tagline">FICO Score for Entrepreneurs</div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Greeting -->
+            <div class="greeting">
+                <h1>Your Signal Readout, *|FNAME|*</h1>
+                <p>Here's what your *|TOP_STRENGTH|* signals tell us about your trajectory.</p>
+            </div>
+            
+            <!-- Score Reminder -->
+            <div class="score-reminder">
+                <h2>Your Current Score</h2>
+                <div class="score">*|GUTCHECK_SCORE|*</div>
+                <div class="strength">Strength: *|TOP_STRENGTH|*</div>
+            </div>
+            
+            <!-- Action Plan -->
+            <div class="action-plan">
+                <h2>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    Signal Analysis
+                </h2>
+                <ul>
+                    <li>
+                        <div class="checkmark">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                        <div class="text">
+                            <h3>Leverage your *|TOP_STRENGTH|* signals</h3>
+                            <p>Focus on opportunities that align with your strongest signals</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="checkmark">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                        <div class="text">
+                            <h3>Develop your *|AREA_GROWTH|* indicators</h3>
+                            <p>Spend 30 minutes daily strengthening this signal area</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="checkmark">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                        <div class="text">
+                            <h3>Track your signal progression</h3>
+                            <p>Document one signal improvement and one insight each day this week</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- CTA -->
+            <div class="cta-section">
+                <a href="https://gutcheck.ai/dashboard?assessment=*|ASSESSMENT_ID|*" class="cta-button">
+                    Access Your Full Analysis →
+                </a>
+            </div>
+            
+            <!-- Quote -->
+            <div class="quote-section">
+                <blockquote>
+                    "Your signals show strong foundation building. Focus on consistent execution patterns."
+                </blockquote>
+                <cite>— Signal Analysis</cite>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>Ready to level up your entrepreneurial journey?</p>
+            <div class="footer-links">
+                <a href="https://gutcheck.ai/dashboard">Dashboard</a>
+                <a href="https://gutcheck.ai/resources">Resources</a>
+                <a href="https://gutcheck.ai/support">Support</a>
+            </div>
+            <div class="unsubscribe">
+                <a href="https://gutcheck.ai/preferences?email=*|EMAIL|*">Manage Email Preferences</a> | 
+                <a href="https://gutcheck.ai/unsubscribe?email=*|EMAIL|*">Unsubscribe</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

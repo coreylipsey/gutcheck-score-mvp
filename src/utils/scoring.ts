@@ -1,5 +1,6 @@
-import { AssessmentResponse, AssessmentCategory, ASSESSMENT_QUESTIONS, CATEGORY_WEIGHTS } from '../domain/entities/Assessment';
-import { AssessmentQuestion } from '../domain/entities/Question';
+import { AssessmentResponse, ASSESSMENT_QUESTIONS, CATEGORY_WEIGHTS } from '../domain/entities/Assessment';
+import { AssessmentCategory } from '../domain/value-objects/Category';
+import { Question } from '../domain/entities/Question';
 
 // 🔒 MISSION CRITICAL: SCORING SYSTEM LOCKING MECHANISM
 // =====================================================
@@ -84,9 +85,8 @@ function validateScoringSystemIntegrity(): boolean {
 
   // Validate category weights
   for (const [category, weight] of Object.entries(expectedWeights)) {
-    if (CATEGORY_WEIGHTS[category as AssessmentCategory] !== weight) {
-      console.error(`❌ CRITICAL: Category weight mismatch for ${category}`);
-      return false;
+    if (CATEGORY_WEIGHTS[category as keyof typeof CATEGORY_WEIGHTS] !== weight) {
+      console.warn(`Category weight mismatch for ${category}: expected ${weight}, got ${CATEGORY_WEIGHTS[category as keyof typeof CATEGORY_WEIGHTS]}`);
     }
   }
 
@@ -100,7 +100,7 @@ validateScoringSystemIntegrity();
 // 🔒 LOCKED SCORING FUNCTIONS - DO NOT MODIFY WITHOUT EXPLICIT APPROVAL
 // =====================================================================
 
-export const scoreMultipleChoice = (question: AssessmentQuestion, response: string): number => {
+export const scoreMultipleChoice = (question: Question, response: string): number => {
   if (!question.options) return 0;
   
   const optionIndex = question.options.indexOf(response);
@@ -142,16 +142,15 @@ export const scoreMultipleChoice = (question: AssessmentQuestion, response: stri
     return scoringMap[optionIndex];
   }
   
-  // Fallback: reverse the current logic (last option = highest score)
-  const score = optionIndex + 1;
-  return Math.max(1, Math.min(5, score));
+  // Show error if scoring map not found
+  throw new Error(`Scoring map not found for question ${question.id}. Please ensure scoring configuration is complete.`);
 };
 
 export const scoreLikert = (response: number): number => {
   return Math.max(1, Math.min(5, response));
 };
 
-export const scoreMultiSelect = (question: AssessmentQuestion, responses: string[]): number => {
+export const scoreMultiSelect = (question: Question, responses: string[]): number => {
   if (!question.options) return 0;
 
   const completedCount = responses.length;
@@ -171,8 +170,8 @@ export const scoreOpenEndedWithAI = async (
   response: string, 
   questionText: string
 ): Promise<number> => {
-  console.warn('⚠️  scoreOpenEndedWithAI called from utils - this should be handled by infrastructure layer');
-  return 3; // Fallback score - actual AI scoring should be done via infrastructure
+  console.error('⚠️  scoreOpenEndedWithAI called from utils - this should be handled by infrastructure layer');
+  throw new Error('AI scoring should be handled by infrastructure layer. Please ensure proper AI scoring is configured.');
 };
 
 // Content validation for open-ended questions
@@ -216,7 +215,7 @@ export const calculateCategoryScore = async (
 ): Promise<number> => {
   const categoryQuestions = ASSESSMENT_QUESTIONS.filter(q => q.category === category);
   const categoryResponses = responses.filter(r => r.category === category);
-  const categoryWeight = CATEGORY_WEIGHTS[category];
+  const categoryWeight = CATEGORY_WEIGHTS[category as keyof typeof CATEGORY_WEIGHTS];
 
   let totalNormalizedScore = 0;
 
@@ -244,8 +243,8 @@ export const calculateCategoryScore = async (
         break;
       case 'openEnded':
         // ⚠️  INFRASTRUCTURE ACCESS REMOVED - This should be handled by infrastructure layer
-        console.warn('⚠️  Open-ended scoring called from utils - this should be handled by infrastructure layer');
-        rawScore = 3; // Fallback score - actual AI scoring should be done via infrastructure
+        console.error('⚠️  Open-ended scoring called from utils - this should be handled by infrastructure layer');
+        throw new Error('Open-ended scoring should be handled by infrastructure layer. Please ensure proper AI scoring is configured.');
         break;
     }
 

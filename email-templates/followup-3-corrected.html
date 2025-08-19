@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trajectory Development: Signal Analysis</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #0A1F44;
+            background-color: #f8fafc;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0A1F44 0%, #147AFF 50%, #19C2A0 100%);
+            color: white;
+            padding: 32px 24px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><g fill="white" fill-opacity="0.1"><circle cx="5" cy="5" r="1"/></g></svg>');
+            opacity: 0.3;
+        }
+        
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .logo svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+        
+        .brand-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .brand-tagline {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 16px;
+        }
+        
+        /* Content */
+        .content {
+            padding: 32px 24px;
+        }
+        
+        .greeting {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .greeting h1 {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #0A1F44;
+        }
+        
+        .greeting p {
+            font-size: 16px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+        
+        /* Featured Case Study */
+        .featured-performer {
+            background: linear-gradient(135deg, #fef3c7 0%, #fef2f2 100%);
+            border: 2px solid #fbbf24;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        
+        .performer-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #147AFF 0%, #19C2A0 100%);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 32px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .performer-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #0A1F44;
+            margin-bottom: 8px;
+        }
+        
+        .performer-title {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+        
+        .performer-score {
+            background: white;
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: inline-block;
+            font-weight: 600;
+            color: #147AFF;
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* Lessons Section */
+        .lessons-section {
+            background: linear-gradient(135deg, #f0f9ff 0%, #f0fdf4 100%);
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .lessons-section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #0A1F44;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .lesson-item {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #147AFF;
+        }
+        
+        .lesson-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .lesson-item h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0A1F44;
+            margin-bottom: 8px;
+        }
+        
+        .lesson-item p {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        /* Your Progress */
+        .your-progress {
+            background: linear-gradient(135deg, rgba(20, 122, 255, 0.05) 0%, rgba(25, 194, 160, 0.05) 100%);
+            border: 1px solid #147AFF;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .your-progress h2 {
+            font-size: 18px;
+            color: #0A1F44;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
+        .progress-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .progress-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .progress-card h3 {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .progress-card .score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #147AFF;
+        }
+        
+        .progress-card .label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, #147AFF 0%, #19C2A0 100%);
+            color: white;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(20, 122, 255, 0.3);
+            transition: transform 0.2s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Next Steps */
+        .next-steps {
+            background: linear-gradient(135deg, #f0fdf4 0%, #f0f9ff 100%);
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .next-steps h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #0A1F44;
+            margin-bottom: 16px;
+        }
+        
+        .next-steps ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .next-steps li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .next-steps .bullet {
+            width: 8px;
+            height: 8px;
+            background: #19C2A0;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .next-steps .text {
+            font-size: 14px;
+            color: #475569;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #f8fafc;
+            padding: 24px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .footer p {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .footer-links a {
+            color: #147AFF;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .unsubscribe {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        
+        .unsubscribe a {
+            color: #94a3b8;
+            text-decoration: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 24px 16px;
+            }
+            
+            .content {
+                padding: 24px 16px;
+            }
+            
+            .greeting h1 {
+                font-size: 24px;
+            }
+            
+            .progress-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                </svg>
+            </div>
+            <div class="brand-name">Gutcheck.AI</div>
+            <div class="brand-tagline">FICO Score for Entrepreneurs</div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Greeting -->
+            <div class="greeting">
+                <h1>Trajectory Development: Signal Analysis</h1>
+                <p>How entrepreneurs develop their signals over time</p>
+            </div>
+            
+            <!-- Featured Case Study -->
+            <div class="featured-performer">
+                <div class="performer-avatar">AR</div>
+                <div class="performer-name">Entrepreneur with similar signals</div>
+                <div class="performer-title">Similar *|TOP_STRENGTH|* signals</div>
+                <div class="performer-score">Signal Score: 4.8</div>
+            </div>
+            
+            <!-- Lessons Section -->
+            <div class="lessons-section">
+                <h2>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                    </svg>
+                    Signal Development Patterns
+                </h2>
+                <div class="lesson-item">
+                    <h3>Master your *|TOP_STRENGTH|* signals</h3>
+                    <p>"I focused on my strongest signals and used them to build confidence in other areas."</p>
+                </div>
+                <div class="lesson-item">
+                    <h3>Systematically develop *|AREA_GROWTH|* indicators</h3>
+                    <p>"I spent 30 minutes daily developing this signal area. Consistent efforts compound over time."</p>
+                </div>
+                <div class="lesson-item">
+                    <h3>Build signal consistency</h3>
+                    <p>"Focus on consistent signal development. Regular assessment helps track progress."</p>
+                </div>
+            </div>
+            
+            <!-- Your Progress -->
+            <div class="your-progress">
+                <h2>Your Signal Development</h2>
+                <div class="progress-comparison">
+                    <div class="progress-card">
+                        <h3>Your Signals</h3>
+                        <div class="score">*|GUTCHECK_SCORE|*</div>
+                        <div class="label">Current</div>
+                    </div>
+                    <div class="progress-card">
+                        <h3>Strong Signal Range</h3>
+                        <div class="score">4.5+</div>
+                        <div class="label">Average</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CTA -->
+            <div class="cta-section">
+                <a href="https://gutcheck.ai/dashboard?assessment=*|ASSESSMENT_ID|*" class="cta-button">
+                    Take Your Next Signal Assessment →
+                </a>
+            </div>
+            
+            <!-- Next Steps -->
+            <div class="next-steps">
+                <h2>Your Next Steps for Signal Development</h2>
+                <ul>
+                    <li>
+                        <div class="bullet"></div>
+                        <div class="text">Complete your next assessment to track signal progression</div>
+                    </li>
+                    <li>
+                        <div class="bullet"></div>
+                        <div class="text">Focus on one specific signal area for development each week</div>
+                    </li>
+                    <li>
+                        <div class="bullet"></div>
+                        <div class="text">Connect with our signal development community</div>
+                    </li>
+                    <li>
+                        <div class="bullet"></div>
+                        <div class="text">Set up regular assessments to maintain signal development</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>Ready to level up your entrepreneurial journey?</p>
+            <div class="footer-links">
+                <a href="https://gutcheck.ai/dashboard">Dashboard</a>
+                <a href="https://gutcheck.ai/resources">Resources</a>
+                <a href="https://gutcheck.ai/support">Support</a>
+            </div>
+            <div class="unsubscribe">
+                <a href="https://gutcheck.ai/preferences?email=*|EMAIL|*">Manage Email Preferences</a> | 
+                <a href="https://gutcheck.ai/unsubscribe?email=*|EMAIL|*">Unsubscribe</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
