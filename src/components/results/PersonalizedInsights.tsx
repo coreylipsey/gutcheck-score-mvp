@@ -128,7 +128,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
             </p>
             
             {/* Specific strengths list */}
-            {competitiveAdvantage?.specificStrengths ? (
+            {competitiveAdvantage?.specificStrengths && (
               <div className="bg-white/60 rounded-lg p-4">
                 <h4 className="font-semibold text-sm text-gray-800 mb-3 flex items-center">
                   <Lightbulb className="w-4 h-4 mr-2" />
@@ -174,7 +174,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
             </p>
             
             {/* Areas for improvement list */}
-            {growthOpportunity?.specificWeaknesses ? (
+            {growthOpportunity?.specificWeaknesses && (
               <div className="bg-white/60 rounded-lg p-4">
                 <h4 className="font-semibold text-sm text-gray-800 mb-3 flex items-center">
                   <Zap className="w-4 h-4 mr-2" />

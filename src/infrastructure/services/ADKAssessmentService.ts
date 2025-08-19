@@ -103,9 +103,23 @@ export class ADKAssessmentService implements IAIScoringService {
       // Return empty feedback - no fallback text
       return {
         feedback: '',
-        competitiveAdvantage: '',
-        growthOpportunity: '',
-        scoreProjection: '',
+        competitiveAdvantage: {
+          category: '',
+          score: '',
+          summary: '',
+          specificStrengths: []
+        },
+        growthOpportunity: {
+          category: '',
+          score: '',
+          summary: '',
+          specificWeaknesses: []
+        },
+        scoreProjection: {
+          currentScore: 0,
+          projectedScore: 0,
+          improvementPotential: 0
+        },
         comprehensiveAnalysis: '',
         nextSteps: ''
       };
