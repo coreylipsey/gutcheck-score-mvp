@@ -244,7 +244,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             
             <div className="space-y-3">
               <p className="text-gray-700 leading-relaxed">
-                {sessionData.geminiFeedback?.feedback ? (
+                {sessionData.geminiFeedback?.feedback && (
                   showFullInsights ? (
                     sessionData.geminiFeedback.feedback
                   ) : (
@@ -252,8 +252,6 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
                       {sessionData.geminiFeedback.feedback.split(' ').slice(0, 15).join(' ')}...
                     </>
                   )
-                ) : (
-                  "Strong foundation with growth opportunities ahead."
                 )}
               </p>
               

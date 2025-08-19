@@ -93,7 +93,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
         <div className="inline-flex items-center space-x-3 px-6 py-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-full border border-green-200">
           <TrendingUp className="w-5 h-5 text-green-600" />
           <span className="font-medium text-green-800">
-            Following these recommendations could increase your score to {scoreProjection?.projectedScore || 'a higher level'}
+            Following these recommendations could increase your score to {scoreProjection?.projectedScore}
           </span>
         </div>
       </div>
@@ -113,10 +113,10 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
               </h3>
               <div className="flex items-center space-x-2">
                 <p className="text-sm font-medium" style={{ color: '#19C2A0' }}>
-                  {competitiveAdvantage?.category || 'Entrepreneurial Skills'}
+                  {competitiveAdvantage?.category}
                 </p>
                 <span className="text-xs px-2 py-1 bg-green-200 text-green-800 rounded-full">
-                  {competitiveAdvantage?.score || 'Strong'}
+                  {competitiveAdvantage?.score}
                 </span>
               </div>
             </div>
@@ -124,7 +124,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
           
           <div className="flex-1">
             <p className="text-gray-700 leading-relaxed font-medium mb-4">
-              {competitiveAdvantage?.summary || 'Your competitive advantages will be identified based on your assessment scores.'}
+              {competitiveAdvantage?.summary}
             </p>
             
             {/* Specific strengths list */}
@@ -143,10 +143,6 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
                   ))}
                 </ul>
               </div>
-            ) : (
-              <div className="bg-white/60 rounded-lg p-4">
-                <p className="text-sm text-gray-600">Detailed competitive analysis will be available once feedback generation is complete.</p>
-              </div>
             )}
           </div>
         </div>
@@ -163,10 +159,10 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
               </h3>
               <div className="flex items-center space-x-2">
                 <p className="text-sm font-medium" style={{ color: '#FF6B00' }}>
-                  {growthOpportunity?.category || 'Resources'}
+                  {growthOpportunity?.category}
                 </p>
                 <span className="text-xs px-2 py-1 bg-orange-200 text-orange-800 rounded-full">
-                  {growthOpportunity?.score || 'Opportunity'}
+                  {growthOpportunity?.score}
                 </span>
               </div>
             </div>
@@ -174,7 +170,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
           
           <div className="flex-1">
             <p className="text-gray-700 leading-relaxed font-medium mb-4">
-              {growthOpportunity?.summary || 'Your growth opportunities will be determined from your assessment results.'}
+              {growthOpportunity?.summary}
             </p>
             
             {/* Areas for improvement list */}
@@ -193,10 +189,6 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
                   ))}
                 </ul>
               </div>
-            ) : (
-              <div className="bg-white/60 rounded-lg p-4">
-                <p className="text-sm text-gray-600">Detailed growth opportunities will be available once feedback generation is complete.</p>
-              </div>
             )}
           </div>
         </div>
@@ -214,16 +206,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
         </div>
         
         <div className="space-y-4 text-gray-700 leading-relaxed">
-          {comprehensiveAnalysis ? (
-            <p>{comprehensiveAnalysis}</p>
-          ) : (
-            <div className="text-red-600">
-              <p><strong>Debug Info:</strong></p>
-              <p>comprehensiveAnalysis is missing from sessionData.geminiFeedback</p>
-              <p>Available fields: {Object.keys(sessionData.geminiFeedback || {}).join(', ')}</p>
-              <p>Raw geminiFeedback: {JSON.stringify(sessionData.geminiFeedback, null, 2)}</p>
-            </div>
-          )}
+          {comprehensiveAnalysis && <p>{comprehensiveAnalysis}</p>}
         </div>
       </div>
     </div>

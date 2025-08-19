@@ -39,14 +39,14 @@ export class ADKAssessmentService implements IAIScoringService {
       const data = await apiResponse.json();
       return {
         score: data.score || 3,
-        explanation: data.explanation || 'ADK agent evaluation completed'
+        explanation: data.explanation || ''
       };
     } catch (error) {
       console.error('ADK scoring error:', error);
       // Fallback to default score
       return {
         score: 3,
-        explanation: 'ADK agent temporarily unavailable, using default score'
+        explanation: ''
       };
     }
   }
@@ -100,14 +100,14 @@ export class ADKAssessmentService implements IAIScoringService {
       };
     } catch (error) {
       console.error('ADK feedback generation error:', error);
-      // Return fallback feedback
+      // Return empty feedback - no fallback text
       return {
-        feedback: 'ADK agent temporarily unavailable',
-        competitiveAdvantage: 'Your competitive advantages will be identified based on your assessment scores.',
-        growthOpportunity: 'Your growth opportunities will be determined from your assessment results.',
-        scoreProjection: 'Score projection not available',
-        comprehensiveAnalysis: 'Comprehensive analysis is temporarily unavailable.',
-        nextSteps: 'Consider seeking mentorship, exploring funding options, and building your entrepreneurial fundamentals.'
+        feedback: '',
+        competitiveAdvantage: '',
+        growthOpportunity: '',
+        scoreProjection: '',
+        comprehensiveAnalysis: '',
+        nextSteps: ''
       };
     }
   }
