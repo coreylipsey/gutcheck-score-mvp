@@ -29,7 +29,7 @@ export function MonthlyInsights({ lastAssessment, canTakeAssessment, daysUntilNe
       
       // Use the growth opportunity summary as the main message
       const message = feedback.growthOpportunity?.summary || feedback.feedback || 
-        "AI feedback is missing. Please ensure AI feedback was generated properly.";
+        "Your AI feedback is being generated. Please check back in a few minutes for personalized insights.";
       
       // Use the specific weaknesses as actions, or parse next steps
       let actions: string[] = [];
@@ -52,11 +52,11 @@ export function MonthlyInsights({ lastAssessment, canTakeAssessment, daysUntilNe
       
       // Show error if no specific actions found
       if (actions.length === 0) {
-        actions = ["AI feedback is incomplete. Please ensure AI feedback was generated properly."];
+        actions = ["AI feedback is being generated. Please check back in a few minutes."];
       }
 
       return {
-        title: `Your Personalized Insights ${feedback.scoreProjection ? `(${feedback.scoreProjection.projectedScore} potential)` : ''}`,
+        title: `Your Personalized Insights`,
         message: message,
         actions: actions
       };
@@ -64,12 +64,12 @@ export function MonthlyInsights({ lastAssessment, canTakeAssessment, daysUntilNe
 
     // Show error if no AI feedback available
     return {
-      title: "AI Feedback Missing",
-      message: "AI feedback is missing. Please ensure AI feedback was generated properly for this assessment.",
+      title: "AI Feedback Being Generated",
+      message: "Your personalized AI feedback is being generated. This may take a few moments. Please check back in a few minutes for your complete analysis.",
       actions: [
-        "Contact support to regenerate AI feedback",
-        "Take a new assessment to get fresh insights",
-        "Check your assessment completion status"
+        "Refresh the page to check for updated insights",
+        "Take a new assessment to get fresh analysis",
+        "Contact support if feedback doesn't appear within 5 minutes"
       ]
     };
   };

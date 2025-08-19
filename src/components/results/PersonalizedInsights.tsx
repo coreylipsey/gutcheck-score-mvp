@@ -62,18 +62,78 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
   // Use AI-generated data from sessionData or show error if missing
   const competitiveAdvantage = sessionData.geminiFeedback?.competitiveAdvantage;
   if (!competitiveAdvantage) {
-    throw new Error('Competitive advantage data is missing. Please ensure AI feedback was generated properly.');
+    return (
+      <div className="space-y-8">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl font-bold" style={{ color: '#0A1F44' }}>
+            AI Feedback Generation In Progress
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Your personalized AI feedback is being generated. This may take a few moments. 
+            Please refresh the page in a minute or two to see your complete analysis.
+          </p>
+          <div className="flex justify-center">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const growthOpportunity = sessionData.geminiFeedback?.growthOpportunity;
   if (!growthOpportunity) {
-    throw new Error('Growth opportunity data is missing. Please ensure AI feedback was generated properly.');
+    return (
+      <div className="space-y-8">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl font-bold" style={{ color: '#0A1F44' }}>
+            AI Feedback Generation In Progress
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Your personalized AI feedback is being generated. This may take a few moments. 
+            Please refresh the page in a minute or two to see your complete analysis.
+          </p>
+          <div className="flex justify-center">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Score projection from AI analysis - show error if missing
   const scoreProjection = sessionData.geminiFeedback?.scoreProjection;
   if (!scoreProjection) {
-    throw new Error('Score projection data is missing. Please ensure AI feedback was generated properly.');
+    return (
+      <div className="space-y-8">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl font-bold" style={{ color: '#0A1F44' }}>
+            AI Feedback Generation In Progress
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Your personalized AI feedback is being generated. This may take a few moments. 
+            Please refresh the page in a minute or two to see your complete analysis.
+          </p>
+          <div className="flex justify-center">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
