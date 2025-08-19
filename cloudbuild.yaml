@@ -36,16 +36,15 @@ steps:
     args: ['run', 'build']
     dir: 'functions'
 
-  # Step 5: Set environment variable for functions and deploy
-  - name: 'node:20'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "GEMINI_API_KEY=${_GEMINI_API_KEY}" > functions/.env
-        ls -la
-        ls -la out/
-        npx firebase-tools deploy --only hosting,functions --project ${_PROJECT_ID}
+        # Step 5: Deploy to Firebase
+      - name: 'node:20'
+        entrypoint: 'bash'
+        args:
+          - '-c'
+          - |
+            ls -la
+            ls -la out/
+            npx firebase-tools deploy --only hosting,functions --project ${_PROJECT_ID}
     dir: '.'
 
 # Build timeout
@@ -59,4 +58,5 @@ options:
 # Substitutions (will be set in Cloud Build trigger)
 substitutions:
   _PROJECT_ID: 'gutcheck-score-mvp'
-  _GEMINI_API_KEY: 'AIzaSyAUq0hEPlGnfkj6MJC-7et_gNim-YTyTzg' 
+  # DEPRECATED: Gemini API key no longer needed as we've switched to ADK agent
+  # _GEMINI_API_KEY: 'AIzaSyAUq0hEPlGnfkj6MJC-7et_gNim-YTyTzg' 

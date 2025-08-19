@@ -1,0 +1,129 @@
+{
+  "metrics": {
+    "health_checks": [
+      {
+        "timestamp": "2025-08-19T11:45:58.326080",
+        "status": 200,
+        "response_time": 0.21039795875549316,
+        "success": true,
+        "data": {
+          "message": "Gutcheck ADK Agent API is running",
+          "agent": "gutcheck_assessment_agent"
+        }
+      },
+      {
+        "timestamp": "2025-08-19T11:46:58.622130",
+        "status": 200,
+        "response_time": 0.18172717094421387,
+        "success": true,
+        "data": {
+          "message": "Gutcheck ADK Agent API is running",
+          "agent": "gutcheck_assessment_agent"
+        }
+      },
+      {
+        "timestamp": "2025-08-19T11:47:58.986038",
+        "status": 200,
+        "response_time": 0.18172383308410645,
+        "success": true,
+        "data": {
+          "message": "Gutcheck ADK Agent API is running",
+          "agent": "gutcheck_assessment_agent"
+        }
+      },
+      {
+        "timestamp": "2025-08-19T11:48:59.434929",
+        "status": 200,
+        "response_time": 0.25804996490478516,
+        "success": true,
+        "data": {
+          "message": "Gutcheck ADK Agent API is running",
+          "agent": "gutcheck_assessment_agent"
+        }
+      },
+      {
+        "timestamp": "2025-08-19T11:49:59.917344",
+        "status": 200,
+        "response_time": 0.16715693473815918,
+        "success": true,
+        "data": {
+          "message": "Gutcheck ADK Agent API is running",
+          "agent": "gutcheck_assessment_agent"
+        }
+      },
+      {
+        "timestamp": "2025-08-19T11:51:00.414704",
+        "status": 200,
+        "response_time": 0.1967010498046875,
+        "success": true,
+        "data": {
+          "message": "Gutcheck ADK Agent API is running",
+          "agent": "gutcheck_assessment_agent"
+        }
+      },
+      {
+        "timestamp": "2025-08-19T11:52:00.759445",
+        "status": 200,
+        "response_time": 0.18111705780029297,
+        "success": true,
+        "data": {
+          "message": "Gutcheck ADK Agent API is running",
+          "agent": "gutcheck_assessment_agent"
+        }
+      },
+      {
+        "timestamp": "2025-08-19T11:53:01.197694",
+        "status": 200,
+        "response_time": 0.19562983512878418,
+        "success": true,
+        "data": {
+          "message": "Gutcheck ADK Agent API is running",
+          "agent": "gutcheck_assessment_agent"
+        }
+      },
+      {
+        "timestamp": "2025-08-19T11:54:01.563743",
+        "status": 200,
+        "response_time": 0.20390987396240234,
+        "success": true,
+        "data": {
+          "message": "Gutcheck ADK Agent API is running",
+          "agent": "gutcheck_assessment_agent"
+        }
+      },
+      {
+        "timestamp": "2025-08-19T11:55:01.889981",
+        "status": 200,
+        "response_time": 0.15384817123413086,
+        "success": true,
+        "data": {
+          "message": "Gutcheck ADK Agent API is running",
+          "agent": "gutcheck_assessment_agent"
+        }
+      }
+    ],
+    "response_times": [
+      0.1506059169769287,
+      0.16790413856506348,
+      0.15354609489440918,
+      0.20005583763122559,
+      0.28143906593322754,
+      0.15107274055480957,
+      0.23131084442138672,
+      0.1480541229248047,
+      0.16005682945251465,
+      0.14645695686340332
+    ],
+    "errors": [],
+    "success_rate": 0,
+    "total_requests": 20
+  },
+  "summary": {
+    "total_requests": 20,
+    "total_errors": 0,
+    "success_rate": 100.0,
+    "avg_response_time": 0.17905025482177733,
+    "last_check": "2025-08-19T11:56:02.053150"
+  },
+  "generated_at": "2025-08-19T11:56:02.053168"
+}

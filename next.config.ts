@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    NEXT_PUBLIC_ADK_SERVER_URL: process.env.NEXT_PUBLIC_ADK_SERVER_URL || 'https://gutcheck-adk-agent-286731768309.us-central1.run.app',
   },
   webpack: (config, { dev, isServer }) => {
     // Exclude functions directory from the build

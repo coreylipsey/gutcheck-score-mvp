@@ -1,183 +1,247 @@
-# Gutcheck ADK Core Assessment Agent
+# Gutcheck ADK Agent Integration
 
-This directory contains the Google ADK implementation of the Core Assessment Agent for Gutcheck's entrepreneurial assessment system.
+This directory contains the Google ADK (Agent Development Kit) integration for the Gutcheck assessment system. The ADK agent provides enhanced AI capabilities for generating comprehensive entrepreneurial assessment feedback.
 
-## Architecture
+## 🚀 Quick Start
 
-The ADK agent follows the **Agentic RAG** pattern with:
+### Prerequisites
+- Python 3.8+
+- Google ADK package (`google-adk>=1.11.0`)
+- Gemini API key
 
-- **Core Assessment Agent**: Main orchestrator agent
-- **Specialized Tools**: Individual analysis functions
-- **Web Search Integration**: Real URL validation for next steps
-- **Clean Architecture Integration**: Seamless integration with existing codebase
+### Installation
+```bash
+# Install dependencies
+pip3 install -r requirements.txt
 
-## Directory Structure
-
-```
-agents/
-├── core_assessment_agent/
-│   ├── __init__.py
-│   ├── agent.py              # Main Core Assessment Agent
-│   └── tools/
-│       ├── __init__.py
-│       ├── competitive_advantage.py
-│       ├── growth_opportunity.py
-│       ├── comprehensive_analysis.py
-│       └── next_steps.py
-├── server.py                 # FastAPI server for deployment
-├── requirements.txt          # Python dependencies
-└── README.md                # This file
+# Set up environment (copy env.example to .env and configure)
+cp env.example .env
 ```
 
-## Installation
+### Starting the ADK Server
+```bash
+# Option 1: Use the startup script
+./start_adk_server.sh
 
-1. **Install ADK**:
-   ```bash
-   pip install google-adk
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set up environment**:
-   ```bash
-   export GOOGLE_API_KEY="your-gemini-api-key"
-   export ADK_AGENT_URL="http://localhost:8000"
-   ```
-
-## Development
-
-### Running the Agent Locally
-
-1. **Start the ADK dev UI**:
-   ```bash
-   adk dev
-   ```
-
-2. **Run the FastAPI server**:
-   ```bash
-   python server.py
-   ```
-
-3. **Test the agent**:
-   ```bash
-   curl -X POST http://localhost:8000/generate-feedback \
-     -H "Content-Type: application/json" \
-     -d @test_data.json
-   ```
-
-### Testing with ADK Dev UI
-
-The ADK dev UI provides a browser-based interface for testing and debugging agents:
-
-1. Open `http://localhost:8000` in your browser
-2. Select the `gutcheck_assessment_agent`
-3. Test with sample assessment data
-4. Monitor the agent's workflow and tool usage
-
-## Integration with Clean Architecture
-
-The ADK agent integrates seamlessly with the existing Clean Architecture:
-
-1. **Domain Layer**: Uses existing DTOs and interfaces
-2. **Application Layer**: Implements `IAIScoringService`
-3. **Infrastructure Layer**: `ADKAssessmentService` handles integration
-4. **Presentation Layer**: No changes required
-
-## Key Features
-
-### 1. Real URL Validation
-The `next_steps` tool uses ADK's `google_search` to find real, verified resources:
-
-```python
-# Uses ADK's built-in web search
-search_results = await google_search("SCORE business mentors", num_results=5)
-
-# Validates URLs before returning
-for result in search_results:
-    if await validate_url(result["url"]):
-        return result
+# Option 2: Start manually
+python3 server.py
 ```
 
-### 2. Preserved Prompt Logic
-All existing prompts are preserved and converted to Python:
+The server will start on `http://localhost:8000` by default.
 
-```python
-# Your existing comprehensive analysis prompt
-prompt = f"""You are a seasoned entrepreneurial scout...
-ASSESSMENT DATA:
-{format_responses(responses)}
-...
-"""
+## 🏗️ Architecture
+
+### Core Components
+
+1. **ADK Agent** (`core_assessment_agent/agent.py`)
+   - Main agent configuration using Google ADK
+   - Uses Gemini 2.0 Flash model
+   - Integrates with assessment tools
+
+2. **Assessment Tools** (`core_assessment_agent/tools/`)
+   - `competitive_advantage.py` - Analyzes strengths
+   - `growth_opportunity.py` - Identifies improvement areas
+   - `comprehensive_analysis.py` - Sports scouting report style analysis
+   - `next_steps.py` - Actionable recommendations with real URLs
+   - `question_scoring.py` - Scores open-ended questions
+
+3. **Toolset** (`core_assessment_agent/toolset.py`)
+   - Organizes all assessment tools using ADK patterns
+   - Provides clean interface for tool management
+
+4. **API Server** (`server.py`)
+   - FastAPI server exposing ADK agent functionality
+   - RESTful endpoints for integration with main application
+   - CORS enabled for cross-origin requests
+
+## 🔌 API Endpoints
+
+### Health Check
+```http
+GET /
 ```
+Returns server status and agent information.
 
-### 3. Graceful Fallback
-If ADK fails, the system falls back to existing Firebase functions:
+### Agent Information
+```http
+GET /agent-info
+```
+Returns detailed information about the ADK agent configuration.
 
-```typescript
-try {
-  // Try ADK agent first
-  const adkResponse = await fetch(`${this.adkAgentUrl}/generate-feedback`, ...);
-  return adkData;
-} catch (error) {
-  // Fallback to existing service
-  return this.fallbackToExistingService(...);
+### Generate Feedback
+```http
+POST /generate-feedback
+Content-Type: application/json
+
+{
+  "responses": [...],
+  "scores": {...},
+  "industry": "Technology",
+  "location": "San Francisco"
 }
 ```
+Generates comprehensive AI feedback including:
+- Competitive advantages
+- Growth opportunities  
+- Comprehensive analysis
+- Actionable next steps
 
-## Deployment
+### Score Question
+```http
+POST /score-question
+Content-Type: application/json
+
+{
+  "questionId": "q3",
+  "response": "User response text...",
+  "questionText": "Question text..."
+}
+```
+Scores individual open-ended questions.
+
+## 🔧 Integration with Main Application
+
+### Environment Configuration
+Add to your Next.js environment:
+```env
+NEXT_PUBLIC_ADK_SERVER_URL=http://localhost:8000
+```
+
+### Service Integration
+The main application uses `ADKAssessmentService` which:
+- Connects to the ADK server
+- Provides fallback mechanisms
+- Handles error cases gracefully
+- Maintains compatibility with existing interfaces
+
+### Dependency Injection
+The DI container is configured to use the ADK service:
+```typescript
+container.register('IAIScoringService', () => 
+  new ADKAssessmentService()
+);
+```
+
+## 🧪 Testing
+
+### Run Integration Tests
+```bash
+python3 test_adk_integration.py
+```
+
+Tests include:
+- Health check
+- Agent info retrieval
+- Feedback generation
+- Question scoring
+
+### Manual Testing
+```bash
+# Test health endpoint
+curl http://localhost:8000/
+
+# Test agent info
+curl http://localhost:8000/agent-info
+
+# Test feedback generation
+curl -X POST http://localhost:8000/generate-feedback \
+  -H "Content-Type: application/json" \
+  -d @test_data.json
+```
+
+## 🔄 Deployment
 
 ### Local Development
-```bash
-python server.py
-```
+1. Start the ADK server: `python3 server.py`
+2. Configure main app to use `http://localhost:8000`
+3. Run integration tests to verify functionality
 
 ### Production Deployment
-1. **Deploy to Cloud Run**:
+1. Deploy ADK server to cloud platform (GCP, AWS, etc.)
+2. Update `NEXT_PUBLIC_ADK_SERVER_URL` to production URL
+3. Ensure proper CORS configuration
+4. Set up monitoring and logging
+
+## 🛠️ Development
+
+### Adding New Tools
+1. Create new tool file in `core_assessment_agent/tools/`
+2. Add function to `AssessmentToolset`
+3. Update agent instructions
+4. Add tests
+
+### Modifying Prompts
+Edit the prompt templates in individual tool files to customize AI behavior.
+
+### Debugging
+- Check server logs for errors
+- Use the test script to verify functionality
+- Monitor API responses for expected format
+
+## 📊 Performance
+
+### Current Capabilities
+- ✅ Health check and monitoring
+- ✅ Comprehensive feedback generation
+- ✅ Question scoring
+- ✅ Error handling and fallbacks
+- ✅ Integration with main application
+
+### Optimization Opportunities
+- Caching frequently used responses
+- Batch processing for multiple assessments
+- Async processing for long-running operations
+- Rate limiting and request queuing
+
+## 🔒 Security
+
+### API Security
+- CORS configuration for allowed origins
+- Input validation and sanitization
+- Error message sanitization
+- Rate limiting (recommended for production)
+
+### Environment Variables
+- Store sensitive keys in environment variables
+- Use `.env` file for local development
+- Never commit API keys to version control
+
+## 📝 Troubleshooting
+
+### Common Issues
+
+1. **Import Errors**
    ```bash
-   gcloud run deploy gutcheck-adk-agent \
-     --source . \
-     --platform managed \
-     --region us-central1 \
-     --allow-unauthenticated
+   pip3 install -r requirements.txt
    ```
 
-2. **Update environment variable**:
+2. **Port Already in Use**
    ```bash
-   export ADK_AGENT_URL="https://gutcheck-adk-agent-xxx-uc.a.run.app"
+   lsof -ti:8000 | xargs kill -9
    ```
 
-## Monitoring and Debugging
+3. **ADK Agent Not Loading**
+   ```bash
+   python3 -c "from core_assessment_agent.agent import core_assessment_agent; print('Agent loaded')"
+   ```
 
-### ADK Dev UI
-- Real-time agent workflow visualization
-- Tool execution monitoring
-- Response analysis
+4. **API Connection Issues**
+   - Check if server is running: `curl http://localhost:8000/`
+   - Verify CORS configuration
+   - Check network connectivity
 
-### Logging
-```python
-# Agent logs all tool executions
-console.log('ADK agent executed:', {
-  tool: 'analyze_competitive_advantage',
-  input: assessment_data,
-  output: result
-});
-```
+### Logs and Debugging
+- Server logs appear in terminal when running `python3 server.py`
+- Use `test_adk_integration.py` for comprehensive testing
+- Check browser network tab for API call details
 
-## Benefits Over Current System
+## 🤝 Contributing
 
-1. **Reliability**: Agentic RAG ensures all sections are generated
-2. **Real URLs**: Web search integration prevents fake URLs
-3. **Better Debugging**: ADK dev UI shows exactly what's happening
-4. **Scalability**: Easy to add new analysis tools
-5. **Maintainability**: Code-first approach with version control
+1. Follow existing code patterns
+2. Add tests for new functionality
+3. Update documentation
+4. Test integration thoroughly
 
-## Next Steps
+## 📄 License
 
-1. **Install ADK** and set up the development environment
-2. **Test locally** using the ADK dev UI
-3. **Deploy to staging** and test with real assessment data
-4. **Gradually migrate** from Firebase functions to ADK
-5. **Monitor performance** and reliability improvements
+This ADK integration is part of the Gutcheck.AI assessment system.
