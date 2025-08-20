@@ -10,6 +10,7 @@ from .tools.competitive_advantage import analyze_competitive_advantage
 from .tools.growth_opportunity import analyze_growth_opportunity
 from .tools.comprehensive_analysis import generate_comprehensive_analysis
 from .tools.next_steps import generate_next_steps
+from .tools.key_insights import generate_key_insights
 from .tools.question_scoring import score_open_ended_question, score_all_open_ended_questions
 
 class AssessmentToolset(base_toolset.BaseToolset):
@@ -59,6 +60,10 @@ class AssessmentToolset(base_toolset.BaseToolset):
                 FunctionTool(
                     func=generate_next_steps,
                     name=f"{self.name_prefix}next_steps"
+                ),
+                FunctionTool(
+                    func=generate_key_insights,
+                    name=f"{self.name_prefix}key_insights"
                 ),
                 FunctionTool(
                     func=score_open_ended_question,

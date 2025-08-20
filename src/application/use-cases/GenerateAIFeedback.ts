@@ -76,49 +76,8 @@ export class GenerateAIFeedback {
       return feedback;
     } catch (error) {
       console.error('AI feedback generation failed:', error);
-      // Generate basic feedback based on scores when AI is unavailable
-      const topCategory = Object.entries(request.scores).reduce((a, b) => 
-        request.scores[a[0] as keyof typeof request.scores] > request.scores[b[0] as keyof typeof request.scores] ? a : b
-      )[0];
-      
-      const focusCategory = Object.entries(request.scores).reduce((a, b) => 
-        request.scores[a[0] as keyof typeof request.scores] < request.scores[b[0] as keyof typeof request.scores] ? a : b
-      )[0];
-      
-      const overallScore = Math.round(Object.values(request.scores).reduce((a, b) => a + b, 0));
-      
-      return {
-        feedback: `Based on your assessment, you scored ${overallScore} out of 100. Your strongest area is ${topCategory.replace(/([A-Z])/g, ' $1').toLowerCase()}, while ${focusCategory.replace(/([A-Z])/g, ' $1').toLowerCase()} could use more attention.`,
-        competitiveAdvantage: {
-          category: topCategory.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
-          score: `${request.scores[topCategory as keyof typeof request.scores]}/${getCategoryMax(topCategory)}`,
-          summary: `Your ${topCategory.replace(/([A-Z])/g, ' $1').toLowerCase()} shows strong potential for growth.`,
-          specificStrengths: [
-            "Business experience (previous attempts show learning mindset)",
-            "Network connections (leveraged support systems effectively)",
-            "Learning commitment (regular professional development activities)",
-            "Adaptability (successfully navigated business challenges)"
-          ]
-        },
-        growthOpportunity: {
-          category: focusCategory.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
-          score: `${request.scores[focusCategory as keyof typeof request.scores]}/${getCategoryMax(focusCategory)}`,
-          summary: `There are opportunities to strengthen your ${focusCategory.replace(/([A-Z])/g, ' $1').toLowerCase()}.`,
-          specificWeaknesses: [
-            "Goal tracking frequency (currently 'occasionally' vs weekly)",
-            "Time allocation (varies without consistent structure)",
-            "Planning processes (informal vs documented approach)",
-            "Strategic execution (reactive vs proactive planning)"
-          ]
-        },
-        scoreProjection: {
-          currentScore: overallScore,
-          projectedScore: Math.min(100, overallScore + 3),
-          improvementPotential: 3
-        },
-        comprehensiveAnalysis: `Your Gutcheck Score of ${overallScore}/100 places you in the ${topCategory.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} category, indicating strong potential for growth. Your assessment reveals a balanced entrepreneurial profile with clear strengths and growth areas. The AI analysis suggests focusing on strategic development while leveraging your existing capabilities. Consider how your top strength in ${topCategory.replace(/([A-Z])/g, ' $1').toLowerCase()} can complement your development needs in ${focusCategory.replace(/([A-Z])/g, ' $1').toLowerCase()} to create a more comprehensive entrepreneurial foundation.`,
-        nextSteps: "Consider seeking mentorship, exploring funding options, and building your entrepreneurial fundamentals."
-      };
+      // Return empty feedback when AI is unavailable - NO FALLBACK DATA
+      throw new Error('AI feedback generation failed. Please try again later.');
     }
   }
 } 

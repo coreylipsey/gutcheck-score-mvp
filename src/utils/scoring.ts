@@ -297,10 +297,10 @@ export const calculateAllScores = async (responses: AssessmentResponse[]): Promi
 
 // Get star rating from overall score (matching HeroScore thresholds)
 export const getStarRating = (overallScore: number): number => {
-  if (overallScore >= 80) return 5; // Visionary Leader
-  if (overallScore >= 60) return 4; // Strong Execution
-  if (overallScore >= 40) return 3; // Emerging Traction
-  if (overallScore >= 20) return 2; // Developing Potential
+  if (overallScore >= 90) return 5; // Transformative Trajectory
+  if (overallScore >= 80) return 4; // Established Signals
+  if (overallScore >= 65) return 3; // Emerging Traction
+  if (overallScore >= 50) return 2; // Forming Potential
   return 1; // Early Spark
 };
 

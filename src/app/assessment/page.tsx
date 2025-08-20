@@ -146,11 +146,11 @@ export default function AssessmentPage() {
       // Store session ID in localStorage for results page
       localStorage.setItem('sessionId', sessionId);
       
-      // Calculate star rating using proper function
-      const starRating = scores.overallScore >= 80 ? 5 : 
-                        scores.overallScore >= 60 ? 4 : 
-                        scores.overallScore >= 40 ? 3 : 
-                        scores.overallScore >= 20 ? 2 : 1;
+      // Calculate star rating using correct thresholds (matching HeroScore component)
+      const starRating = scores.overallScore >= 90 ? 5 : 
+                        scores.overallScore >= 80 ? 4 : 
+                        scores.overallScore >= 65 ? 3 : 
+                        scores.overallScore >= 50 ? 2 : 1;
       
       // Store responses data in localStorage as fallback
       localStorage.setItem('responsesData', JSON.stringify({
