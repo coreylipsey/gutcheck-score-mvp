@@ -62,13 +62,6 @@
         { "fieldPath": "responsePattern", "order": "ASCENDING" },
         { "fieldPath": "completedAt", "order": "DESCENDING" }
       ]
-    },
-    {
-      "collectionGroup": "anonymousSessions",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "score", "order": "DESCENDING" }
-      ]
     }
   ],
   "fieldOverrides": []
