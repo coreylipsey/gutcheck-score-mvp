@@ -16,6 +16,16 @@ export class ADKAssessmentService implements IAIScoringService {
     
     // A/B testing flag - defaults to true (use ADK) if not specified
     this.useADK = process.env.USE_ADK !== 'false';
+    
+    // Debug logging
+    console.log('ADK AssessmentService initialized:', {
+      adkServerUrl: this.adkServerUrl,
+      useADK: this.useADK,
+      env: {
+        NEXT_PUBLIC_ADK_SERVER_URL: process.env.NEXT_PUBLIC_ADK_SERVER_URL,
+        USE_ADK: process.env.USE_ADK
+      }
+    });
   }
 
   async scoreOpenEndedResponse(
@@ -61,6 +71,15 @@ export class ADKAssessmentService implements IAIScoringService {
     industry?: string,
     location?: string
   ): Promise<AIFeedback> {
+    console.log('ADK AssessmentService.generateFeedback called:', {
+      useADK: this.useADK,
+      adkServerUrl: this.adkServerUrl,
+      responsesCount: responses.length,
+      scores,
+      industry,
+      location
+    });
+
     // A/B testing: Check if we should use ADK or legacy system
     if (!this.useADK) {
       console.log('ADK AssessmentService: Using legacy system (USE_ADK=false)');
@@ -68,6 +87,8 @@ export class ADKAssessmentService implements IAIScoringService {
     }
 
     try {
+      console.log('ADK AssessmentService: Making request to coordinated endpoint...');
+      
       // Use the new coordinated request endpoint for enhanced functionality
       const apiResponse = await fetch(`${this.adkServerUrl}/coordinated-request`, {
         method: 'POST',
@@ -85,6 +106,8 @@ export class ADKAssessmentService implements IAIScoringService {
         })
       });
 
+      console.log('ADK AssessmentService: Response status:', apiResponse.status, apiResponse.statusText);
+
       if (!apiResponse.ok) {
         throw new Error(`ADK API error: ${apiResponse.statusText}`);
       }
@@ -96,7 +119,8 @@ export class ADKAssessmentService implements IAIScoringService {
         coordinator_status: data.coordinator_status,
         delegated_agent: data.delegated_agent,
         safety_info: data.safety_info ? 'present' : 'missing',
-        result: data.result ? 'present' : 'missing'
+        result: data.result ? 'present' : 'missing',
+        resultKeys: data.result ? Object.keys(data.result) : 'no result'
       });
       
       // Extract the result from the coordinated response
@@ -126,6 +150,10 @@ export class ADKAssessmentService implements IAIScoringService {
       };
     } catch (error) {
       console.error('ADK feedback generation error:', error);
+      console.log('ADK AssessmentService: Error details:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       // Fallback to legacy system if ADK fails
       console.log('ADK AssessmentService: Falling back to legacy system due to error');
       return this.generateLegacyFeedback(responses, scores, industry, location);
