@@ -1,0 +1,15 @@
+{
+  "responses": [
+    {"questionId": "q1", "response": "Early operations with a few customers"},
+    {"questionId": "q2", "response": "Small team (2–5 people)"}
+  ],
+  "scores": {
+    "personalBackground": 15,
+    "entrepreneurialSkills": 18,
+    "resources": 17,
+    "behavioralMetrics": 12,
+    "growthVision": 16
+  },
+  "industry": "Manufacturing & Consumer Goods",
+  "location": "California"
+}

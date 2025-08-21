@@ -9,19 +9,19 @@ export class ADKAssessmentService implements IAIScoringService {
   private readonly adkServerUrl: string;
 
   constructor() {
-    this.useADK = process.env.USE_ADK_AGENT === 'true';
-    this.agentUrl = process.env.ASSESSMENT_AGENT_URL || 'http://localhost:8000/process_assessment';
-    this.scoringAgentUrl = process.env.OPEN_ENDED_SCORING_AGENT_URL || 'http://localhost:8000/score_open_ended';
-    this.adkServerUrl = process.env.ADK_SERVER_URL || 'http://localhost:8000';
+    this.useADK = process.env.NEXT_PUBLIC_USE_ADK_AGENT === 'true';
+    this.agentUrl = process.env.NEXT_PUBLIC_ASSESSMENT_AGENT_URL || 'http://localhost:8000/process_assessment';
+    this.scoringAgentUrl = process.env.NEXT_PUBLIC_OPEN_ENDED_SCORING_AGENT_URL || 'http://localhost:8000/score_open_ended';
+    this.adkServerUrl = process.env.NEXT_PUBLIC_ADK_SERVER_URL || 'http://localhost:8000';
     
     console.log('ADK AssessmentService initialized:', {
       agentUrl: this.agentUrl,
       scoringAgentUrl: this.scoringAgentUrl,
       useADK: this.useADK,
       env: {
-        USE_ADK_AGENT: process.env.USE_ADK_AGENT,
-        ASSESSMENT_AGENT_URL: process.env.ASSESSMENT_AGENT_URL,
-        OPEN_ENDED_SCORING_AGENT_URL: process.env.OPEN_ENDED_SCORING_AGENT_URL
+        NEXT_PUBLIC_USE_ADK_AGENT: process.env.NEXT_PUBLIC_USE_ADK_AGENT,
+        NEXT_PUBLIC_ASSESSMENT_AGENT_URL: process.env.NEXT_PUBLIC_ASSESSMENT_AGENT_URL,
+        NEXT_PUBLIC_OPEN_ENDED_SCORING_AGENT_URL: process.env.NEXT_PUBLIC_OPEN_ENDED_SCORING_AGENT_URL
       }
     });
   }

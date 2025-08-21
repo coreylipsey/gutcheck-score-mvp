@@ -62,7 +62,7 @@ echo "✅ Environment configuration looks good"
 
 # Run deployment tests
 echo "🧪 Running deployment tests..."
-if ! python test_deployment.py; then
+if ! python3 test_deployment.py; then
     echo "❌ Deployment tests failed. Please fix issues before deploying."
     exit 1
 fi
