@@ -72,11 +72,8 @@ export class ADKAssessmentService implements IAIScoringService {
       };
     } catch (error) {
       console.error('Open-ended scoring agent error:', error);
-      // Fallback to default score (same as old system)
-      return {
-        score: 3,
-        explanation: error instanceof Error ? error.message : 'Scoring failed'
-      };
+      // Re-throw the error to make agent failures immediately visible
+      throw error;
     }
   }
 
@@ -229,9 +226,8 @@ export class ADKAssessmentService implements IAIScoringService {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined
       });
-      // Fallback to legacy system if agent fails
-      console.log('ADK AssessmentService: Falling back to legacy system due to error');
-      return this.generateLegacyFeedback(responses, scores, industry, location);
+      // Re-throw the error to make agent failures immediately visible
+      throw error;
     }
   }
 
@@ -285,29 +281,8 @@ export class ADKAssessmentService implements IAIScoringService {
       };
     } catch (error) {
       console.error('Legacy feedback generation error:', error);
-      // Return empty feedback - no fallback text
-      return {
-        feedback: '',
-        competitiveAdvantage: {
-          category: '',
-          score: '',
-          summary: '',
-          specificStrengths: []
-        },
-        growthOpportunity: {
-          category: '',
-          score: '',
-          summary: '',
-          specificWeaknesses: []
-        },
-        scoreProjection: {
-          currentScore: 0,
-          projectedScore: 0,
-          improvementPotential: 0
-        },
-        comprehensiveAnalysis: '',
-        nextSteps: ''
-      };
+      // Re-throw the error to make failures immediately visible
+      throw error;
     }
   }
 
