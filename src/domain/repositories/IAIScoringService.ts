@@ -6,6 +6,7 @@ export interface AIScoringResult {
 }
 
 export interface AIFeedback {
+  keyInsights: string;
   feedback: string;
   competitiveAdvantage: {
     category: string;

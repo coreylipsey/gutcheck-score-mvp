@@ -40,6 +40,29 @@ function parseGeminiResponse(response: string): { score: number; explanation: st
 }
 
 // AI Helper Functions
+export async function generateKeyInsights(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
+  const overallScore = Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number;
+  
+  const prompt = `You are an expert business evaluator providing key insights from an entrepreneurial assessment.
+
+Assessment Overview:
+- Overall Score: ${overallScore}/100
+- Personal Background: ${scores.personalBackground}/20
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
+- Resources: ${scores.resources}/20
+- Behavioral Metrics: ${scores.behavioralMetrics}/15
+- Growth Vision: ${scores.growthVision}/20
+- Industry: ${industry || 'General'}
+- Location: ${location || 'Unknown'}
+
+Write a 2-sentence executive summary that captures the most important insights about this entrepreneur's profile. Focus on the overall assessment picture, highlighting key strengths and critical areas for improvement. Be specific and actionable.
+
+Keep it concise and impactful - maximum 200 characters total.`;
+
+  const response = await callGemini(prompt, apiKey);
+  return response;
+}
+
 export async function generateFeedbackText(responses: any[], scores: any, apiKey: string): Promise<string> {
   const prompt = `You are an expert business evaluator providing feedback on an entrepreneurial assessment.
 
@@ -58,22 +81,33 @@ Provide 3-4 key insights about this entrepreneur's profile, focusing on their st
 }
 
 export async function generateCompetitiveAdvantage(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
-  const highestCategory = Object.entries(scores).reduce((a, b) => scores[a[0] as keyof typeof scores] > scores[b[0] as keyof typeof scores] ? a : b);
+  const highestCategory = Object.entries(scores).reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) > (scores[b[0] as keyof typeof scores] as number) ? a : b);
   
-  const prompt = `You are an expert business evaluator identifying competitive advantages.
+  const prompt = `Context:
+You are an expert business evaluator analyzing an entrepreneur's assessment results. Your goal is to extract actionable insights by identifying their top strengths based on their Gutcheck Score.
 
-Assessment Context:
-- Industry: ${industry || 'General'}
-- Location: ${location || 'Unknown'}
-- Highest Scoring Category: ${highestCategory[0]} (${highestCategory[1]} points)
+Assessment Categories & Scores:
 
-Based on this entrepreneur's assessment results, identify their primary competitive advantage. Focus on their strongest category and how it positions them for success.
+Personal Background Score: ${scores.personalBackground}/20
 
-Return a JSON object with:
-- category: the strongest category
-- score: the score as a string
-- summary: 2-3 sentences about their competitive advantage
-- specificStrengths: array of 3-4 specific strengths`;
+Entrepreneurial Skills Score: ${scores.entrepreneurialSkills}/25
+
+Resources Score: ${scores.resources}/20
+
+Behavioral Metrics Score: ${scores.behavioralMetrics}/15
+
+Growth & Vision Score: ${scores.growthVision}/20
+
+Industry: ${industry || 'Creative & Media'}
+
+Location: ${location || 'Delaware'}
+
+🔍 Instructions for Response Formatting
+Step 1: Identify Strengths
+Select the highest-scoring category as the key strength area.
+Provide a concise and encouraging 1-2 sentence explanation with a practical recommendation.
+Max 200 characters for the entire response.
+No little hashtags or stars or any other weird characters, just the text.`;
 
   const response = await callGemini(prompt, apiKey);
   try {
@@ -83,14 +117,14 @@ Return a JSON object with:
     }
     return {
       category: highestCategory[0],
-      score: highestCategory[1].toString(),
+      score: (highestCategory[1] as number).toString(),
       summary: response,
       specificStrengths: [response]
     };
   } catch (error) {
     return {
       category: highestCategory[0],
-      score: highestCategory[1].toString(),
+      score: (highestCategory[1] as number).toString(),
       summary: response,
       specificStrengths: [response]
     };
@@ -98,22 +132,33 @@ Return a JSON object with:
 }
 
 export async function generateGrowthOpportunity(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
-  const lowestCategory = Object.entries(scores).reduce((a, b) => scores[a[0] as keyof typeof scores] < scores[b[0] as keyof typeof scores] ? a : b);
+  const lowestCategory = Object.entries(scores).reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) < (scores[b[0] as keyof typeof scores] as number) ? a : b);
   
-  const prompt = `You are an expert business evaluator identifying growth opportunities.
+  const prompt = `Context:
+You are an expert business evaluator analyzing an entrepreneur's assessment results. Your goal is to extract actionable insights by identifying their key improvement areas based on their Gutcheck Score.
 
-Assessment Context:
-- Industry: ${industry || 'General'}
-- Location: ${location || 'Unknown'}
-- Lowest Scoring Category: ${lowestCategory[0]} (${lowestCategory[1]} points)
+Assessment Categories & Scores:
 
-Based on this entrepreneur's assessment results, identify their primary growth opportunity. Focus on their weakest category and how improving it could significantly impact their success.
+Personal Background Score: ${scores.personalBackground}/20
 
-Return a JSON object with:
-- category: the weakest category
-- score: the score as a string
-- summary: 2-3 sentences about their growth opportunity
-- specificWeaknesses: array of 3-4 specific areas for improvement`;
+Entrepreneurial Skills Score: ${scores.entrepreneurialSkills}/25
+
+Resources Score: ${scores.resources}/20
+
+Behavioral Metrics Score: ${scores.behavioralMetrics}/15
+
+Growth & Vision Score: ${scores.growthVision}/20
+
+Industry: ${industry || 'Creative & Media'}
+
+Location: ${location || 'Delaware'}
+
+🔍 Instructions for Response Formatting
+Step 1: Identify Areas for Improvement
+Select the lowest-scoring category as the key area for improvement.
+Provide a concise and encouraging 1-2 sentence explanation with a practical recommendation.
+Max 200 characters for the entire response.
+No little hashtags or stars or any other weird characters, just the text.`;
 
   const response = await callGemini(prompt, apiKey);
   try {
@@ -123,14 +168,14 @@ Return a JSON object with:
     }
     return {
       category: lowestCategory[0],
-      score: lowestCategory[1].toString(),
+      score: (lowestCategory[1] as number).toString(),
       summary: response,
       specificWeaknesses: [response]
     };
   } catch (error) {
     return {
       category: lowestCategory[0],
-      score: lowestCategory[1].toString(),
+      score: (lowestCategory[1] as number).toString(),
       summary: response,
       specificWeaknesses: [response]
     };
@@ -138,7 +183,7 @@ Return a JSON object with:
 }
 
 export async function generateTruthfulScoreProjection(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
-  const currentScore = Object.values(scores).reduce((a: any, b: any) => a + b, 0);
+  const currentScore = Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number;
   
   const prompt = `You are an expert business evaluator providing realistic score projections.
 
@@ -174,47 +219,72 @@ Return a JSON object with:
 }
 
 export async function generateComprehensiveAnalysis(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
-  const prompt = `You are an expert business evaluator providing comprehensive analysis.
+  // Extract open-ended responses for the comprehensive analysis
+  const openEndedResponses = responses.filter(r => ['q3', 'q8', 'q18', 'q23'].includes(r.questionId));
+  
+  const visionResponse = openEndedResponses.find(r => r.questionId === 'q23')?.response || 'Not provided';
+  const journeyResponse = openEndedResponses.find(r => r.questionId === 'q3')?.response || 'Not provided';
+  const challengeResponse = openEndedResponses.find(r => r.questionId === 'q8')?.response || 'Not provided';
+  const setbackResponse = openEndedResponses.find(r => r.questionId === 'q18')?.response || 'Not provided';
+  
+  const prompt = `You are an expert entrepreneurship coach and evaluator. Based on a founder's responses to the four key questions below, generate a short paragraph (3-4 sentences) of encouraging and insightful feedback. 
 
-Assessment Scores:
-- Personal Background: ${scores.personalBackground}/20
-- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
-- Resources: ${scores.resources}/20
-- Behavioral Metrics: ${scores.behavioralMetrics}/15
-- Growth Vision: ${scores.growthVision}/20
-- Overall Score: ${Object.values(scores).reduce((a: any, b: any) => a + b, 0)}/100
+Your role is to provide honest, constructive guidance that helps the founder recognize what they're doing well, where they can improve, and what next step would make the biggest difference. Use a warm, growth-oriented tone—like a coach who genuinely wants them to win. Be specific, but avoid jargon or over-generalization.
 
-Industry: ${industry || 'General'}
-Location: ${location || 'Unknown'}
+Founder's Responses:
+- Vision Statement: ${visionResponse}
+- Entrepreneurial Journey: ${journeyResponse}
+- Business Challenge: ${challengeResponse}
+- Setback Response: ${setbackResponse}
 
-Provide a comprehensive 3-4 paragraph analysis of this entrepreneur's profile. Include:
-1. Overall assessment of their entrepreneurial readiness
-2. Key strengths and how they position them for success
-3. Critical areas for improvement and specific recommendations
-4. Industry-specific insights and opportunities
+---
 
-Be thorough, specific, and actionable.`;
+Response Format:
+Return ONLY the response as plain text, without JSON formatting, markdown, or additional headers. Do NOT include the original responses or re-summarize them. Do NOT exceed 120 words. Make it feel personalized and authentic.`;
 
   const response = await callGemini(prompt, apiKey);
   return response;
 }
 
 export async function generateNextStepsText(scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
-  const prompt = `You are an expert business evaluator providing actionable next steps.
+  const prompt = `Context:
+You are an expert business evaluator analyzing an entrepreneur's assessment results. Your goal is to extract actionable insights by identifying their personalized next steps based on their Gutcheck Score.
 
-Assessment Scores:
-- Personal Background: ${scores.personalBackground}/20
-- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
-- Resources: ${scores.resources}/20
-- Behavioral Metrics: ${scores.behavioralMetrics}/15
-- Growth Vision: ${scores.growthVision}/20
+Assessment Categories & Scores:
 
-Industry: ${industry || 'General'}
-Location: ${location || 'Unknown'}
+Personal Background Score: ${scores.personalBackground}/20
 
-Provide 4-5 specific, actionable next steps this entrepreneur should take to improve their profile and increase their chances of success. Focus on the areas where they scored lowest and provide concrete, implementable recommendations.
+Entrepreneurial Skills Score: ${scores.entrepreneurialSkills}/25
 
-Format as a numbered list with clear, specific actions.`;
+Resources Score: ${scores.resources}/20
+
+Behavioral Metrics Score: ${scores.behavioralMetrics}/15
+
+Growth & Vision Score: ${scores.growthVision}/20
+
+Industry: ${industry || 'Creative & Media'}
+
+Location: ${location || 'Delaware'}
+
+Step 1: Generate Personalized Next Steps
+🔴 HARD RULE: MUST INCLUDE CURRENT, VALID, AND SPECIFIC LINKS
+Mentorship:
+Identify an active and credible mentorship program, incubator, accelerator, or networking group specific to the entrepreneur's exact industry and location. Verify that the link is active and the community is currently accepting new participants. If no local program exists, suggest an online mentorship community (not generic like Y Combinator or Techstars—find specific, niche communities like Slack groups, active LinkedIn groups, or industry-specific Reddit communities).
+Resources:
+Find current grants, funding opportunities, or business tools specifically relevant to their industry and location.
+Provide direct application links whenever available. Ensure the resource's link is valid and active. If local resources aren't found, recommend reputable online platforms offering grants or tools (e.g., Hello Alice, Fundera, local Chamber of Commerce funding pages).
+Learning:
+Recommend a currently available and relevant course, article, book, or video directly addressing their improvement areas.
+Source from highly regarded platforms (e.g., Coursera, Udemy, Amazon, Skillshare) or recent (within the last year) highly rated Medium articles, LinkedIn articles, or industry blogs. Confirm the link is accessible and current.
+Your response should feel tailored, actionable, and timely, resembling a personalized coaching conversation.
+Clearly label each step and category.
+Ensure all recommended links are verified and active before including them.
+max 200 characters for each category.
+No little hashtags or stars or any other weird characters, just the text.
+See below an example of how the output should look:
+Mentorship: Delaware Innovation Space
+Funding: Delaware Arts Grants
+Learning: Coursera's "Creative Entrepreneurship"`;
 
   const response = await callGemini(prompt, apiKey);
   return response;

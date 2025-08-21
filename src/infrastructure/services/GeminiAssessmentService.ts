@@ -85,6 +85,7 @@ export class GeminiAssessmentService implements IAIScoringService {
       const result = await apiResponse.json();
       
       return {
+        keyInsights: result.keyInsights || '',
         feedback: result.feedback || '',
         competitiveAdvantage: result.competitiveAdvantage || {
           category: '',

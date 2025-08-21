@@ -105,6 +105,7 @@ setGlobalOptions({ maxInstances: 10 });
 
 // Import AI helper functions
 import { 
+  generateKeyInsights,
   generateFeedbackText, 
   generateCompetitiveAdvantage, 
   generateGrowthOpportunity, 
@@ -142,10 +143,11 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     }
 
     // Generate enhanced feedback using the new AI functions with individual error handling
-    let feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps;
+    let keyInsights, feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps;
     
     try {
-      [feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps] = await Promise.all([
+      [keyInsights, feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps] = await Promise.all([
+        generateKeyInsights(responses, scores, apiKey, industry, location),
         generateFeedbackText(responses, scores, apiKey),
         generateCompetitiveAdvantage(responses, scores, apiKey, industry, location),
         generateGrowthOpportunity(responses, scores, apiKey, industry, location),
@@ -156,6 +158,13 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     } catch (error) {
       console.error('Error in Promise.all:', error);
       // Fallback to individual calls with error handling
+             try {
+         keyInsights = await generateKeyInsights(responses, scores, apiKey, industry, location);
+       } catch (e) {
+         console.error('Error generating key insights:', e);
+         keyInsights = null;
+       }
+      
              try {
          feedback = await generateFeedbackText(responses, scores, apiKey);
        } catch (e) {
@@ -201,6 +210,7 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
 
     // Debug logging to see what's being returned
     console.log('Generated AI feedback:', {
+      keyInsights: keyInsights ? 'present' : 'missing',
       feedback: feedback ? 'present' : 'missing',
       competitiveAdvantage: competitiveAdvantage ? 'present' : 'missing',
       growthOpportunity: growthOpportunity ? 'present' : 'missing',
@@ -215,6 +225,7 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     }
 
     response.json({
+      keyInsights,
       feedback,
       competitiveAdvantage,
       growthOpportunity,
