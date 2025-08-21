@@ -1,16 +1,24 @@
-# ADK Agent Dependencies
+# Google ADK Dependencies
 google-adk>=1.11.0
+google-generativeai>=0.3.0
+
+# Web Framework
 fastapi>=0.104.0
 uvicorn>=0.24.0
-pydantic>=2.0.0
-aiohttp>=3.8.0
+functions-framework>=3.4.0
+
+# Database & Storage (Firebase/Firestore integration)
+firebase-admin>=6.2.0
+google-cloud-firestore>=2.11.0
+
+# Utilities
 python-dotenv>=1.0.0
+pydantic>=2.0.0
+httpx>=0.25.0
 
-# Enhanced System Dependencies
-requests>=2.31.0
-dataclasses>=0.6; python_version<"3.7"
-
-# Development dependencies
-pytest>=7.0.0
+# Development and Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.11.0
 black>=23.0.0
 flake8>=6.0.0

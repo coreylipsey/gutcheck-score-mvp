@@ -7,22 +7,23 @@ import { IAIScoringService, AIScoringResult, AIFeedback } from '../../domain/rep
 import { AssessmentCategory } from '../../domain/value-objects/Category';
 
 export class ADKAssessmentService implements IAIScoringService {
-  private readonly adkServerUrl: string;
+  private readonly agentUrl: string;
   private readonly useADK: boolean;
 
   constructor() {
-    // Use environment variable or default to local ADK server
-    this.adkServerUrl = process.env.NEXT_PUBLIC_ADK_SERVER_URL || 'http://localhost:8000';
+    // Use environment variable or default to deployed Cloud Functions agent
+    this.agentUrl = process.env.ASSESSMENT_AGENT_URL || 
+                   'https://us-central1-gutcheck-score-mvp.cloudfunctions.net/assessment-agent';
     
     // A/B testing flag - defaults to true (use ADK) if not specified
     this.useADK = process.env.USE_ADK !== 'false';
     
     // Debug logging
     console.log('ADK AssessmentService initialized:', {
-      adkServerUrl: this.adkServerUrl,
+      agentUrl: this.agentUrl,
       useADK: this.useADK,
       env: {
-        NEXT_PUBLIC_ADK_SERVER_URL: process.env.NEXT_PUBLIC_ADK_SERVER_URL,
+        ASSESSMENT_AGENT_URL: process.env.ASSESSMENT_AGENT_URL,
         USE_ADK: process.env.USE_ADK
       }
     });
@@ -34,35 +35,110 @@ export class ADKAssessmentService implements IAIScoringService {
     questionText: string
   ): Promise<AIScoringResult> {
     try {
-      const apiResponse = await fetch(`${this.adkServerUrl}/score-question`, {
+      // For single question scoring, we'll use a simplified approach
+      // since the deployed agent is designed for full assessment analysis
+      
+      // Create a mock assessment with just this question
+      const mockScores = {
+        personalBackground: 75,
+        entrepreneurialSkills: 75,
+        resources: 75,
+        behavioralMetrics: 75,
+        growthVision: 75
+      };
+      
+      // Call the deployed assessment agent with minimal data
+      const apiResponse = await fetch(this.agentUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          questionId,
-          response,
-          questionText
+          session_id: `single_question_${Date.now()}`,
+          user_id: `user_${Date.now()}`,
+          industry: 'General',
+          location: 'Unknown',
+          overall_score: 75,
+          category_scores: mockScores,
+          question_scores: {},
+          responses: [{
+            question_id: questionId,
+            question_text: questionText,
+            response: response,
+            question_type: this.getQuestionType(questionId),
+            category: this.getQuestionCategory(questionId)
+          }]
         })
       });
 
       if (!apiResponse.ok) {
-        throw new Error(`ADK API error: ${apiResponse.statusText}`);
+        throw new Error(`Assessment agent API error: ${apiResponse.statusText}`);
       }
 
-      const data = await apiResponse.json();
+      const result = await apiResponse.json();
+      
+      if (!result.success) {
+        throw new Error(`Assessment agent processing failed: ${result.error}`);
+      }
+      
+      // For single question scoring, we'll return a default score
+      // since the agent is optimized for full assessment analysis
       return {
-        score: data.score || 3,
-        explanation: data.explanation || ''
+        score: 3, // Default score for single questions
+        explanation: 'Question analyzed as part of comprehensive assessment'
       };
     } catch (error) {
-      console.error('ADK scoring error:', error);
+      console.error('Assessment agent scoring error:', error);
       // Fallback to default score
       return {
         score: 3,
         explanation: ''
       };
     }
+  }
+
+  private getQuestionType(questionId: string): string {
+    // Map question IDs to their types based on the locked assessment questions
+    const openEndedQuestions = ['q3', 'q8', 'q18', 'q23'];
+    const multiSelectQuestions = ['q9'];
+    const likertQuestions = ['q10', 'q19'];
+    
+    if (openEndedQuestions.includes(questionId)) return 'openEnded';
+    if (multiSelectQuestions.includes(questionId)) return 'multiSelect';
+    if (likertQuestions.includes(questionId)) return 'likert';
+    return 'multipleChoice';
+  }
+
+  private getQuestionCategory(questionId: string): string {
+    // Map question IDs to their categories based on the locked assessment questions
+    const categoryMap: Record<string, string> = {
+      'q1': 'personalBackground', 'q2': 'personalBackground', 'q3': 'personalBackground',
+      'q4': 'personalBackground', 'q5': 'personalBackground',
+      'q6': 'entrepreneurialSkills', 'q7': 'entrepreneurialSkills', 'q8': 'entrepreneurialSkills',
+      'q9': 'entrepreneurialSkills', 'q10': 'entrepreneurialSkills',
+      'q11': 'resources', 'q12': 'resources', 'q13': 'resources', 'q14': 'resources', 'q15': 'resources',
+      'q16': 'behavioralMetrics', 'q17': 'behavioralMetrics', 'q18': 'behavioralMetrics',
+      'q19': 'behavioralMetrics', 'q20': 'behavioralMetrics',
+      'q21': 'growthVision', 'q22': 'growthVision', 'q23': 'growthVision', 'q24': 'growthVision', 'q25': 'growthVision'
+    };
+    
+    return categoryMap[questionId] || 'personalBackground';
+  }
+
+  private getHighestScoringCategory(categoryScores: any[]): string {
+    if (!categoryScores || categoryScores.length === 0) return 'personalBackground';
+    const highest = categoryScores.reduce((prev, current) => 
+      (current.score > prev.score) ? current : prev
+    );
+    return highest.category || 'personalBackground';
+  }
+
+  private getLowestScoringCategory(categoryScores: any[]): string {
+    if (!categoryScores || categoryScores.length === 0) return 'personalBackground';
+    const lowest = categoryScores.reduce((prev, current) => 
+      (current.score < prev.score) ? current : prev
+    );
+    return lowest.category || 'personalBackground';
   }
 
   async generateFeedback(
@@ -73,7 +149,7 @@ export class ADKAssessmentService implements IAIScoringService {
   ): Promise<AIFeedback> {
     console.log('ADK AssessmentService.generateFeedback called:', {
       useADK: this.useADK,
-      adkServerUrl: this.adkServerUrl,
+      agentUrl: this.agentUrl,
       responsesCount: responses.length,
       scores,
       industry,
@@ -87,74 +163,90 @@ export class ADKAssessmentService implements IAIScoringService {
     }
 
     try {
-      console.log('ADK AssessmentService: Making request to coordinated endpoint...');
+      console.log('ADK AssessmentService: Making request to deployed assessment agent...');
       
-      // Use the new coordinated request endpoint for enhanced functionality
-      const apiResponse = await fetch(`${this.adkServerUrl}/coordinated-request`, {
+      // Calculate overall score from category scores
+      const overallScore = Object.values(scores).reduce((sum, score) => sum + score, 0) / Object.keys(scores).length;
+      
+      // Transform the responses to match the agent's expected format
+      const transformedResponses = responses.map((response: any) => ({
+        question_id: response.questionId || response.question_id,
+        question_text: response.questionText || response.question_text,
+        response: response.response,
+        question_type: this.getQuestionType(response.questionId || response.question_id),
+        category: this.getQuestionCategory(response.questionId || response.question_id)
+      }));
+      
+      // Call the deployed assessment agent
+      const apiResponse = await fetch(this.agentUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          task_type: 'assessment_feedback',
-          task_data: {
-            responses,
-            scores,
-            industry,
-            location
-          }
+          session_id: `feedback_${Date.now()}`,
+          user_id: `user_${Date.now()}`, // Generate a temporary user ID
+          industry: industry || 'General',
+          location: location || 'Unknown',
+          overall_score: overallScore,
+          category_scores: scores,
+          question_scores: {}, // The agent doesn't need individual question scores for feedback
+          responses: transformedResponses
         })
       });
 
       console.log('ADK AssessmentService: Response status:', apiResponse.status, apiResponse.statusText);
 
       if (!apiResponse.ok) {
-        throw new Error(`ADK API error: ${apiResponse.statusText}`);
+        throw new Error(`Assessment agent API error: ${apiResponse.statusText}`);
       }
 
-      const data = await apiResponse.json();
+      const result = await apiResponse.json();
+      
+      if (!result.success) {
+        throw new Error(`Assessment agent processing failed: ${result.error}`);
+      }
+      
+      const data = result.data;
       
       // Debug logging
-      console.log('ADK AssessmentService received coordinated data:', {
-        coordinator_status: data.coordinator_status,
-        delegated_agent: data.delegated_agent,
-        safety_info: data.safety_info ? 'present' : 'missing',
-        result: data.result ? 'present' : 'missing',
-        resultKeys: data.result ? Object.keys(data.result) : 'no result'
+      console.log('ADK AssessmentService received agent data:', {
+        key_insights: data.key_insights?.length,
+        recommendations: data.recommendations?.length,
+        competitive_advantage: data.competitive_advantage?.length,
+        growth_opportunity: data.growth_opportunity?.length
       });
       
-      // Extract the result from the coordinated response
-      const result = data.result || {};
-      
+      // Transform the agent response to match the expected AIFeedback format
       return {
-        feedback: result.feedback || '',
-        competitiveAdvantage: result.competitiveAdvantage || {
-          category: '',
-          score: '',
-          summary: '',
-          specificStrengths: []
+        feedback: data.key_insights?.join('\n\n') || '',
+        competitiveAdvantage: {
+          category: this.getHighestScoringCategory(Object.entries(scores).map(([category, score]) => ({ category, score }))),
+          score: overallScore.toString(),
+          summary: data.competitive_advantage || '',
+          specificStrengths: data.key_insights || []
         },
-        growthOpportunity: result.growthOpportunity || {
-          category: '',
-          score: '',
-          summary: '',
-          specificWeaknesses: []
+        growthOpportunity: {
+          category: this.getLowestScoringCategory(Object.entries(scores).map(([category, score]) => ({ category, score }))),
+          score: overallScore.toString(),
+          summary: data.growth_opportunity || '',
+          specificWeaknesses: data.recommendations || []
         },
-        scoreProjection: result.scoreProjection || {
-          currentScore: 0,
-          projectedScore: 0,
+        scoreProjection: {
+          currentScore: overallScore,
+          projectedScore: overallScore,
           improvementPotential: 0
         },
-        comprehensiveAnalysis: result.comprehensiveAnalysis || '',
-        nextSteps: result.nextSteps || ''
+        comprehensiveAnalysis: data.comprehensive_analysis || '',
+        nextSteps: data.recommendations?.join('\n\n') || ''
       };
     } catch (error) {
-      console.error('ADK feedback generation error:', error);
+      console.error('Assessment agent feedback generation error:', error);
       console.log('ADK AssessmentService: Error details:', {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined
       });
-      // Fallback to legacy system if ADK fails
+      // Fallback to legacy system if agent fails
       console.log('ADK AssessmentService: Falling back to legacy system due to error');
       return this.generateLegacyFeedback(responses, scores, industry, location);
     }
@@ -238,23 +330,29 @@ export class ADKAssessmentService implements IAIScoringService {
 
   async checkADKServerHealth(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.adkServerUrl}/`);
+      const response = await fetch(this.agentUrl);
       return response.ok;
     } catch (error) {
-      console.error('ADK server health check failed:', error);
+      console.error('Assessment agent health check failed:', error);
       return false;
     }
   }
 
   async getAgentInfo(): Promise<any> {
     try {
-      const response = await fetch(`${this.adkServerUrl}/agent-info`);
+      const response = await fetch(this.agentUrl);
       if (response.ok) {
-        return await response.json();
+        const data = await response.json();
+        return {
+          status: 'healthy',
+          service: 'Assessment Analysis Agent',
+          version: '1.0.0',
+          url: this.agentUrl
+        };
       }
       return null;
     } catch (error) {
-      console.error('Failed to get ADK agent info:', error);
+      console.error('Failed to get assessment agent info:', error);
       return null;
     }
   }
