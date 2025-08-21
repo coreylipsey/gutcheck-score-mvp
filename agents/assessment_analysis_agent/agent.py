@@ -521,21 +521,21 @@ The {lowest_weight}% weight of {get_category_display_name(lowest_category['categ
             Based on the assessment score for the {category} category ({score:.1f}/100), generate 1-2 specific insights.
             
             Focus on what this score reveals about this entrepreneur's {category} strengths and areas for improvement.
-            
-            Return as a JSON array of insight strings.
-            """
-            
+        
+        Return as a JSON array of insight strings.
+        """
+        
             async for result in self.canonical_model.generate_content_async(prompt):
                 response_text = result if isinstance(result, str) else result.text
                 break  # Take the first result
-            
-            # Parse JSON response
-            json_match = re.search(r'\[.*\]', response_text, re.DOTALL)
-            
-            if not json_match:
-                insights = [f"Category {category} scored {score:.1f}/100"]
-            else:
-                insights = json.loads(json_match.group())
+        
+        # Parse JSON response
+        json_match = re.search(r'\[.*\]', response_text, re.DOTALL)
+        
+        if not json_match:
+            insights = [f"Category {category} scored {score:.1f}/100"]
+        else:
+            insights = json.loads(json_match.group())
             
             category_insights.append({
                 "category": category,

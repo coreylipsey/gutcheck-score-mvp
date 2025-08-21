@@ -1,247 +1,129 @@
-# Gutcheck ADK Agent Integration
+# Gutcheck.AI Agent System
 
-This directory contains the Google ADK (Agent Development Kit) integration for the Gutcheck assessment system. The ADK agent provides enhanced AI capabilities for generating comprehensive entrepreneurial assessment feedback.
+AI-powered assessment agents for instant entrepreneurial evaluation and feedback.
 
-## 🚀 Quick Start
+## 🎯 Strategic Vision
 
-### Prerequisites
-- Python 3.8+
-- Google ADK package (`google-adk>=1.11.0`)
-- Gemini API key
+Gutcheck.AI is building intelligent agents to transform entrepreneurial assessment from a 24+ hour manual process into an instant, intelligent, and scalable system.
 
-### Installation
+### Why Agents? The 3-Question Test
+
+✅ **High Frequency**: 50-100+ assessments processed daily  
+✅ **Time Sensitive**: Delays cost revenue through lead cooling  
+✅ **Rule-Based**: Clear scoring and feedback patterns  
+
+## 🚀 Current Focus: Assessment Analysis Agent
+
+**Phase 1 Pilot**: Instant assessment analysis and feedback generation
+
+**Target Impact:**
+- **99.7% Faster Response**: 24+ hours → <30 seconds
+- **10x Cost Reduction**: $100+ → <$1 per assessment  
+- **Improved User Experience**: Instant gratification
+- **24/7 Availability**: No human bottlenecks
+
+## 🏗️ Technical Architecture
+
+### Framework: LangChain
+- **Predictable Workflows**: Assessment analysis follows consistent patterns
+- **Rich Ecosystem**: Extensive tools for data processing and analysis
+- **Production Ready**: Battle-tested in enterprise environments
+- **Observability**: Excellent monitoring and debugging capabilities
+
+### Technology Stack
+- **LangChain**: Primary agent framework
+- **Python**: Backend development
+- **FastAPI**: API development
+- **PostgreSQL**: Data storage
+- **OpenAI GPT-4**: Primary LLM
+
+## 📁 Project Structure
+
+```
+agents/
+├── README.md                    # This file
+├── requirements.txt             # Python dependencies
+├── AGENT_STRATEGY_FRAMEWORK.md  # Strategic analysis
+├── IMPLEMENTATION_ROADMAP.md    # Development roadmap
+├── env.example                  # Environment template
+└── (ready for agent development)
+```
+
+## 🚀 Getting Started
+
+### 1. Environment Setup
 ```bash
 # Install dependencies
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 
-# Set up environment (copy env.example to .env and configure)
+# Set up environment
 cp env.example .env
+# Add your API keys to .env
 ```
 
-### Starting the ADK Server
-```bash
-# Option 1: Use the startup script
-./start_adk_server.sh
+### 2. Development Phases
 
-# Option 2: Start manually
-python3 server.py
-```
+**Phase 1A: MVP Development (Weeks 1-2)**
+- Basic assessment agent prototype
+- Scoring logic implementation
+- Integration with existing systems
 
-The server will start on `http://localhost:8000` by default.
+**Phase 1B: Knowledge Integration (Weeks 3-4)**
+- Historical data training
+- Expert feedback patterns
+- Quality validation
 
-## 🏗️ Architecture
+**Phase 1C: Production Deployment (Weeks 5-6)**
+- Live deployment
+- User testing and feedback
+- Performance optimization
 
-### Core Components
+## 📊 Success Metrics
 
-1. **ADK Agent** (`core_assessment_agent/agent.py`)
-   - Main agent configuration using Google ADK
-   - Uses Gemini 2.0 Flash model
-   - Integrates with assessment tools
+### Phase 1 Targets
+- **Response Time**: <30 seconds (99.7% improvement)
+- **Accuracy**: >95% match human analysis
+- **User Satisfaction**: >90% positive feedback
+- **Cost per Assessment**: <$1 (99% cost reduction)
 
-2. **Assessment Tools** (`core_assessment_agent/tools/`)
-   - `competitive_advantage.py` - Analyzes strengths
-   - `growth_opportunity.py` - Identifies improvement areas
-   - `comprehensive_analysis.py` - Sports scouting report style analysis
-   - `next_steps.py` - Actionable recommendations with real URLs
-   - `question_scoring.py` - Scores open-ended questions
+## 🔄 Roadmap
 
-3. **Toolset** (`core_assessment_agent/toolset.py`)
-   - Organizes all assessment tools using ADK patterns
-   - Provides clean interface for tool management
+### Phase 1: Assessment Analysis (Month 1)
+- ✅ Strategic framework defined
+- ✅ Implementation roadmap created
+- 🔄 MVP development in progress
+- ⏳ Production deployment
 
-4. **API Server** (`server.py`)
-   - FastAPI server exposing ADK agent functionality
-   - RESTful endpoints for integration with main application
-   - CORS enabled for cross-origin requests
+### Phase 2: Enhanced Features (Month 2-3)
+- Personalization & context awareness
+- Support & onboarding automation
+- Sales & marketing optimization
 
-## 🔌 API Endpoints
+### Phase 3: Analytics & Optimization (Month 3-4)
+- Advanced analytics and insights
+- Performance optimization
+- Business intelligence
 
-### Health Check
-```http
-GET /
-```
-Returns server status and agent information.
+### Phase 4: Scale & Innovation (Month 4+)
+- Multi-agent orchestration
+- Platform expansion
+- API & integration ecosystem
 
-### Agent Information
-```http
-GET /agent-info
-```
-Returns detailed information about the ADK agent configuration.
+## 📚 Documentation
 
-### Generate Feedback
-```http
-POST /generate-feedback
-Content-Type: application/json
+- **[Agent Strategy Framework](AGENT_STRATEGY_FRAMEWORK.md)**: Strategic analysis and business case
+- **[Implementation Roadmap](IMPLEMENTATION_ROADMAP.md)**: Detailed development plan
+- **[Environment Setup](env.example)**: Configuration template
 
-{
-  "responses": [...],
-  "scores": {...},
-  "industry": "Technology",
-  "location": "San Francisco"
-}
-```
-Generates comprehensive AI feedback including:
-- Competitive advantages
-- Growth opportunities  
-- Comprehensive analysis
-- Actionable next steps
+## 🎯 Next Steps
 
-### Score Question
-```http
-POST /score-question
-Content-Type: application/json
+1. **Set up development environment** with LangChain
+2. **Create basic assessment agent** prototype
+3. **Gather initial assessment data** for training
+4. **Define success metrics** and monitoring
 
-{
-  "questionId": "q3",
-  "response": "User response text...",
-  "questionText": "Question text..."
-}
-```
-Scores individual open-ended questions.
+---
 
-## 🔧 Integration with Main Application
+**Mission**: Transform Gutcheck.AI into the world's fastest, most intelligent entrepreneurial assessment platform through AI agent technology.
 
-### Environment Configuration
-Add to your Next.js environment:
-```env
-NEXT_PUBLIC_ADK_SERVER_URL=http://localhost:8000
-```
-
-### Service Integration
-The main application uses `ADKAssessmentService` which:
-- Connects to the ADK server
-- Provides fallback mechanisms
-- Handles error cases gracefully
-- Maintains compatibility with existing interfaces
-
-### Dependency Injection
-The DI container is configured to use the ADK service:
-```typescript
-container.register('IAIScoringService', () => 
-  new ADKAssessmentService()
-);
-```
-
-## 🧪 Testing
-
-### Run Integration Tests
-```bash
-python3 test_adk_integration.py
-```
-
-Tests include:
-- Health check
-- Agent info retrieval
-- Feedback generation
-- Question scoring
-
-### Manual Testing
-```bash
-# Test health endpoint
-curl http://localhost:8000/
-
-# Test agent info
-curl http://localhost:8000/agent-info
-
-# Test feedback generation
-curl -X POST http://localhost:8000/generate-feedback \
-  -H "Content-Type: application/json" \
-  -d @test_data.json
-```
-
-## 🔄 Deployment
-
-### Local Development
-1. Start the ADK server: `python3 server.py`
-2. Configure main app to use `http://localhost:8000`
-3. Run integration tests to verify functionality
-
-### Production Deployment
-1. Deploy ADK server to cloud platform (GCP, AWS, etc.)
-2. Update `NEXT_PUBLIC_ADK_SERVER_URL` to production URL
-3. Ensure proper CORS configuration
-4. Set up monitoring and logging
-
-## 🛠️ Development
-
-### Adding New Tools
-1. Create new tool file in `core_assessment_agent/tools/`
-2. Add function to `AssessmentToolset`
-3. Update agent instructions
-4. Add tests
-
-### Modifying Prompts
-Edit the prompt templates in individual tool files to customize AI behavior.
-
-### Debugging
-- Check server logs for errors
-- Use the test script to verify functionality
-- Monitor API responses for expected format
-
-## 📊 Performance
-
-### Current Capabilities
-- ✅ Health check and monitoring
-- ✅ Comprehensive feedback generation
-- ✅ Question scoring
-- ✅ Error handling and fallbacks
-- ✅ Integration with main application
-
-### Optimization Opportunities
-- Caching frequently used responses
-- Batch processing for multiple assessments
-- Async processing for long-running operations
-- Rate limiting and request queuing
-
-## 🔒 Security
-
-### API Security
-- CORS configuration for allowed origins
-- Input validation and sanitization
-- Error message sanitization
-- Rate limiting (recommended for production)
-
-### Environment Variables
-- Store sensitive keys in environment variables
-- Use `.env` file for local development
-- Never commit API keys to version control
-
-## 📝 Troubleshooting
-
-### Common Issues
-
-1. **Import Errors**
-   ```bash
-   pip3 install -r requirements.txt
-   ```
-
-2. **Port Already in Use**
-   ```bash
-   lsof -ti:8000 | xargs kill -9
-   ```
-
-3. **ADK Agent Not Loading**
-   ```bash
-   python3 -c "from core_assessment_agent.agent import core_assessment_agent; print('Agent loaded')"
-   ```
-
-4. **API Connection Issues**
-   - Check if server is running: `curl http://localhost:8000/`
-   - Verify CORS configuration
-   - Check network connectivity
-
-### Logs and Debugging
-- Server logs appear in terminal when running `python3 server.py`
-- Use `test_adk_integration.py` for comprehensive testing
-- Check browser network tab for API call details
-
-## 🤝 Contributing
-
-1. Follow existing code patterns
-2. Add tests for new functionality
-3. Update documentation
-4. Test integration thoroughly
-
-## 📄 License
-
-This ADK integration is part of the Gutcheck.AI assessment system.
+**Vision**: Every entrepreneur gets instant, personalized, and actionable feedback to accelerate their success.

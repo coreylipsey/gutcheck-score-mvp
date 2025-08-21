@@ -30,6 +30,7 @@ steps:
       - 'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=286731768309'
       - 'NEXT_PUBLIC_FIREBASE_APP_ID=1:286731768309:web:daa2346433cefedc1e90bc'
       - 'ASSESSMENT_AGENT_URL=https://us-central1-gutcheck-score-mvp.cloudfunctions.net/assessment-agent'
+      - 'OPEN_ENDED_SCORING_AGENT_URL=https://us-central1-gutcheck-score-mvp.cloudfunctions.net/open-ended-scoring-agent'
 
   # Step 4: Build Firebase Functions
   - name: 'node:20'

@@ -20,6 +20,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     NEXT_PUBLIC_ADK_SERVER_URL: process.env.NEXT_PUBLIC_ADK_SERVER_URL || 'https://gutcheck-adk-agent-286731768309.us-central1.run.app',
     ASSESSMENT_AGENT_URL: process.env.ASSESSMENT_AGENT_URL || 'https://us-central1-gutcheck-score-mvp.cloudfunctions.net/assessment-agent',
+    OPEN_ENDED_SCORING_AGENT_URL: process.env.OPEN_ENDED_SCORING_AGENT_URL || 'https://us-central1-gutcheck-score-mvp.cloudfunctions.net/open-ended-scoring-agent',
   },
   webpack: (config, { dev, isServer }) => {
     // Exclude functions directory from the build

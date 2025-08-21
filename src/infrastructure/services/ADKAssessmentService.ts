@@ -8,6 +8,7 @@ import { AssessmentCategory } from '../../domain/value-objects/Category';
 
 export class ADKAssessmentService implements IAIScoringService {
   private readonly agentUrl: string;
+  private readonly scoringAgentUrl: string;
   private readonly useADK: boolean;
 
   constructor() {
@@ -15,15 +16,21 @@ export class ADKAssessmentService implements IAIScoringService {
     this.agentUrl = process.env.ASSESSMENT_AGENT_URL || 
                    'https://us-central1-gutcheck-score-mvp.cloudfunctions.net/assessment-agent';
     
+    // Use environment variable or default to deployed scoring agent
+    this.scoringAgentUrl = process.env.OPEN_ENDED_SCORING_AGENT_URL || 
+                          'https://us-central1-gutcheck-score-mvp.cloudfunctions.net/open-ended-scoring-agent';
+    
     // A/B testing flag - defaults to true (use ADK) if not specified
     this.useADK = process.env.USE_ADK !== 'false';
     
     // Debug logging
     console.log('ADK AssessmentService initialized:', {
       agentUrl: this.agentUrl,
+      scoringAgentUrl: this.scoringAgentUrl,
       useADK: this.useADK,
       env: {
         ASSESSMENT_AGENT_URL: process.env.ASSESSMENT_AGENT_URL,
+        OPEN_ENDED_SCORING_AGENT_URL: process.env.OPEN_ENDED_SCORING_AGENT_URL,
         USE_ADK: process.env.USE_ADK
       }
     });
@@ -35,64 +42,40 @@ export class ADKAssessmentService implements IAIScoringService {
     questionText: string
   ): Promise<AIScoringResult> {
     try {
-      // For single question scoring, we'll use a simplified approach
-      // since the deployed agent is designed for full assessment analysis
-      
-      // Create a mock assessment with just this question
-      const mockScores = {
-        personalBackground: 75,
-        entrepreneurialSkills: 75,
-        resources: 75,
-        behavioralMetrics: 75,
-        growthVision: 75
-      };
-      
-      // Call the deployed assessment agent with minimal data
-      const apiResponse = await fetch(this.agentUrl, {
+      // Call the specialized open-ended scoring agent
+      const apiResponse = await fetch(this.scoringAgentUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          session_id: `single_question_${Date.now()}`,
-          user_id: `user_${Date.now()}`,
-          industry: 'General',
-          location: 'Unknown',
-          overall_score: 75,
-          category_scores: mockScores,
-          question_scores: {},
-          responses: [{
-            question_id: questionId,
-            question_text: questionText,
-            response: response,
-            question_type: this.getQuestionType(questionId),
-            category: this.getQuestionCategory(questionId)
-          }]
+          question_id: questionId,
+          response: response,
+          question_text: questionText
         })
       });
 
       if (!apiResponse.ok) {
-        throw new Error(`Assessment agent API error: ${apiResponse.statusText}`);
+        throw new Error(`Scoring agent API error: ${apiResponse.statusText}`);
       }
 
       const result = await apiResponse.json();
       
       if (!result.success) {
-        throw new Error(`Assessment agent processing failed: ${result.error}`);
+        throw new Error(`Scoring agent processing failed: ${result.error}`);
       }
       
-      // For single question scoring, we'll return a default score
-      // since the agent is optimized for full assessment analysis
+      // Return the scored result from the agent
       return {
-        score: 3, // Default score for single questions
-        explanation: 'Question analyzed as part of comprehensive assessment'
+        score: result.score,
+        explanation: result.explanation
       };
     } catch (error) {
-      console.error('Assessment agent scoring error:', error);
-      // Fallback to default score
+      console.error('Open-ended scoring agent error:', error);
+      // Fallback to default score (same as old system)
       return {
         score: 3,
-        explanation: ''
+        explanation: error instanceof Error ? error.message : 'Scoring failed'
       };
     }
   }
