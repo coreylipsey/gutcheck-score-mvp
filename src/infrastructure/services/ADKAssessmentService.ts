@@ -1,37 +1,27 @@
-/**
- * ADK Assessment Service
- * Integrates Google ADK Core Assessment Agent with existing Clean Architecture
- */
-
 import { IAIScoringService, AIScoringResult, AIFeedback } from '../../domain/repositories/IAIScoringService';
 import { AssessmentCategory } from '../../domain/value-objects/Category';
+import { ASSESSMENT_QUESTIONS } from '../../domain/entities/Assessment';
 
 export class ADKAssessmentService implements IAIScoringService {
+  private readonly useADK: boolean;
   private readonly agentUrl: string;
   private readonly scoringAgentUrl: string;
-  private readonly useADK: boolean;
+  private readonly adkServerUrl: string;
 
   constructor() {
-    // Use environment variable or default to deployed Cloud Functions agent
-    this.agentUrl = process.env.ASSESSMENT_AGENT_URL || 
-                   'https://us-central1-gutcheck-score-mvp.cloudfunctions.net/assessment-agent';
+    this.useADK = process.env.USE_ADK_AGENT === 'true';
+    this.agentUrl = process.env.ASSESSMENT_AGENT_URL || 'http://localhost:8000/process_assessment';
+    this.scoringAgentUrl = process.env.OPEN_ENDED_SCORING_AGENT_URL || 'http://localhost:8000/score_open_ended';
+    this.adkServerUrl = process.env.ADK_SERVER_URL || 'http://localhost:8000';
     
-    // Use environment variable or default to deployed scoring agent
-    this.scoringAgentUrl = process.env.OPEN_ENDED_SCORING_AGENT_URL || 
-                          'https://us-central1-gutcheck-score-mvp.cloudfunctions.net/open-ended-scoring-agent';
-    
-    // A/B testing flag - defaults to true (use ADK) if not specified
-    this.useADK = process.env.USE_ADK !== 'false';
-    
-    // Debug logging
     console.log('ADK AssessmentService initialized:', {
       agentUrl: this.agentUrl,
       scoringAgentUrl: this.scoringAgentUrl,
       useADK: this.useADK,
       env: {
+        USE_ADK_AGENT: process.env.USE_ADK_AGENT,
         ASSESSMENT_AGENT_URL: process.env.ASSESSMENT_AGENT_URL,
-        OPEN_ENDED_SCORING_AGENT_URL: process.env.OPEN_ENDED_SCORING_AGENT_URL,
-        USE_ADK: process.env.USE_ADK
+        OPEN_ENDED_SCORING_AGENT_URL: process.env.OPEN_ENDED_SCORING_AGENT_URL
       }
     });
   }
@@ -42,7 +32,8 @@ export class ADKAssessmentService implements IAIScoringService {
     questionText: string
   ): Promise<AIScoringResult> {
     try {
-      // Call the specialized open-ended scoring agent
+      console.log(`Scoring open-ended question ${questionId} with agent`);
+      
       const apiResponse = await fetch(this.scoringAgentUrl, {
         method: 'POST',
         headers: {
@@ -56,16 +47,15 @@ export class ADKAssessmentService implements IAIScoringService {
       });
 
       if (!apiResponse.ok) {
-        throw new Error(`Scoring agent API error: ${apiResponse.statusText}`);
+        throw new Error(`Open-ended scoring agent API error: ${apiResponse.statusText}`);
       }
 
       const result = await apiResponse.json();
       
       if (!result.success) {
-        throw new Error(`Scoring agent processing failed: ${result.error}`);
+        throw new Error(`Open-ended scoring failed: ${result.error}`);
       }
-      
-      // Return the scored result from the agent
+
       return {
         score: result.score,
         explanation: result.explanation
@@ -87,6 +77,11 @@ export class ADKAssessmentService implements IAIScoringService {
     if (multiSelectQuestions.includes(questionId)) return 'multiSelect';
     if (likertQuestions.includes(questionId)) return 'likert';
     return 'multipleChoice';
+  }
+
+  private getQuestionText(questionId: string): string {
+    const question = ASSESSMENT_QUESTIONS.find(q => q.id === questionId);
+    return question?.text || `Question ${questionId}`;
   }
 
   private getQuestionCategory(questionId: string): string {
@@ -145,16 +140,10 @@ export class ADKAssessmentService implements IAIScoringService {
     try {
       console.log('ADK AssessmentService: Making request to deployed assessment agent...');
       
-      // Calculate overall score from category scores
-      const overallScore = Object.values(scores).reduce((sum, score) => sum + score, 0) / Object.keys(scores).length;
-      
-      // Transform the responses to match the agent's expected format
+      // Transform the responses to match the agent's expected format (simplified)
       const transformedResponses = responses.map((response: any) => ({
-        question_id: response.questionId || response.question_id,
-        question_text: response.questionText || response.question_text,
-        response: response.response,
-        question_type: this.getQuestionType(response.questionId || response.question_id),
-        category: this.getQuestionCategory(response.questionId || response.question_id)
+        questionId: response.questionId || response.question_id,
+        response: response.response
       }));
       
       // Call the deployed assessment agent
@@ -164,14 +153,10 @@ export class ADKAssessmentService implements IAIScoringService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          session_id: `feedback_${Date.now()}`,
-          user_id: `user_${Date.now()}`, // Generate a temporary user ID
+          responses: transformedResponses,
+          scores: scores,
           industry: industry || 'General',
-          location: location || 'Unknown',
-          overall_score: overallScore,
-          category_scores: scores,
-          question_scores: {}, // The agent doesn't need individual question scores for feedback
-          responses: transformedResponses
+          location: location || 'Unknown'
         })
       });
 
@@ -196,6 +181,9 @@ export class ADKAssessmentService implements IAIScoringService {
         competitive_advantage: data.competitive_advantage?.length,
         growth_opportunity: data.growth_opportunity?.length
       });
+      
+      // Calculate overall score from category scores
+      const overallScore = Object.values(scores).reduce((sum, score) => sum + score, 0) / Object.keys(scores).length;
       
       // Transform the agent response to match the expected AIFeedback format
       return {
@@ -252,66 +240,20 @@ export class ADKAssessmentService implements IAIScoringService {
       });
 
       if (!apiResponse.ok) {
-        throw new Error(`Legacy ADK API error: ${apiResponse.statusText}`);
+        throw new Error(`Legacy feedback API error: ${apiResponse.statusText}`);
       }
 
-      const data = await apiResponse.json();
+      const result = await apiResponse.json();
       
-      return {
-        feedback: data.feedback || '',
-        competitiveAdvantage: data.competitiveAdvantage || {
-          category: '',
-          score: '',
-          summary: '',
-          specificStrengths: []
-        },
-        growthOpportunity: data.growthOpportunity || {
-          category: '',
-          score: '',
-          summary: '',
-          specificWeaknesses: []
-        },
-        scoreProjection: data.scoreProjection || {
-          currentScore: 0,
-          projectedScore: 0,
-          improvementPotential: 0
-        },
-        comprehensiveAnalysis: data.comprehensiveAnalysis || '',
-        nextSteps: data.nextSteps || ''
-      };
+      if (!result.success) {
+        throw new Error(`Legacy feedback generation failed: ${result.error || 'Unknown error'}`);
+      }
+      
+      return result.data;
     } catch (error) {
       console.error('Legacy feedback generation error:', error);
       // Re-throw the error to make failures immediately visible
       throw error;
-    }
-  }
-
-  async checkADKServerHealth(): Promise<boolean> {
-    try {
-      const response = await fetch(this.agentUrl);
-      return response.ok;
-    } catch (error) {
-      console.error('Assessment agent health check failed:', error);
-      return false;
-    }
-  }
-
-  async getAgentInfo(): Promise<any> {
-    try {
-      const response = await fetch(this.agentUrl);
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          status: 'healthy',
-          service: 'Assessment Analysis Agent',
-          version: '1.0.0',
-          url: this.agentUrl
-        };
-      }
-      return null;
-    } catch (error) {
-      console.error('Failed to get assessment agent info:', error);
-      return null;
     }
   }
 }
