@@ -17,24 +17,6 @@ steps:
       - --set-env-vars=GOOGLE_API_KEY=${_GOOGLE_API_KEY}
       - --project=${PROJECT_ID}
 
-  # Step 2: Deploy Health Check Function
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - functions
-      - deploy
-      - open-ended-scoring-agent-health
-      - --gen2
-      - --runtime=python311
-      - --region=us-central1
-      - --source=.
-      - --entry-point=health_check_http
-      - --trigger-http
-      - --allow-unauthenticated
-      - --memory=256MB
-      - --timeout=30s
-      - --set-env-vars=GOOGLE_API_KEY=${_GOOGLE_API_KEY}
-      - --project=${PROJECT_ID}
-
 substitutions:
   _GOOGLE_API_KEY: 'AIzaSyC0ZeeBKi4tod07bOnrB40hVOlWaFhfuzE'
 

@@ -231,10 +231,17 @@ def process_open_ended_scoring_http(request):
     """
     Cloud Functions HTTP entry point for open-ended question scoring
     """
+    # CORS headers for all responses
+    cors_headers = {
+        'Access-Control-Allow-Origin': 'https://gutcheck-score-mvp.web.app',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+    }
+    
     # Handle CORS preflight requests
     if request.method == 'OPTIONS':
         headers = {
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': 'https://gutcheck-score-mvp.web.app',
             'Access-Control-Allow-Methods': 'POST, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type',
             'Access-Control-Max-Age': '3600'
@@ -246,7 +253,7 @@ def process_open_ended_scoring_http(request):
         return (json.dumps({
             'success': False,
             'error': 'Only POST requests are allowed'
-        }), 405, {'Content-Type': 'application/json'})
+        }), 405, {**cors_headers, 'Content-Type': 'application/json'})
 
     try:
         # Parse the request
@@ -255,7 +262,7 @@ def process_open_ended_scoring_http(request):
             return (json.dumps({
                 'success': False,
                 'error': 'No JSON data provided'
-            }), 400, {'Content-Type': 'application/json'})
+            }), 400, {**cors_headers, 'Content-Type': 'application/json'})
 
         # Validate required fields
         required_fields = ['question_id', 'response', 'question_text']
@@ -264,7 +271,7 @@ def process_open_ended_scoring_http(request):
                 return (json.dumps({
                     'success': False,
                     'error': f'Missing required field: {field}'
-                }), 400, {'Content-Type': 'application/json'})
+                }), 400, {**cors_headers, 'Content-Type': 'application/json'})
 
         # Convert to JSON string for the agent
         input_data = {
@@ -285,20 +292,20 @@ def process_open_ended_scoring_http(request):
                 'success': True,
                 'score': scoring_data.get('score'),
                 'explanation': scoring_data.get('explanation')
-            }), 200, {'Content-Type': 'application/json'})
+            }), 200, {**cors_headers, 'Content-Type': 'application/json'})
         except json.JSONDecodeError:
             logger.error(f'Failed to parse agent response: {result}')
             return (json.dumps({
                 'success': False,
                 'error': 'Failed to parse agent response'
-            }), 500, {'Content-Type': 'application/json'})
+            }), 500, {**cors_headers, 'Content-Type': 'application/json'})
 
     except Exception as e:
         logger.error(f'Error processing open-ended scoring request: {str(e)}')
         return (json.dumps({
             'success': False,
             'error': f'Processing failed: {str(e)}'
-        }), 500, {'Content-Type': 'application/json'})
+        }), 500, {**cors_headers, 'Content-Type': 'application/json'})
 
 @functions_framework.http
 def health_check_http(request):
@@ -318,25 +325,23 @@ def health_check_http(request):
         return (json.dumps({
             'success': False,
             'error': 'Only GET requests are allowed'
-        }), 405, {'Content-Type': 'application/json'})
+        }), 405, {**headers, 'Content-Type': 'application/json'})
 
     try:
-        # Test the agent with a simple query
-        import asyncio
-        result = asyncio.run(open_ended_agent.run("hello"))
+        # Simple health check without calling the agent
         return (json.dumps({
             'success': True,
             'service': 'Open-Ended Question Scoring Agent',
             'status': 'healthy',
             'version': '1.0.0',
-            'agent_response': result
-        }), 200, {'Content-Type': 'application/json'})
+            'message': 'Service is running'
+        }), 200, {**headers, 'Content-Type': 'application/json'})
     except Exception as e:
         return (json.dumps({
             'success': False,
             'status': 'unhealthy',
             'error': str(e)
-        }), 500, {'Content-Type': 'application/json'})
+        }), 500, {**headers, 'Content-Type': 'application/json'})
 
 if __name__ == "__main__":
     import uvicorn
