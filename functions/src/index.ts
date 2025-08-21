@@ -2,8 +2,7 @@ import {onCall} from "firebase-functions/v2/https";
 import {onRequest} from "firebase-functions/v2/https";
 import {setGlobalOptions} from "firebase-functions/v2";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
-// DEPRECATED: No longer needed as we've switched to ADK agent
-// import {defineString} from "firebase-functions/params";
+import {defineString} from "firebase-functions/params";
 import Stripe from 'stripe';
 import * as admin from 'firebase-admin';
 
@@ -14,55 +13,54 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-// DEPRECATED: Gemini API key no longer needed as we've switched to ADK agent
-// const geminiApiKey = defineString("GEMINI_API_KEY");
+const geminiApiKey = defineString("GEMINI_API_KEY");
 
-// DEPRECATED: Scoring prompts no longer needed as we've switched to ADK agent
-// const SCORING_PROMPTS = {
-//   entrepreneurialJourney: `You are an expert business evaluator assessing a founder's entrepreneurial journey.
-// Score this response on a scale of 1-5 where:
-// 1 = Vague, lacks structure, no clear direction or milestones
-// 3 = Decent clarity with some evidence of execution and progress
-// 5 = Well-articulated, structured response with strong execution and clear growth path
+// Scoring prompts for open-ended questions
+const SCORING_PROMPTS = {
+  entrepreneurialJourney: `You are an expert business evaluator assessing a founder's entrepreneurial journey.
+Score this response on a scale of 1-5 where:
+1 = Vague, lacks structure, no clear direction or milestones
+3 = Decent clarity with some evidence of execution and progress
+5 = Well-articulated, structured response with strong execution and clear growth path
 
-// Founder's Response:
-// {{RESPONSE}}
+Founder's Response:
+{{RESPONSE}}
 
-// Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`,
+Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`,
 
-//   businessChallenge: `You are an expert business evaluator assessing how a founder navigates business challenges.
-// Score this response on a scale of 1-5 where:
-// 1 = Poor problem definition, reactive approach, no clear solution strategy
-// 3 = Clear problem definition, reasonable approach, some evidence of execution
-// 5 = Exceptional problem clarity, strategic solution, strong evidence of execution/learning
+  businessChallenge: `You are an expert business evaluator assessing how a founder navigates business challenges.
+Score this response on a scale of 1-5 where:
+1 = Poor problem definition, reactive approach, no clear solution strategy
+3 = Clear problem definition, reasonable approach, some evidence of execution
+5 = Exceptional problem clarity, strategic solution, strong evidence of execution/learning
 
-// Founder's Response:
-// {{RESPONSE}}
+Founder's Response:
+{{RESPONSE}}
 
-// Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`,
+Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`,
 
-//   setbacksResilience: `You are an expert business evaluator assessing a founder's ability to handle setbacks.
-// Score this response on a scale of 1-5 where:
-// 1 = Poor resilience, gives up easily, no clear recovery strategy
-// 3 = Moderate resilience, recovers but slowly, some adaptation
-// 5 = Exceptional resilience, adapts quickly, shows growth mindset and clear recovery process
+  setbacksResilience: `You are an expert business evaluator assessing a founder's ability to handle setbacks.
+Score this response on a scale of 1-5 where:
+1 = Poor resilience, gives up easily, no clear recovery strategy
+3 = Moderate resilience, recovers but slowly, some adaptation
+5 = Exceptional resilience, adapts quickly, shows growth mindset and clear recovery process
 
-// Founder's Response:
-// {{RESPONSE}}
+Founder's Response:
+{{RESPONSE}}
 
-// Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`,
+Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`,
 
-//   finalVision: `You are an expert business evaluator assessing a founder's long-term vision.
-// Score this response on a scale of 1-5 where:
-// 1 = Vague, unrealistic, or very limited vision, no clear roadmap
-// 3 = Clear vision with reasonable ambition, some future goals
-// 5 = Compelling, ambitious vision with clear roadmap and long-term impact
+  finalVision: `You are an expert business evaluator assessing a founder's long-term vision.
+Score this response on a scale of 1-5 where:
+1 = Vague, unrealistic, or very limited vision, no clear roadmap
+3 = Clear vision with reasonable ambition, some future goals
+5 = Compelling, ambitious vision with clear roadmap and long-term impact
 
-// Founder's Response:
-// {{RESPONSE}}
+Founder's Response:
+{{RESPONSE}}
 
-// Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`
-// };
+Return your evaluation as a JSON object with 'score' (number 1-5) and 'explanation' (string) fields.`
+};
 
 // DEPRECATED: Gemini response parsing no longer needed as we've switched to ADK agent
 // function parseGeminiResponse(response: string): { score: number; explanation: string } {
@@ -105,187 +103,198 @@ const db = admin.firestore();
 // this will be the maximum concurrent request count.
 setGlobalOptions({ maxInstances: 10 });
 
-// DEPRECATED: AI Feedback Generation Function - Replaced by ADK Agent
-// This function is no longer used as we've switched to the ADK agent for all AI functionality
-// export const generateFeedback = onRequest({ cors: true, invoker: "public" }, async (request, response) => {
-//   // Enable CORS
-//   response.set('Access-Control-Allow-Origin', '*');
-//   response.set('Access-Control-Allow-Methods', 'GET, POST');
-//   response.set('Access-Control-Allow-Headers', 'Content-Type');
+// Import AI helper functions
+import { 
+  generateFeedbackText, 
+  generateCompetitiveAdvantage, 
+  generateGrowthOpportunity, 
+  generateTruthfulScoreProjection, 
+  generateComprehensiveAnalysis, 
+  generateNextStepsText,
+  callGemini,
+  parseGeminiResponse 
+} from './services/GeminiAIService';
 
-//   if (request.method === 'OPTIONS') {
-//     response.status(204).send('');
-//     return;
-//   }
+// AI Feedback Generation Function - Using Gemini API
+export const generateFeedback = onRequest({ cors: true, invoker: "public" }, async (request, response) => {
+  // Enable CORS
+  response.set('Access-Control-Allow-Origin', '*');
+  response.set('Access-Control-Allow-Methods', 'GET, POST');
+  response.set('Access-Control-Allow-Headers', 'Content-Type');
 
-//   if (request.method !== 'POST') {
-//     response.status(405).json({ error: 'Method not allowed' });
-//     return;
-//   }
+  if (request.method === 'OPTIONS') {
+    response.status(204).send('');
+    return;
+  }
 
-//   try {
-//     const { responses, scores, industry, location } = request.body;
+  if (request.method !== 'POST') {
+    response.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
 
-//     const apiKey = geminiApiKey.value();
-//     if (!apiKey) {
-//       response.status(500).json({ error: 'Gemini API key not configured' });
-//       return;
-//     }
+  try {
+    const { responses, scores, industry, location } = request.body;
 
-//     // Generate enhanced feedback using the new AI functions with individual error handling
-//     let feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps;
+    const apiKey = geminiApiKey.value();
+    if (!apiKey) {
+      response.status(500).json({ error: 'Gemini API key not configured' });
+      return;
+    }
+
+    // Generate enhanced feedback using the new AI functions with individual error handling
+    let feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps;
     
-//     try {
-//       [feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps] = await Promise.all([
-//         generateFeedbackText(responses, scores, apiKey),
-//         generateCompetitiveAdvantage(responses, scores, apiKey, industry, location),
-//         generateGrowthOpportunity(responses, scores, apiKey, industry, location),
-//         generateTruthfulScoreProjection(responses, scores, apiKey, industry, location),
-//         generateComprehensiveAnalysis(responses, scores, apiKey, industry, location),
-//         generateNextStepsText(scores, apiKey, industry, location)
-//       ]);
-//     } catch (error) {
-//       console.error('Error in Promise.all:', error);
-//       // Fallback to individual calls with error handling
-//              try {
-//          feedback = await generateFeedbackText(responses, scores, apiKey);
-//        } catch (e) {
-//          console.error('Error generating feedback:', e);
-//          feedback = null;
-//        }
+    try {
+      [feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps] = await Promise.all([
+        generateFeedbackText(responses, scores, apiKey),
+        generateCompetitiveAdvantage(responses, scores, apiKey, industry, location),
+        generateGrowthOpportunity(responses, scores, apiKey, industry, location),
+        generateTruthfulScoreProjection(responses, scores, apiKey, industry, location),
+        generateComprehensiveAnalysis(responses, scores, apiKey, industry, location),
+        generateNextStepsText(scores, apiKey, industry, location)
+      ]);
+    } catch (error) {
+      console.error('Error in Promise.all:', error);
+      // Fallback to individual calls with error handling
+             try {
+         feedback = await generateFeedbackText(responses, scores, apiKey);
+       } catch (e) {
+         console.error('Error generating feedback:', e);
+         feedback = null;
+       }
       
-//              try {
-//          competitiveAdvantage = await generateCompetitiveAdvantage(responses, scores, apiKey, industry, location);
-//        } catch (e) {
-//          console.error('Error generating competitive advantage:', e);
-//          competitiveAdvantage = null;
-//        }
+             try {
+         competitiveAdvantage = await generateCompetitiveAdvantage(responses, scores, apiKey, industry, location);
+       } catch (e) {
+         console.error('Error generating competitive advantage:', e);
+         competitiveAdvantage = null;
+       }
       
-//              try {
-//          growthOpportunity = await generateGrowthOpportunity(responses, scores, apiKey, industry, location);
-//        } catch (e) {
-//          console.error('Error generating growth opportunity:', e);
-//          growthOpportunity = null;
-//        }
+             try {
+         growthOpportunity = await generateGrowthOpportunity(responses, scores, apiKey, industry, location);
+       } catch (e) {
+         console.error('Error generating growth opportunity:', e);
+         growthOpportunity = null;
+       }
       
-//              try {
-//          scoreProjection = await generateTruthfulScoreProjection(responses, scores, apiKey, industry, location);
-//        } catch (e) {
-//          console.error('Error generating score projection:', e);
-//          scoreProjection = null;
-//        }
+             try {
+         scoreProjection = await generateTruthfulScoreProjection(responses, scores, apiKey, industry, location);
+       } catch (e) {
+         console.error('Error generating score projection:', e);
+         scoreProjection = null;
+       }
       
-//              try {
-//          comprehensiveAnalysis = await generateComprehensiveAnalysis(responses, scores, apiKey, industry, location);
-//        } catch (e) {
-//          console.error('Error generating comprehensive analysis:', e);
-//          comprehensiveAnalysis = null;
-//        }
+             try {
+         comprehensiveAnalysis = await generateComprehensiveAnalysis(responses, scores, apiKey, industry, location);
+       } catch (e) {
+         console.error('Error generating comprehensive analysis:', e);
+         comprehensiveAnalysis = null;
+       }
       
-//              try {
-//          nextSteps = await generateNextStepsText(scores, apiKey, industry, location);
-//        } catch (e) {
-//          console.error('Error generating next steps:', e);
-//          nextSteps = null;
-//        }
-//     }
+             try {
+         nextSteps = await generateNextStepsText(scores, apiKey, industry, location);
+       } catch (e) {
+         console.error('Error generating next steps:', e);
+         nextSteps = null;
+       }
+    }
 
-//     // Debug logging to see what's being returned
-//     console.log('Generated AI feedback:', {
-//       feedback: feedback ? 'present' : 'missing',
-//       competitiveAdvantage: competitiveAdvantage ? 'present' : 'missing',
-//       growthOpportunity: growthOpportunity ? 'present' : 'missing',
-//       scoreProjection: scoreProjection ? 'present' : 'missing',
-//       comprehensiveAnalysis: comprehensiveAnalysis ? 'present' : 'missing',
-//       nextSteps: nextSteps ? 'present' : 'missing'
-//     });
+    // Debug logging to see what's being returned
+    console.log('Generated AI feedback:', {
+      feedback: feedback ? 'present' : 'missing',
+      competitiveAdvantage: competitiveAdvantage ? 'present' : 'missing',
+      growthOpportunity: growthOpportunity ? 'present' : 'missing',
+      scoreProjection: scoreProjection ? 'present' : 'missing',
+      comprehensiveAnalysis: comprehensiveAnalysis ? 'present' : 'missing',
+      nextSteps: nextSteps ? 'present' : 'missing'
+    });
     
-//     if (comprehensiveAnalysis) {
-//       console.log('Comprehensive Analysis length:', comprehensiveAnalysis.length);
-//       console.log('Comprehensive Analysis preview:', comprehensiveAnalysis.substring(0, 100) + '...');
-//     }
+    if (comprehensiveAnalysis) {
+      console.log('Comprehensive Analysis length:', comprehensiveAnalysis.length);
+      console.log('Comprehensive Analysis preview:', comprehensiveAnalysis.substring(0, 100) + '...');
+    }
 
-//     response.json({
-//       feedback,
-//       competitiveAdvantage,
-//       growthOpportunity,
-//       scoreProjection,
-//       comprehensiveAnalysis,
-//       nextSteps
-//     });
+    response.json({
+      feedback,
+      competitiveAdvantage,
+      growthOpportunity,
+      scoreProjection,
+      comprehensiveAnalysis,
+      nextSteps
+    });
 
-//   } catch (error) {
-//     console.error('Error generating feedback:', error);
-//     response.status(500).json({
-//       error: 'Failed to generate feedback',
-//       details: error instanceof Error ? error.message : 'Unknown error'
-//     });
-//   }
-// });
+  } catch (error) {
+    console.error('Error generating feedback:', error);
+    response.status(500).json({
+      error: 'Failed to generate feedback',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
 
-// DEPRECATED: AI Scoring Function - Replaced by ADK Agent
-// export const scoreQuestion = onRequest({ cors: true, invoker: "public" }, async (request, response) => {
-//   // Enable CORS
-//   response.set('Access-Control-Allow-Origin', '*');
-//   response.set('Access-Control-Allow-Methods', 'GET, POST');
-//   response.set('Access-Control-Allow-Headers', 'Content-Type');
+// AI Scoring Function - Using Gemini API
+export const scoreQuestion = onRequest({ cors: true, invoker: "public" }, async (request, response) => {
+  // Enable CORS
+  response.set('Access-Control-Allow-Origin', '*');
+  response.set('Access-Control-Allow-Methods', 'GET, POST');
+  response.set('Access-Control-Allow-Headers', 'Content-Type');
 
-//   if (request.method === 'OPTIONS') {
-//     response.status(204).send('');
-//     return;
-//   }
+  if (request.method === 'OPTIONS') {
+    response.status(204).send('');
+    return;
+  }
 
-//   if (request.method !== 'POST') {
-//     response.status(405).json({ error: 'Method not allowed' });
-//     return;
-//   }
+  if (request.method !== 'POST') {
+    response.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
 
-//   try {
-//     const { questionType, response: questionResponse } = request.body;
+  try {
+    const { questionType, response: questionResponse } = request.body;
 
-//     if (!questionType || !questionResponse) {
-//       response.status(400).json({ error: 'Missing required fields: questionType and response' });
-//       return;
-//     }
+    if (!questionType || !questionResponse) {
+      response.status(400).json({ error: 'Missing required fields: questionType and response' });
+      return;
+    }
 
-//     const apiKey = geminiApiKey.value();
-//     if (!apiKey) {
-//       response.status(500).json({ error: 'Gemini API key not configured' });
-//       return;
-//     }
+    const apiKey = geminiApiKey.value();
+    if (!apiKey) {
+      response.status(500).json({ error: 'Gemini API key not configured' });
+      return;
+    }
 
-//     // Get the appropriate prompt for the question type
-//     const validQuestionTypes = ['entrepreneurialJourney', 'businessChallenge', 'setbacksResilience', 'finalVision'] as const;
-//     if (!validQuestionTypes.includes(questionType as any)) {
-//       response.status(400).json({ error: 'Invalid question type' });
-//       return;
-//     }
+    // Get the appropriate prompt for the question type
+    const validQuestionTypes = ['entrepreneurialJourney', 'businessChallenge', 'setbacksResilience', 'finalVision'] as const;
+    if (!validQuestionTypes.includes(questionType as any)) {
+      response.status(400).json({ error: 'Invalid question type' });
+      return;
+    }
     
-//     const promptTemplate = SCORING_PROMPTS[questionType as keyof typeof SCORING_PROMPTS];
-//     if (!promptTemplate) {
-//       response.status(400).json({ error: 'Invalid question type' });
-//       return;
-//     }
+    const promptTemplate = SCORING_PROMPTS[questionType as keyof typeof SCORING_PROMPTS];
+    if (!promptTemplate) {
+      response.status(400).json({ error: 'Invalid question type' });
+      return;
+    }
 
-//     // Replace placeholder with actual response
-//     const prompt = promptTemplate.replace('{{RESPONSE}}', questionResponse);
+    // Replace placeholder with actual response
+    const prompt = promptTemplate.replace('{{RESPONSE}}', questionResponse);
 
-//     // Call Gemini API
-//     const geminiResponse = await callGemini(prompt, apiKey);
+    // Call Gemini API
+    const geminiResponse = await callGemini(prompt, apiKey);
     
-//     // Parse the response
-//     const scoringResult = parseGeminiResponse(geminiResponse);
+    // Parse the response
+    const scoringResult = parseGeminiResponse(geminiResponse);
 
-//     response.json(scoringResult);
+    response.json(scoringResult);
 
-//   } catch (error) {
-//     console.error('Error in AI scoring:', error);
-//     response.status(500).json({
-//       error: 'Failed to score response',
-//       details: error instanceof Error ? error.message : 'Unknown error'
-//     });
-//   }
-// });
+  } catch (error) {
+    console.error('Error in AI scoring:', error);
+    response.status(500).json({
+      error: 'Failed to score response',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
