@@ -200,25 +200,87 @@ No little hashtags or stars or any other weird characters, just the text.`;
 }
 
 export async function generateTruthfulScoreProjection(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
-  const currentScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score as number), 0);
+  const overallScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score as number), 0);
   
-  // Get the realistic improvements that are already calculated
-  const improvementsAnalysis = await generateRealisticImprovements(responses, scores, apiKey, industry, location);
+  const prompt = `You are an expert business consultant calculating realistic score improvements.
+
+ASSESSMENT DATA:
+${responses.map((r: any) => `
+Question ${r.questionId}: ${r.questionText}
+Response: ${r.response}
+`).join('\n')}
+
+CURRENT SCORES:
+- Personal Background: ${scores.personalBackground}/20
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
+- Resources & Network: ${scores.resources}/20
+- Behavioral Metrics: ${scores.behavioralMetrics}/15
+- Growth & Vision: ${scores.growthVision}/20
+- Overall Score: ${overallScore}/100
+
+TASK: 
+1. Identify the lowest-scoring category (Biggest Growth Opportunity)
+2. Analyze specific responses in that category
+3. Calculate realistic point improvements based on the scoring rubric
+4. Sum the improvements to get the projected score
+
+SCORING RUBRIC:
+- Multiple choice: Specific point values (e.g., "Weekly"=5, "Monthly"=4, "Occasionally"=3)
+- Open-ended: AI scored 1-5 based on quality and depth
+
+OUTPUT FORMAT (JSON):
+{
+  "currentScore": ${overallScore},
+  "projectedScore": 68,
+  "improvementPotential": 3,
+  "analysis": {
+    "lowestCategory": "Entrepreneurial Skills",
+    "currentCategoryScore": 15,
+    "realisticImprovements": [
+      {
+        "questionId": "q17",
+        "currentResponse": "Occasionally",
+        "currentScore": 3,
+        "suggestedImprovement": "Weekly",
+        "potentialScore": 4,
+        "pointGain": 1,
+        "reasoning": "Moving from occasional to weekly goal tracking"
+      }
+    ],
+    "totalPointGain": 3
+  }
+}
+
+INSTRUCTIONS:
+- Only suggest improvements that are realistically achievable
+- Base projections on actual response changes, not hypothetical scenarios
+- Be conservative - under-promise and over-deliver
+- Focus on the lowest-scoring category first
+- Provide specific, actionable recommendations`;
+
+  const response = await callGemini(prompt, apiKey);
   
-  // Calculate projected score: current score + total point gain from improvements
-  const projectedScore = Math.min(100, currentScore + improvementsAnalysis.totalPointGain);
-  
-  return {
-    currentScore: currentScore,
-    projectedScore: projectedScore,
-    improvementPotential: improvementsAnalysis.totalPointGain,
-    analysis: {
-      lowestCategory: improvementsAnalysis.lowestCategory,
-      currentCategoryScore: improvementsAnalysis.currentCategoryScore,
-      realisticImprovements: improvementsAnalysis.realisticImprovements,
-      totalPointGain: improvementsAnalysis.totalPointGain
+  try {
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
     }
-  };
+    throw new Error('No JSON found in response');
+  } catch (error) {
+    console.error('Error parsing score projection response:', error);
+    // Fallback to conservative estimate
+    return {
+      currentScore: overallScore,
+      projectedScore: Math.min(100, (overallScore as number) + 3),
+      improvementPotential: 3,
+      analysis: {
+        lowestCategory: "Unknown",
+        currentCategoryScore: 0,
+        realisticImprovements: [],
+        totalPointGain: 3
+      }
+    };
+  }
 }
 
 export async function generateComprehensiveAnalysis(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
@@ -419,19 +481,7 @@ export async function generateRealisticImprovements(responses: any[], scores: an
   // Calculate total potential point gain
   const totalPointGain = topImprovements.reduce((sum, improvement) => sum + improvement.pointGain, 0);
 
-  // Debug logging for improvements analysis
-  console.log('Realistic improvements analysis:', {
-    lowestCategory: lowestCategory[0],
-    currentCategoryScore: lowestCategory[1] as number,
-    totalImprovements: improvements.length,
-    topImprovements: topImprovements.map(imp => ({
-      questionId: imp.questionId,
-      currentScore: imp.currentScore,
-      potentialScore: imp.potentialScore,
-      pointGain: imp.pointGain
-    })),
-    totalPointGain
-  });
+
 
   return {
     lowestCategory: lowestCategory[0],
@@ -447,16 +497,6 @@ export async function generateDynamicInsights(responses: any[], scores: any, api
   const highestCategory = categoryScores.reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) > (scores[b[0] as keyof typeof scores] as number) ? a : b);
   const lowestCategory = categoryScores.reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) < (scores[b[0] as keyof typeof scores] as number) ? a : b);
   
-  // Debug logging
-  console.log('generateDynamicInsights debug:', {
-    scores,
-    categoryScores,
-    highestCategory,
-    lowestCategory,
-    highestCategoryKey: highestCategory[0],
-    lowestCategoryKey: lowestCategory[0]
-  });
-  
   // Get realistic improvements analysis
   const improvementsAnalysis = await generateRealisticImprovements(responses, scores, apiKey, industry, location);
   
@@ -464,15 +504,6 @@ export async function generateDynamicInsights(responses: any[], scores: any, api
   const currentScore = Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number;
   const calculatedProjectedScore = currentScore + improvementsAnalysis.totalPointGain;
   const projectedScore = Math.min(100, calculatedProjectedScore);
-  
-  // Debug the projected score calculation
-  console.log('Projected score calculation:', {
-    currentScore,
-    totalPointGain: improvementsAnalysis.totalPointGain,
-    calculatedProjectedScore,
-    finalProjectedScore: projectedScore,
-    isCapped: calculatedProjectedScore > 100
-  });
   
   // Map category names to display names
   const categoryDisplayNames: Record<string, string> = {
@@ -482,13 +513,6 @@ export async function generateDynamicInsights(responses: any[], scores: any, api
     'behavioralMetrics': 'Behavioral Metrics',
     'growthVision': 'Growth & Vision'
   };
-  
-  // Debug category mapping
-  console.log('Category mapping debug:', {
-    highestCategoryKey: highestCategory[0],
-    mappedCategory: categoryDisplayNames[highestCategory[0]],
-    availableKeys: Object.keys(categoryDisplayNames)
-  });
   
   // Map question IDs to their categories
   const questionCategoryMap: Record<string, string> = {
@@ -565,13 +589,11 @@ Return as JSON:
 }`;
 
   const response = await callGemini(prompt, apiKey);
-  console.log('Raw Gemini response for dynamic insights:', response);
   
   try {
     const jsonMatch = response.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
-      console.log('Parsed JSON from Gemini:', parsed);
       return {
         ...parsed,
         realisticImprovements: improvementsAnalysis.realisticImprovements,
@@ -580,11 +602,9 @@ Return as JSON:
     }
     
     // If JSON parsing fails, throw an error instead of using fallback text
-    console.error('JSON parsing failed in generateDynamicInsights. Raw response:', response);
     throw new Error('Failed to parse AI response for dynamic insights');
     
   } catch (error) {
-    console.error('Error in generateDynamicInsights:', error);
     throw new Error(`Dynamic insights generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }

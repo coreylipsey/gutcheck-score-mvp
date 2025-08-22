@@ -209,22 +209,7 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
       nextSteps: nextSteps ? 'present' : 'missing'
     });
     
-    // Debug dynamicInsights specifically
-    if (dynamicInsights) {
-      console.log('DynamicInsights details:', {
-        projectedScore: dynamicInsights.projectedScore,
-        competitiveAdvantage: dynamicInsights.competitiveAdvantage,
-        growthOpportunity: dynamicInsights.growthOpportunity,
-        totalPointGain: dynamicInsights.totalPointGain
-      });
-    } else {
-      console.log('DynamicInsights is null/undefined');
-    }
 
-    if (comprehensiveAnalysis) {
-      console.log('Comprehensive Analysis length:', comprehensiveAnalysis.length);
-      console.log('Comprehensive Analysis preview:', comprehensiveAnalysis.substring(0, 100) + '...');
-    }
 
     response.json({
       keyInsights,
