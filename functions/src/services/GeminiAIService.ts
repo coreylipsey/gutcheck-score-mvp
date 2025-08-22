@@ -200,37 +200,85 @@ No little hashtags or stars or any other weird characters, just the text.`;
 }
 
 export async function generateTruthfulScoreProjection(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
-  const currentScore = Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number;
+  const overallScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score as number), 0);
   
-  const prompt = `You are an expert business evaluator providing realistic score projections.
+  const prompt = `You are an expert business consultant calculating realistic score improvements.
 
-Current Assessment Score: ${currentScore}/100
-Industry: ${industry || 'General'}
-Location: ${location || 'Unknown'}
+ASSESSMENT DATA:
+${responses.map((r: any) => `
+Question ${r.questionId}: ${r.questionText}
+Response: ${r.response}
+`).join('\n')}
 
-Based on the assessment results, provide a realistic projection of how much the score could improve with focused effort on the weakest areas. Be conservative and realistic.
+CURRENT SCORES:
+- Personal Background: ${scores.personalBackground}/20
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
+- Resources & Network: ${scores.resources}/20
+- Behavioral Metrics: ${scores.behavioralMetrics}/15
+- Growth & Vision: ${scores.growthVision}/20
+- Overall Score: ${overallScore}/100
 
-Return a JSON object with:
-- currentScore: ${currentScore}
-- projectedScore: realistic projection (max 100)
-- improvementPotential: the difference between current and projected`;
+TASK: 
+1. Identify the lowest-scoring category (Biggest Growth Opportunity)
+2. Analyze specific responses in that category
+3. Calculate realistic point improvements based on the scoring rubric
+4. Sum the improvements to get the projected score
+
+SCORING RUBRIC:
+- Multiple choice: Specific point values (e.g., "Weekly"=5, "Monthly"=4, "Occasionally"=3)
+- Open-ended: AI scored 1-5 based on quality and depth
+
+OUTPUT FORMAT (JSON):
+{
+  "currentScore": ${overallScore},
+  "projectedScore": 68,
+  "improvementPotential": 3,
+  "analysis": {
+    "lowestCategory": "Entrepreneurial Skills",
+    "currentCategoryScore": 15,
+    "realisticImprovements": [
+      {
+        "questionId": "q17",
+        "currentResponse": "Occasionally",
+        "currentScore": 3,
+        "suggestedImprovement": "Weekly",
+        "potentialScore": 4,
+        "pointGain": 1,
+        "reasoning": "Moving from occasional to weekly goal tracking"
+      }
+    ],
+    "totalPointGain": 3
+  }
+}
+
+INSTRUCTIONS:
+- Only suggest improvements that are realistically achievable
+- Base projections on actual response changes, not hypothetical scenarios
+- Be conservative - under-promise and over-deliver
+- Focus on the lowest-scoring category first
+- Provide specific, actionable recommendations`;
 
   const response = await callGemini(prompt, apiKey);
+  
   try {
     const jsonMatch = response.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
     }
-    return {
-      currentScore: currentScore,
-      projectedScore: Math.min(100, currentScore + 10),
-      improvementPotential: 10
-    };
+    throw new Error('No JSON found in response');
   } catch (error) {
+    console.error('Error parsing score projection response:', error);
+    // Fallback to conservative estimate
     return {
-      currentScore: currentScore,
-      projectedScore: Math.min(100, currentScore + 10),
-      improvementPotential: 10
+      currentScore: overallScore,
+      projectedScore: Math.min(100, (overallScore as number) + 3),
+      improvementPotential: 3,
+      analysis: {
+        lowestCategory: "Unknown",
+        currentCategoryScore: 0,
+        realisticImprovements: [],
+        totalPointGain: 3
+      }
     };
   }
 }
@@ -433,6 +481,20 @@ export async function generateRealisticImprovements(responses: any[], scores: an
   // Calculate total potential point gain
   const totalPointGain = topImprovements.reduce((sum, improvement) => sum + improvement.pointGain, 0);
 
+  // Debug logging for improvements analysis
+  console.log('Realistic improvements analysis:', {
+    lowestCategory: lowestCategory[0],
+    currentCategoryScore: lowestCategory[1] as number,
+    totalImprovements: improvements.length,
+    topImprovements: topImprovements.map(imp => ({
+      questionId: imp.questionId,
+      currentScore: imp.currentScore,
+      potentialScore: imp.potentialScore,
+      pointGain: imp.pointGain
+    })),
+    totalPointGain
+  });
+
   return {
     lowestCategory: lowestCategory[0],
     currentCategoryScore: lowestCategory[1] as number,
@@ -442,13 +504,15 @@ export async function generateRealisticImprovements(responses: any[], scores: an
 }
 
 export async function generateDynamicInsights(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
-  // Find the highest and lowest scoring categories
-  const highestCategory = Object.entries(scores).reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) > (scores[b[0] as keyof typeof scores] as number) ? a : b);
-  const lowestCategory = Object.entries(scores).reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) < (scores[b[0] as keyof typeof scores] as number) ? a : b);
+  // Find the highest and lowest scoring categories (exclude overallScore)
+  const categoryScores = Object.entries(scores).filter(([key]) => key !== 'overallScore');
+  const highestCategory = categoryScores.reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) > (scores[b[0] as keyof typeof scores] as number) ? a : b);
+  const lowestCategory = categoryScores.reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) < (scores[b[0] as keyof typeof scores] as number) ? a : b);
   
   // Debug logging
   console.log('generateDynamicInsights debug:', {
     scores,
+    categoryScores,
     highestCategory,
     lowestCategory,
     highestCategoryKey: highestCategory[0],
@@ -460,7 +524,17 @@ export async function generateDynamicInsights(responses: any[], scores: any, api
   
   // Calculate projected score based on actual improvements
   const currentScore = Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number;
-  const projectedScore = Math.min(100, currentScore + improvementsAnalysis.totalPointGain);
+  const calculatedProjectedScore = currentScore + improvementsAnalysis.totalPointGain;
+  const projectedScore = Math.min(100, calculatedProjectedScore);
+  
+  // Debug the projected score calculation
+  console.log('Projected score calculation:', {
+    currentScore,
+    totalPointGain: improvementsAnalysis.totalPointGain,
+    calculatedProjectedScore,
+    finalProjectedScore: projectedScore,
+    isCapped: calculatedProjectedScore > 100
+  });
   
   // Map category names to display names
   const categoryDisplayNames: Record<string, string> = {
@@ -531,8 +605,8 @@ ${improvementsAnalysis.realisticImprovements.map((imp: any) =>
 
 Generate dynamic insights based on the actual responses and realistic improvements:
 
-1. For Competitive Advantage (highest category): Create 3 specific bullet points based on the actual responses that show their strengths
-2. For Growth Opportunity (lowest category): Create 3 specific bullet points based on the realistic improvements analysis, focusing on the most impactful changes
+1. For Competitive Advantage (highest category): Create 3 specific bullet points based on the actual responses that show their strengths. Do NOT include point values or question numbers in parentheses.
+2. For Growth Opportunity (lowest category): Create 3 specific bullet points based on the realistic improvements analysis, focusing on the most impactful changes. Do NOT include point values or question numbers in parentheses.
 3. Projected Score: ${projectedScore}
 
 Return as JSON:
@@ -542,13 +616,13 @@ Return as JSON:
     "category": "${categoryDisplayNames[highestCategory[0]]}",
     "score": "${highestCategory[1]}",
     "summary": "1-2 sentence summary based on actual responses",
-    "specificStrengths": ["3 specific bullet points based on actual responses"]
+    "specificStrengths": ["3 specific bullet points based on actual responses - no points or question numbers"]
   },
   "growthOpportunity": {
     "category": "${categoryDisplayNames[lowestCategory[0]]}",
     "score": "${lowestCategory[1]}",
     "summary": "1-2 sentence summary based on realistic improvements",
-    "specificWeaknesses": ["3 specific bullet points based on realistic improvements analysis"]
+    "specificWeaknesses": ["3 specific bullet points based on realistic improvements analysis - no points or question numbers"]
   }
 }`;
 

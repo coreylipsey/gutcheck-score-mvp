@@ -231,30 +231,17 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
       feedback,
       competitiveAdvantage: dynamicInsights?.competitiveAdvantage,
       growthOpportunity: dynamicInsights?.growthOpportunity,
-      scoreProjection: dynamicInsights?.projectedScore ? {
+      scoreProjection: scoreProjection || {
         currentScore: Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number,
-        projectedScore: dynamicInsights.projectedScore,
-        improvementPotential: dynamicInsights.projectedScore - (Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number),
+        projectedScore: 0,
+        improvementPotential: 0,
         analysis: {
-          lowestCategory: dynamicInsights.realisticImprovements?.[0]?.questionId?.split('q')[1] ? 
-            Object.keys(scores).find(cat => {
-              const questionCategoryMap: Record<string, string> = {
-                'q1': 'personalBackground', 'q2': 'personalBackground', 'q3': 'personalBackground',
-                'q4': 'personalBackground', 'q5': 'personalBackground',
-                'q6': 'entrepreneurialSkills', 'q7': 'entrepreneurialSkills', 'q8': 'entrepreneurialSkills',
-                'q9': 'entrepreneurialSkills', 'q10': 'entrepreneurialSkills',
-                'q11': 'resources', 'q12': 'resources', 'q13': 'resources', 'q14': 'resources', 'q15': 'resources',
-                'q16': 'behavioralMetrics', 'q17': 'behavioralMetrics', 'q18': 'behavioralMetrics',
-                'q19': 'behavioralMetrics', 'q20': 'behavioralMetrics',
-                'q21': 'growthVision', 'q22': 'growthVision', 'q23': 'growthVision', 'q24': 'growthVision', 'q25': 'growthVision'
-              };
-              return questionCategoryMap[dynamicInsights.realisticImprovements[0].questionId] === cat;
-            }) : 'unknown',
-          currentCategoryScore: Object.values(scores).reduce((a: any, b: any) => Math.min(a as number, b as number), Infinity) as number,
-          realisticImprovements: dynamicInsights.realisticImprovements || [],
-          totalPointGain: dynamicInsights.totalPointGain || 0
+          lowestCategory: 'unknown',
+          currentCategoryScore: 0,
+          realisticImprovements: [],
+          totalPointGain: 0
         }
-      } : scoreProjection,
+      },
       comprehensiveAnalysis,
       nextSteps
     });
