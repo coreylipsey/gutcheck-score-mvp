@@ -37,6 +37,8 @@ steps:
     entrypoint: 'npm'
     args: ['run', 'build']
     dir: 'functions'
+    env:
+      - 'GEMINI_API_KEY=AIzaSyC0ZeeBKi4tod07bOnrB40hVOlWaFhfuzE'
 
   # Step 5: Deploy to Firebase
   - name: 'node:20'
