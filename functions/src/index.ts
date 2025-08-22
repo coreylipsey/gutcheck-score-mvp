@@ -142,7 +142,7 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     }
 
     // Generate enhanced feedback using the new AI functions with individual error handling
-    let keyInsights: string | undefined, feedback: string | undefined, dynamicInsights: any | undefined, scoreProjection: any | undefined, comprehensiveAnalysis: any | undefined, nextSteps: string | undefined;
+    let keyInsights: string | undefined, feedback: string | undefined, dynamicInsights: any | undefined, scoreProjection: any | undefined, comprehensiveAnalysis: any | undefined, nextSteps: any | undefined;
     
     try {
       // First, generate all AI feedback except Next Steps

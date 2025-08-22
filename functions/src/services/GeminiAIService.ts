@@ -405,7 +405,7 @@ export async function generateNextStepsTextWithContext(
     growthOpportunity?: any;
     comprehensiveAnalysis?: any;
   }
-): Promise<string> {
+): Promise<any> {
   
   // Use existing scoring system to get performance levels (matching CategoryBreakdown.tsx)
   const getCategoryPerformance = (score: number, max: number) => {
@@ -512,15 +512,42 @@ QUALITY CRITERIA:
 - Must address specific needs identified in AI analysis
 - Must be from reputable sources
 
-OUTPUT FORMAT:
-Mentorship: [Program Name] - [Brief description of fit] (https://url.com)
-Funding: [Opportunity Name] - [Brief description of fit] (https://url.com)
-Learning: [Course/Resource Name] - [Brief description of fit] (https://url.com)
+OUTPUT FORMAT - Return as JSON:
+{
+  "mentorship": {
+    "title": "[Specific Program Name]",
+    "description": "[Brief description of why this is a good fit for the entrepreneur]",
+    "url": "https://verified-url.com"
+  },
+  "funding": {
+    "title": "[Specific Opportunity Name]",
+    "description": "[Brief description of why this funding matches their needs]", 
+    "url": "https://verified-url.com"
+  },
+  "learning": {
+    "title": "[Specific Course/Resource Name]",
+    "description": "[Brief description of how this addresses their development areas]",
+    "url": "https://verified-url.com"
+  }
+}
 
-Keep each line under 250 characters. Only include resources you can verify through web search.`;
+CRITICAL: Only include resources you can verify through web search. Each description should be under 150 characters.`;
 
   const response = await callGeminiWithSearch(prompt, apiKey);
-  return response;
+  
+  try {
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return parsed;
+    }
+    
+    // If JSON parsing fails, throw an error instead of using fallback
+    throw new Error('Failed to parse AI response for next steps');
+    
+  } catch (error) {
+    throw new Error(`Next steps generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 export async function generateRealisticImprovements(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {

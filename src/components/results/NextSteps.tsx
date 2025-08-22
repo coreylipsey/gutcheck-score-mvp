@@ -1,6 +1,5 @@
 import { AssessmentSessionDTO } from "@/domain/dtos/AssessmentSessionDTO";
 import { ArrowRight, CheckCircle, Clock, Target } from "lucide-react";
-import Link from "next/link";
 
 interface NextStepsProps {
   sessionData: AssessmentSessionDTO;
@@ -11,137 +10,65 @@ interface ActionItem {
   category: "Learning" | "Mentorship" | "Funding";
   title: string;
   description: string;
-  url?: string;
+  url: string;
 }
 
 export function NextSteps({ sessionData }: NextStepsProps) {
-  // Parse AI recommendations and extract URLs
-  const parseAIRecommendations = (nextSteps: string) => {
-    // Process nextSteps content
-    
-    const lines = nextSteps.split('\n');
-    const recommendations = {
-      mentorship: { title: '', url: '' },
-      funding: { title: '', url: '' },
-      learning: { title: '', url: '' }
-    };
-    
-    lines.forEach(line => {
-              // Processing line
-      
-      if (line.startsWith('Mentorship:')) {
-        const content = line.replace('Mentorship:', '').trim();
-        // Extract mentorship content
-        
-        // Extract URLs from the content (both parentheses format and direct URL format)
-        let urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
-        if (!urlMatch) {
-          // Try direct URL format: "Resource Name https://url.com" - match the entire URL including path
-          urlMatch = content.match(/(https?:\/\/[^\s]+(?:\/[^\s]*)*)/);
-        }
-        
-        if (urlMatch) {
-          const url = urlMatch[1];
-          const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-          recommendations.mentorship.title = content.replace(urlMatch[0], '').trim();
-          recommendations.mentorship.url = fullUrl;
-          // Mentorship recommendation parsed
-        } else {
-          recommendations.mentorship.title = content;
-          // Mentorship recommendation without URL
-        }
-      } else if (line.startsWith('Funding:')) {
-        const content = line.replace('Funding:', '').trim();
-        // Extract funding content
-        
-        // Extract URLs from the content (both parentheses format and direct URL format)
-        let urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
-        if (!urlMatch) {
-          // Try direct URL format: "Resource Name https://url.com" - match the entire URL including path
-          urlMatch = content.match(/(https?:\/\/[^\s]+(?:\/[^\s]*)*)/);
-        }
-        
-        if (urlMatch) {
-          const url = urlMatch[1];
-          const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-          recommendations.funding.title = content.replace(urlMatch[0], '').trim();
-          recommendations.funding.url = fullUrl;
-          // Funding recommendation parsed
-        } else {
-          recommendations.funding.title = content;
-          // Funding recommendation without URL
-        }
-      } else if (line.startsWith('Learning:')) {
-        const content = line.replace('Learning:', '').trim();
-        // Extract learning content
-        
-        // Extract URLs from the content (both parentheses format and direct URL format)
-        let urlMatch = content.match(/\(([^)]+\.(?:org|com|edu|gov|net))\)/);
-        if (!urlMatch) {
-          // Try direct URL format: "Resource Name https://url.com" - match the entire URL including path
-          urlMatch = content.match(/(https?:\/\/[^\s]+(?:\/[^\s]*)*)/);
-        }
-        
-        if (urlMatch) {
-          const url = urlMatch[1];
-          const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-          recommendations.learning.title = content.replace(urlMatch[0], '').trim();
-          recommendations.learning.url = fullUrl;
-          // Learning recommendation parsed
-        } else {
-          recommendations.learning.title = content;
-          // Learning recommendation without URL
-        }
-      }
-    });
-    
-    // Final recommendations processed
-    return recommendations;
-  };
+  // Check if AI feedback is available
+  if (!sessionData.geminiFeedback) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl font-bold" style={{ color: '#0A1F44' }}>
+            AI Feedback Not Available
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            AI feedback is missing. Please ensure AI feedback was generated properly for this assessment.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  const aiRecommendations = sessionData.geminiFeedback?.nextSteps ? 
-    parseAIRecommendations(sessionData.geminiFeedback.nextSteps) : null;
+  // Check if nextSteps data is available and properly structured
+  const nextSteps = sessionData.geminiFeedback.nextSteps;
+  if (!nextSteps || typeof nextSteps === 'string' || !nextSteps.mentorship || !nextSteps.funding || !nextSteps.learning) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl font-bold" style={{ color: '#0A1F44' }}>
+            Next Steps Not Available
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Next steps recommendations are being generated. Please check back in a few minutes.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  const actionItems: ActionItem[] = aiRecommendations ? [
+  // Create action items from structured data
+  const actionItems: ActionItem[] = [
     {
       icon: CheckCircle,
       category: "Mentorship",
-      title: aiRecommendations.mentorship.title || "Find a Business Mentor",
-      description: "Connect with experienced entrepreneurs who can guide your journey and provide insights.",
-      url: aiRecommendations.mentorship.url || "https://www.score.org"
+      title: nextSteps.mentorship.title,
+      description: nextSteps.mentorship.description,
+      url: nextSteps.mentorship.url
     },
     {
       icon: Target,
       category: "Funding",
-      title: aiRecommendations.funding.title || "Explore Funding Options", 
-      description: "Research grants, accelerators, and early-stage investment opportunities.",
-      url: aiRecommendations.funding.url || "https://www.sba.gov/funding-programs"
+      title: nextSteps.funding.title,
+      description: nextSteps.funding.description,
+      url: nextSteps.funding.url
     },
     {
       icon: Clock,
       category: "Learning",
-      title: aiRecommendations.learning.title || "Entrepreneurship Fundamentals",
-      description: "Build core business knowledge through structured learning programs and courses.",
-      url: aiRecommendations.learning.url || "https://www.coursera.org/browse/business/entrepreneurship"
-    }
-  ] : [
-    {
-      icon: Clock,
-      category: "Learning",
-      title: "Entrepreneurship Fundamentals",
-      description: "Build core business knowledge through structured learning programs and courses."
-    },
-    {
-      icon: CheckCircle,
-      category: "Mentorship", 
-      title: "Find a Business Mentor",
-      description: "Connect with experienced entrepreneurs who can guide your journey and provide insights."
-    },
-    {
-      icon: Target,
-      category: "Funding",
-      title: "Explore Funding Options",
-      description: "Research grants, accelerators, and early-stage investment opportunities."
+      title: nextSteps.learning.title,
+      description: nextSteps.learning.description,
+      url: nextSteps.learning.url
     }
   ];
 
@@ -209,23 +136,16 @@ export function NextSteps({ sessionData }: NextStepsProps) {
 
               {/* CTA Button */}
               <div className="mt-6">
-                {item.url ? (
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center space-x-2 text-sm font-medium group-hover:space-x-3 transition-all duration-300 hover:underline"
-                    style={{ color: categoryColor }}
-                  >
-                    <span>Learn More</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </a>
-                ) : (
-                  <div className="flex items-center space-x-2 text-sm font-medium text-gray-400">
-                    <span>Resource details coming soon</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
-                )}
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center space-x-2 text-sm font-medium group-hover:space-x-3 transition-all duration-300 hover:underline"
+                  style={{ color: categoryColor }}
+                >
+                  <span>Learn More</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
             </div>
           );
@@ -243,19 +163,19 @@ export function NextSteps({ sessionData }: NextStepsProps) {
             mentors, and partners who need to see what you&apos;re capable of.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
+            <a
               href="/dashboard"
               className="px-8 py-3 bg-white text-blue-600 rounded-2xl font-semibold hover:shadow-lg transition-all duration-300 border-2 border-blue-200 hover:border-blue-300"
             >
               View Dashboard
-            </Link>
-            <Link
+            </a>
+            <a
               href="/assessment"
               className="px-8 py-3 rounded-2xl font-semibold text-white hover:shadow-lg transition-all duration-300"
               style={{ backgroundColor: '#147AFF' }}
             >
               Retake Assessment
-            </Link>
+            </a>
           </div>
         </div>
       </div>

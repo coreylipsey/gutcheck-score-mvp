@@ -37,9 +37,17 @@ export function MonthlyInsights({ lastAssessment, canTakeAssessment, daysUntilNe
       if (feedback.growthOpportunity?.specificWeaknesses) {
         actions = feedback.growthOpportunity.specificWeaknesses.slice(0, 3);
       } else if (feedback.nextSteps) {
-        // Parse next steps if available
-        if (feedback.nextSteps) {
-          const steps = feedback.nextSteps.split('\n').filter((step: string) =>
+        // Handle structured nextSteps data
+        if (typeof feedback.nextSteps === 'object' && feedback.nextSteps.mentorship && feedback.nextSteps.funding && feedback.nextSteps.learning) {
+          // Use titles from structured nextSteps
+          actions = [
+            feedback.nextSteps.mentorship.title,
+            feedback.nextSteps.funding.title,
+            feedback.nextSteps.learning.title
+          ].slice(0, 3);
+        } else if (typeof feedback.nextSteps === 'string') {
+          // Fallback for old string format
+          const steps = (feedback.nextSteps as string).split('\n').filter((step: string) =>
             step.trim().length > 0
           );
           

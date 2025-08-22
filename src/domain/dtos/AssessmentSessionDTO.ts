@@ -49,7 +49,23 @@ export interface AssessmentSessionDTO {
       };
     };
     comprehensiveAnalysis: string;
-    nextSteps: string;
+    nextSteps: {
+      mentorship: {
+        title: string;
+        description: string;
+        url: string;
+      };
+      funding: {
+        title: string;
+        description: string;
+        url: string;
+      };
+      learning: {
+        title: string;
+        description: string;
+        url: string;
+      };
+    };
   };
   createdAt: Date;
   completedAt: Date;

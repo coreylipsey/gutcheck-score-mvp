@@ -45,7 +45,23 @@ export interface AIFeedback {
     developmentAreas: string;
     trajectoryIndicators: string;
   };
-  nextSteps: string;
+  nextSteps: {
+    mentorship: {
+      title: string;
+      description: string;
+      url: string;
+    };
+    funding: {
+      title: string;
+      description: string;
+      url: string;
+    };
+    learning: {
+      title: string;
+      description: string;
+      url: string;
+    };
+  };
 }
 
 export interface IAIScoringService {

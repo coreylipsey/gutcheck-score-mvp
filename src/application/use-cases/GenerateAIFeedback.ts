@@ -22,6 +22,7 @@ export interface GenerateAIFeedbackRequest {
 }
 
 export interface AIFeedback {
+  keyInsights: string;
   feedback: string;
   competitiveAdvantage: {
     category: string;
@@ -54,8 +55,29 @@ export interface AIFeedback {
       totalPointGain: number;
     };
   };
-  comprehensiveAnalysis: string;
-  nextSteps: string;
+  comprehensiveAnalysis: {
+    signalReadout: string;
+    strengthSignals: string;
+    developmentAreas: string;
+    trajectoryIndicators: string;
+  };
+  nextSteps: {
+    mentorship: {
+      title: string;
+      description: string;
+      url: string;
+    };
+    funding: {
+      title: string;
+      description: string;
+      url: string;
+    };
+    learning: {
+      title: string;
+      description: string;
+      url: string;
+    };
+  };
 }
 
 export class GenerateAIFeedback {
