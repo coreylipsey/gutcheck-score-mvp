@@ -394,6 +394,69 @@ Keep each category under 200 characters. Only include resources you can verify t
   return response;
 }
 
+export async function generateNextStepsTextWithContext(
+  scores: any, 
+  apiKey: string, 
+  industry?: string, 
+  location?: string,
+  aiFeedback?: {
+    keyInsights?: string;
+    competitiveAdvantage?: any;
+    growthOpportunity?: any;
+    comprehensiveAnalysis?: any;
+  }
+): Promise<string> {
+  
+  const contextSection = aiFeedback ? `
+AI ANALYSIS CONTEXT:
+Key Insights: ${aiFeedback.keyInsights || 'Not available'}
+
+Competitive Advantage: ${aiFeedback.competitiveAdvantage?.summary || 'Not available'}
+- Strengths: ${aiFeedback.competitiveAdvantage?.specificStrengths?.join(', ') || 'Not available'}
+
+Growth Opportunity: ${aiFeedback.growthOpportunity?.summary || 'Not available'}
+- Areas for Improvement: ${aiFeedback.growthOpportunity?.specificWeaknesses?.join(', ') || 'Not available'}
+
+Comprehensive Analysis:
+- Signal Readout: ${aiFeedback.comprehensiveAnalysis?.signalReadout || 'Not available'}
+- Development Areas: ${aiFeedback.comprehensiveAnalysis?.developmentAreas || 'Not available'}
+- Trajectory Indicators: ${aiFeedback.comprehensiveAnalysis?.trajectoryIndicators || 'Not available'}
+` : '';
+
+  const prompt = `You are an expert business evaluator with access to real-time web search capabilities. Your goal is to find CURRENT, VERIFIED resources for an entrepreneur based on their assessment results and AI analysis.
+
+IMPORTANT: Use web search to find real, current resources. Do not make up or guess at resources.
+
+Assessment Context:
+- Industry: ${industry || 'Creative & Media'}
+- Location: ${location || 'Delaware'}
+- Personal Background Score: ${scores.personalBackground}/20
+- Entrepreneurial Skills Score: ${scores.entrepreneurialSkills}/25
+- Resources Score: ${scores.resources}/20
+- Behavioral Metrics Score: ${scores.behavioralMetrics}/15
+- Growth & Vision Score: ${scores.growthVision}/20
+
+${contextSection}
+
+Use web search to find CURRENT, VERIFIED resources that specifically address the AI-identified needs:
+
+MENTORSHIP: Search for active mentorship programs, incubators, accelerators, or networking groups in ${location} for ${industry} entrepreneurs that address the specific growth areas identified. Find specific programs currently accepting participants.
+
+FUNDING: Search for current grants, funding opportunities, or business tools for ${industry} businesses in ${location} that align with the entrepreneur's specific needs and growth trajectory.
+
+LEARNING: Search for relevant courses, articles, or learning resources that directly address the development areas and improvement opportunities identified in the AI analysis.
+
+Return only verified, current resources with active links. Format as:
+Mentorship: [Specific program name with link]
+Funding: [Specific opportunity with link]  
+Learning: [Specific course/resource with link]
+
+Keep each category under 200 characters. Only include resources you can verify through web search.`;
+
+  const response = await callGeminiWithSearch(prompt, apiKey);
+  return response;
+}
+
 export async function generateRealisticImprovements(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
   // Find the lowest scoring category
   const lowestCategory = Object.entries(scores).reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) < (scores[b[0] as keyof typeof scores] as number) ? a : b);

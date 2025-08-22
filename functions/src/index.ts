@@ -111,6 +111,7 @@ import {
   generateTruthfulScoreProjection, 
   generateComprehensiveAnalysis, 
   generateNextStepsText,
+  generateNextStepsTextWithContext,
   callGemini,
   parseGeminiResponse 
 } from './services/GeminiAIService';
@@ -145,14 +146,28 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     let keyInsights, feedback, dynamicInsights, scoreProjection, comprehensiveAnalysis, nextSteps;
     
     try {
-      [keyInsights, feedback, dynamicInsights, scoreProjection, comprehensiveAnalysis, nextSteps] = await Promise.all([
+      // First, generate all AI feedback except Next Steps
+      [keyInsights, feedback, dynamicInsights, scoreProjection, comprehensiveAnalysis] = await Promise.all([
         generateKeyInsights(responses, scores, apiKey, industry, location),
         generateFeedbackText(responses, scores, apiKey),
         generateDynamicInsights(responses, scores, apiKey, industry, location),
         generateTruthfulScoreProjection(responses, scores, apiKey, industry, location),
-        generateComprehensiveAnalysis(responses, scores, apiKey, industry, location),
-        generateNextStepsText(scores, apiKey, industry, location)
+        generateComprehensiveAnalysis(responses, scores, apiKey, industry, location)
       ]);
+      
+      // Then generate Next Steps with context from other AI feedback
+      nextSteps = await generateNextStepsTextWithContext(
+        scores, 
+        apiKey, 
+        industry, 
+        location,
+        {
+          keyInsights,
+          competitiveAdvantage: dynamicInsights?.competitiveAdvantage,
+          growthOpportunity: dynamicInsights?.growthOpportunity,
+          comprehensiveAnalysis
+        }
+      );
     } catch (error) {
       console.error('Error in Promise.all:', error);
       // Fallback to individual calls with error handling
@@ -192,7 +207,18 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
       }
       
       try {
-        nextSteps = await generateNextStepsText(scores, apiKey, industry, location);
+        nextSteps = await generateNextStepsTextWithContext(
+          scores, 
+          apiKey, 
+          industry, 
+          location,
+          {
+            keyInsights,
+            competitiveAdvantage: dynamicInsights?.competitiveAdvantage,
+            growthOpportunity: dynamicInsights?.growthOpportunity,
+            comprehensiveAnalysis
+          }
+        );
       } catch (e) {
         console.error('Error generating nextSteps:', e);
         nextSteps = null;
