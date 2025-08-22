@@ -276,13 +276,6 @@ INSTRUCTIONS:
 }
 
 export async function generateComprehensiveAnalysis(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
-  // Extract open-ended responses for the comprehensive analysis
-  const openEndedResponses = responses.filter(r => ['q3', 'q8', 'q18', 'q23'].includes(r.questionId));
-  
-  const visionResponse = openEndedResponses.find(r => r.questionId === 'q23')?.response || 'Not provided';
-  const journeyResponse = openEndedResponses.find(r => r.questionId === 'q3')?.response || 'Not provided';
-  const challengeResponse = openEndedResponses.find(r => r.questionId === 'q8')?.response || 'Not provided';
-  const setbackResponse = openEndedResponses.find(r => r.questionId === 'q18')?.response || 'Not provided';
   
   const prompt = `You are a seasoned entrepreneurial scout, analyzing the signals from a founder's Gutcheck Assessment the way an NFL scout would evaluate a player's combine results and tape. Your role is not to prescribe or judge, but to surface signals, tendencies, and overlooked strengths/risks that help explain where this entrepreneur sits on their trajectory.
 
