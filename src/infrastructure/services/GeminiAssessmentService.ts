@@ -102,7 +102,13 @@ export class GeminiAssessmentService implements IAIScoringService {
         scoreProjection: result.scoreProjection || {
           currentScore: 0,
           projectedScore: 0,
-          improvementPotential: 0
+          improvementPotential: 0,
+          analysis: result.scoreProjection?.analysis || {
+            lowestCategory: '',
+            currentCategoryScore: 0,
+            realisticImprovements: [],
+            totalPointGain: 0
+          }
         },
         comprehensiveAnalysis: result.comprehensiveAnalysis || '',
         nextSteps: result.nextSteps || ''

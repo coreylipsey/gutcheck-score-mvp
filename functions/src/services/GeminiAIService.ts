@@ -290,4 +290,311 @@ Learning: Coursera's "Creative Entrepreneurship"`;
   return response;
 }
 
+export async function generateRealisticImprovements(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
+  // Find the lowest scoring category
+  const lowestCategory = Object.entries(scores).reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) < (scores[b[0] as keyof typeof scores] as number) ? a : b);
+  
+  // Map question IDs to their categories
+  const questionCategoryMap: Record<string, string> = {
+    'q1': 'personalBackground', 'q2': 'personalBackground', 'q3': 'personalBackground',
+    'q4': 'personalBackground', 'q5': 'personalBackground',
+    'q6': 'entrepreneurialSkills', 'q7': 'entrepreneurialSkills', 'q8': 'entrepreneurialSkills',
+    'q9': 'entrepreneurialSkills', 'q10': 'entrepreneurialSkills',
+    'q11': 'resources', 'q12': 'resources', 'q13': 'resources', 'q14': 'resources', 'q15': 'resources',
+    'q16': 'behavioralMetrics', 'q17': 'behavioralMetrics', 'q18': 'behavioralMetrics',
+    'q19': 'behavioralMetrics', 'q20': 'behavioralMetrics',
+    'q21': 'growthVision', 'q22': 'growthVision', 'q23': 'growthVision', 'q24': 'growthVision', 'q25': 'growthVision'
+  };
+
+  // Get responses for the lowest category
+  const lowestCategoryResponses = responses.filter(r => questionCategoryMap[r.questionId] === lowestCategory[0]);
+  
+  // 🔒 ACTUAL ASSESSMENT SCORING MAPS - DO NOT MODIFY
+  const scoringMaps: Record<string, number[]> = {
+    // SECTION 1: Personal Foundation
+    'q1': [3, 4, 5], // Idea stage=3, Early ops=4, Established=5
+    'q2': [3, 4, 5], // Solo=3, Small team=4, Large team=5
+    'q4': [5, 4, 3], // Still running=5, Failed=4, First time=3
+    'q5': [5, 4, 3, 2], // Market opportunity=5, Income=4, Independence=3, Other=2
+    
+    // SECTION 2: Entrepreneurial Skills
+    'q6': [5, 4, 3, 2], // Excellent=5, Good=4, Fair=3, Poor=2
+    'q7': [5, 4, 3, 2], // Daily=5, Weekly=4, Monthly=3, Rarely=2
+    
+    // SECTION 3: Resources
+    'q11': [2, 3, 4, 5, 0], // Lack funding=2, Limited mentorship=3, Access customers=4, Scaling=5, Other=0
+    'q12': [5, 4, 3], // Sufficient=5, Not enough=4, Self-funded=3
+    'q13': [5, 4, 3], // Very strong=5, Moderate=4, Weak=3
+    'q14': [5, 3], // Yes=5, No=3
+    'q15': [5, 4, 3, 2], // Weekly=5, Monthly=4, Occasionally=3, Rarely=2
+    
+    // SECTION 4: Behavioral Metrics
+    'q16': [2, 3, 4, 5], // 1-10 hours=2, 11-20=3, 21-40=4, 40+=5
+    'q17': [5, 4, 3], // Prioritize=5, Occasionally=4, No routine=3
+    'q20': [5, 4, 3], // Restarted=5, Haven't restarted=4, No=3
+    
+    // SECTION 5: Growth & Vision
+    'q21': [3, 4, 5], // Small-scale=3, Regional=4, Global=5
+    'q22': [3, 4, 5, 2], // Bootstrapping=3, Loans/grants=4, Investments=5, Unsure=2
+    'q24': [4, 5, 3, 2], // 1-5 jobs=4, 6+ jobs=5, No=3, Not sure=2
+    'q25': [5, 3, 2], // Yes=5, No=3, Not sure=2
+  };
+
+  // Question text mapping for context
+  const questionTexts: Record<string, string> = {
+    'q1': 'What stage is your business currently in?',
+    'q2': 'Do you currently have any team members or collaborators?',
+    'q3': 'Tell me about your entrepreneurial journey so far.',
+    'q4': 'Have you previously tried to start a business?',
+    'q5': 'What best describes your motivation for starting your business?',
+    'q6': 'How would you rate your financial literacy?',
+    'q7': 'How frequently do you dedicate time to professional learning?',
+    'q8': 'Describe a time when you faced a major business challenge and how you addressed it.',
+    'q9': 'Which of the following milestones have you completed?',
+    'q10': 'How confident are you in your ability to pivot your business model if needed?',
+    'q11': 'What is your biggest challenge right now?',
+    'q12': 'How would you describe your current funding situation?',
+    'q13': 'How strong is your professional network?',
+    'q14': 'Do you have access to mentors or advisors?',
+    'q15': 'How often do you network with other entrepreneurs?',
+    'q16': 'How many hours per week do you spend on your business?',
+    'q17': 'How do you prioritize tasks and manage your time?',
+    'q18': 'Tell me about a time when you faced a major setback and how you responded.',
+    'q19': 'How much does fear of failure impact your decision-making?',
+    'q20': 'Have you ever had to restart or significantly pivot your business?',
+    'q21': 'What is your vision for the scale of your business?',
+    'q22': 'What is your preferred approach to funding growth?',
+    'q23': 'What is your ultimate vision for your business?',
+    'q24': 'How many different jobs or roles have you had in your career?',
+    'q25': 'Do you have a clear exit strategy for your business?'
+  };
+
+  // Question options mapping
+  const questionOptions: Record<string, string[]> = {
+    'q1': ['Idea/Concept stage', 'Early operations with a few customers', 'Established and generating consistent revenue'],
+    'q2': ['Solo entrepreneur', 'Small team (2–5 people)', 'Larger team (6+ people)'],
+    'q4': ['Yes – it\'s still running', 'Yes – it failed', 'No – this is my first'],
+    'q5': ['I saw a market opportunity', 'I needed income to support myself or my family', 'I wanted independence or flexibility', 'Other'],
+    'q6': ['Excellent: I can confidently manage budgets, forecasts, and financial analysis', 'Good: I understand basic budgeting and cash flow management', 'Fair: I need help understanding financial documents', 'Poor: I avoid managing finances whenever possible'],
+    'q7': ['Daily', 'Weekly', 'Monthly', 'Rarely or never'],
+    'q11': ['Lack of funding', 'Limited access to mentorship', 'Difficulty accessing customers', 'Challenges with scaling', 'Other'],
+    'q12': ['Sufficient funding for current needs', 'Not enough funding for growth', 'Self-funded with limited resources'],
+    'q13': ['Very strong network', 'Moderate network', 'Weak network'],
+    'q14': ['Yes', 'No'],
+    'q15': ['Weekly', 'Monthly', 'Occasionally', 'Rarely'],
+    'q16': ['1-10 hours', '11-20 hours', '21-40 hours', '40+ hours'],
+    'q17': ['I prioritize and stick to a routine', 'I occasionally prioritize', 'I don\'t have a routine'],
+    'q20': ['Yes, I restarted', 'Yes, I haven\'t restarted yet', 'No'],
+    'q21': ['Small-scale operation', 'Regional business', 'Global business'],
+    'q22': ['Bootstrapping', 'Loans or grants', 'Outside investments', 'Unsure'],
+    'q24': ['1-5 different jobs', '6+ different jobs', 'No', 'Not sure'],
+    'q25': ['Yes', 'No', 'Not sure']
+  };
+
+  // Analyze each response in the lowest category
+  const improvements: Array<{
+    questionId: string;
+    currentResponse: string;
+    currentScore: number;
+    suggestedImprovement: string;
+    potentialScore: number;
+    pointGain: number;
+    reasoning: string;
+  }> = [];
+
+  for (const response of lowestCategoryResponses) {
+    const questionId = response.questionId;
+    const currentResponse = response.response;
+    const scoringMap = scoringMaps[questionId];
+    const options = questionOptions[questionId];
+    
+    if (!scoringMap || !options) continue;
+    
+    // Find current score
+    const optionIndex = options.indexOf(currentResponse);
+    const currentScore = optionIndex !== -1 ? scoringMap[optionIndex] : 0;
+    
+    // Find the highest possible score for this question
+    const maxScore = Math.max(...scoringMap);
+    const potentialScore = maxScore;
+    const pointGain = potentialScore - currentScore;
+    
+    // Only include if there's room for improvement
+    if (pointGain > 0) {
+      // Find the option that gives the highest score
+      const bestOptionIndex = scoringMap.indexOf(maxScore);
+      const suggestedOption = options[bestOptionIndex];
+      
+      improvements.push({
+        questionId,
+        currentResponse,
+        currentScore,
+        suggestedImprovement: suggestedOption,
+        potentialScore,
+        pointGain,
+        reasoning: `Improving from "${currentResponse}" to "${suggestedOption}" would increase your score by ${pointGain} points in this category.`
+      });
+    }
+  }
+
+  // Sort by point gain (highest first) and take top 3
+  const topImprovements = improvements
+    .sort((a, b) => b.pointGain - a.pointGain)
+    .slice(0, 3);
+
+  // Calculate total potential point gain
+  const totalPointGain = topImprovements.reduce((sum, improvement) => sum + improvement.pointGain, 0);
+
+  return {
+    lowestCategory: lowestCategory[0],
+    currentCategoryScore: lowestCategory[1] as number,
+    realisticImprovements: topImprovements,
+    totalPointGain
+  };
+}
+
+export async function generateDynamicInsights(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
+  // Find the highest and lowest scoring categories
+  const highestCategory = Object.entries(scores).reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) > (scores[b[0] as keyof typeof scores] as number) ? a : b);
+  const lowestCategory = Object.entries(scores).reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) < (scores[b[0] as keyof typeof scores] as number) ? a : b);
+  
+  // Get realistic improvements analysis
+  const improvementsAnalysis = await generateRealisticImprovements(responses, scores, apiKey, industry, location);
+  
+  // Calculate projected score based on actual improvements
+  const currentScore = Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number;
+  const projectedScore = Math.min(100, currentScore + improvementsAnalysis.totalPointGain);
+  
+  // Map category names to display names
+  const categoryDisplayNames: Record<string, string> = {
+    'personalBackground': 'Personal Background',
+    'entrepreneurialSkills': 'Entrepreneurial Skills', 
+    'resources': 'Resources',
+    'behavioralMetrics': 'Behavioral Metrics',
+    'growthVision': 'Growth & Vision'
+  };
+  
+  // Map question IDs to their categories
+  const questionCategoryMap: Record<string, string> = {
+    'q1': 'personalBackground', 'q2': 'personalBackground', 'q3': 'personalBackground',
+    'q4': 'personalBackground', 'q5': 'personalBackground',
+    'q6': 'entrepreneurialSkills', 'q7': 'entrepreneurialSkills', 'q8': 'entrepreneurialSkills',
+    'q9': 'entrepreneurialSkills', 'q10': 'entrepreneurialSkills',
+    'q11': 'resources', 'q12': 'resources', 'q13': 'resources', 'q14': 'resources', 'q15': 'resources',
+    'q16': 'behavioralMetrics', 'q17': 'behavioralMetrics', 'q18': 'behavioralMetrics',
+    'q19': 'behavioralMetrics', 'q20': 'behavioralMetrics',
+    'q21': 'growthVision', 'q22': 'growthVision', 'q23': 'growthVision', 'q24': 'growthVision', 'q25': 'growthVision'
+  };
+  
+  // Get responses for the highest and lowest categories
+  const highestCategoryResponses = responses.filter(r => questionCategoryMap[r.questionId] === highestCategory[0]);
+  const lowestCategoryResponses = responses.filter(r => questionCategoryMap[r.questionId] === lowestCategory[0]);
+  
+  // Create detailed analysis of responses
+  const highestCategoryAnalysis = highestCategoryResponses.map(r => ({
+    questionId: r.questionId,
+    response: r.response,
+    category: questionCategoryMap[r.questionId]
+  }));
+  
+  const lowestCategoryAnalysis = lowestCategoryResponses.map(r => ({
+    questionId: r.questionId,
+    response: r.response,
+    category: questionCategoryMap[r.questionId]
+  }));
+  
+  const prompt = `You are an expert business evaluator analyzing assessment responses to generate dynamic insights.
+
+Assessment Context:
+- Industry: ${industry || 'Creative & Media'}
+- Location: ${location || 'Delaware'}
+- Current Overall Score: ${currentScore}/100
+- Projected Score: ${projectedScore}/100
+
+Highest Scoring Category: ${categoryDisplayNames[highestCategory[0]]} (${highestCategory[1]}/20)
+Lowest Scoring Category: ${categoryDisplayNames[lowestCategory[0]]} (${lowestCategory[1]}/20)
+
+Highest Category Responses:
+${highestCategoryAnalysis.map(r => `- ${r.questionId}: "${r.response}"`).join('\n')}
+
+Lowest Category Responses:
+${lowestCategoryAnalysis.map(r => `- ${r.questionId}: "${r.response}"`).join('\n')}
+
+Realistic Improvements Analysis:
+${improvementsAnalysis.realisticImprovements.map(imp => 
+  `- ${imp.questionId}: Currently "${imp.currentResponse}" (${imp.currentScore} points) → Suggested "${imp.suggestedImprovement}" (${imp.potentialScore} points) = +${imp.pointGain} points`
+).join('\n')}
+
+Generate dynamic insights based on the actual responses and realistic improvements:
+
+1. For Competitive Advantage (highest category): Create 3 specific bullet points based on the actual responses that show their strengths
+2. For Growth Opportunity (lowest category): Create 3 specific bullet points based on the realistic improvements analysis, focusing on the most impactful changes
+3. Projected Score: ${projectedScore}
+
+Return as JSON:
+{
+  "projectedScore": ${projectedScore},
+  "competitiveAdvantage": {
+    "category": "${categoryDisplayNames[highestCategory[0]]}",
+    "score": "${highestCategory[1]}",
+    "summary": "1-2 sentence summary based on actual responses",
+    "specificStrengths": ["3 specific bullet points based on actual responses"]
+  },
+  "growthOpportunity": {
+    "category": "${categoryDisplayNames[lowestCategory[0]]}",
+    "score": "${lowestCategory[1]}",
+    "summary": "1-2 sentence summary based on realistic improvements",
+    "specificWeaknesses": ["3 specific bullet points based on realistic improvements analysis"]
+  }
+}`;
+
+  const response = await callGemini(prompt, apiKey);
+  try {
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        ...parsed,
+        realisticImprovements: improvementsAnalysis.realisticImprovements,
+        totalPointGain: improvementsAnalysis.totalPointGain
+      };
+    }
+    return {
+      projectedScore,
+      competitiveAdvantage: {
+        category: categoryDisplayNames[highestCategory[0]],
+        score: highestCategory[1].toString(),
+        summary: "Analysis based on your highest-scoring category",
+        specificStrengths: ["Strength 1", "Strength 2", "Strength 3"]
+      },
+      growthOpportunity: {
+        category: categoryDisplayNames[lowestCategory[0]],
+        score: lowestCategory[1].toString(),
+        summary: "Analysis based on your lowest-scoring category",
+        specificWeaknesses: ["Improvement 1", "Improvement 2", "Improvement 3"]
+      },
+      realisticImprovements: improvementsAnalysis.realisticImprovements,
+      totalPointGain: improvementsAnalysis.totalPointGain
+    };
+  } catch (error) {
+    return {
+      projectedScore,
+      competitiveAdvantage: {
+        category: categoryDisplayNames[highestCategory[0]],
+        score: highestCategory[1].toString(),
+        summary: "Analysis based on your highest-scoring category",
+        specificStrengths: ["Strength 1", "Strength 2", "Strength 3"]
+      },
+      growthOpportunity: {
+        category: categoryDisplayNames[lowestCategory[0]],
+        score: lowestCategory[1].toString(),
+        summary: "Analysis based on your lowest-scoring category",
+        specificWeaknesses: ["Improvement 1", "Improvement 2", "Improvement 3"]
+      },
+      realisticImprovements: improvementsAnalysis.realisticImprovements,
+      totalPointGain: improvementsAnalysis.totalPointGain
+    };
+  }
+}
+
 export { callGemini, parseGeminiResponse };

@@ -107,8 +107,7 @@ setGlobalOptions({ maxInstances: 10 });
 import { 
   generateKeyInsights,
   generateFeedbackText, 
-  generateCompetitiveAdvantage, 
-  generateGrowthOpportunity, 
+  generateDynamicInsights,
   generateTruthfulScoreProjection, 
   generateComprehensiveAnalysis, 
   generateNextStepsText,
@@ -143,14 +142,13 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     }
 
     // Generate enhanced feedback using the new AI functions with individual error handling
-    let keyInsights, feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps;
+    let keyInsights, feedback, dynamicInsights, scoreProjection, comprehensiveAnalysis, nextSteps;
     
     try {
-      [keyInsights, feedback, competitiveAdvantage, growthOpportunity, scoreProjection, comprehensiveAnalysis, nextSteps] = await Promise.all([
+      [keyInsights, feedback, dynamicInsights, scoreProjection, comprehensiveAnalysis, nextSteps] = await Promise.all([
         generateKeyInsights(responses, scores, apiKey, industry, location),
         generateFeedbackText(responses, scores, apiKey),
-        generateCompetitiveAdvantage(responses, scores, apiKey, industry, location),
-        generateGrowthOpportunity(responses, scores, apiKey, industry, location),
+        generateDynamicInsights(responses, scores, apiKey, industry, location),
         generateTruthfulScoreProjection(responses, scores, apiKey, industry, location),
         generateComprehensiveAnalysis(responses, scores, apiKey, industry, location),
         generateNextStepsText(scores, apiKey, industry, location)
@@ -173,17 +171,10 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
        }
       
              try {
-         competitiveAdvantage = await generateCompetitiveAdvantage(responses, scores, apiKey, industry, location);
+         dynamicInsights = await generateDynamicInsights(responses, scores, apiKey, industry, location);
        } catch (e) {
-         console.error('Error generating competitive advantage:', e);
-         competitiveAdvantage = null;
-       }
-      
-             try {
-         growthOpportunity = await generateGrowthOpportunity(responses, scores, apiKey, industry, location);
-       } catch (e) {
-         console.error('Error generating growth opportunity:', e);
-         growthOpportunity = null;
+         console.error('Error generating dynamic insights:', e);
+         dynamicInsights = null;
        }
       
              try {
@@ -212,8 +203,7 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     console.log('Generated AI feedback:', {
       keyInsights: keyInsights ? 'present' : 'missing',
       feedback: feedback ? 'present' : 'missing',
-      competitiveAdvantage: competitiveAdvantage ? 'present' : 'missing',
-      growthOpportunity: growthOpportunity ? 'present' : 'missing',
+      dynamicInsights: dynamicInsights ? 'present' : 'missing',
       scoreProjection: scoreProjection ? 'present' : 'missing',
       comprehensiveAnalysis: comprehensiveAnalysis ? 'present' : 'missing',
       nextSteps: nextSteps ? 'present' : 'missing'
@@ -227,9 +217,32 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     response.json({
       keyInsights,
       feedback,
-      competitiveAdvantage,
-      growthOpportunity,
-      scoreProjection,
+      competitiveAdvantage: dynamicInsights?.competitiveAdvantage,
+      growthOpportunity: dynamicInsights?.growthOpportunity,
+      scoreProjection: dynamicInsights?.projectedScore ? {
+        currentScore: Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0),
+        projectedScore: dynamicInsights.projectedScore,
+        improvementPotential: dynamicInsights.projectedScore - Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0),
+        analysis: {
+          lowestCategory: dynamicInsights.realisticImprovements?.[0]?.questionId?.split('q')[1] ? 
+            Object.keys(scores).find(cat => {
+              const questionCategoryMap: Record<string, string> = {
+                'q1': 'personalBackground', 'q2': 'personalBackground', 'q3': 'personalBackground',
+                'q4': 'personalBackground', 'q5': 'personalBackground',
+                'q6': 'entrepreneurialSkills', 'q7': 'entrepreneurialSkills', 'q8': 'entrepreneurialSkills',
+                'q9': 'entrepreneurialSkills', 'q10': 'entrepreneurialSkills',
+                'q11': 'resources', 'q12': 'resources', 'q13': 'resources', 'q14': 'resources', 'q15': 'resources',
+                'q16': 'behavioralMetrics', 'q17': 'behavioralMetrics', 'q18': 'behavioralMetrics',
+                'q19': 'behavioralMetrics', 'q20': 'behavioralMetrics',
+                'q21': 'growthVision', 'q22': 'growthVision', 'q23': 'growthVision', 'q24': 'growthVision', 'q25': 'growthVision'
+              };
+              return questionCategoryMap[dynamicInsights.realisticImprovements[0].questionId] === cat;
+            }) : 'unknown',
+          currentCategoryScore: Object.values(scores).reduce((a: any, b: any) => Math.min(a as number, b as number), Infinity),
+          realisticImprovements: dynamicInsights.realisticImprovements || [],
+          totalPointGain: dynamicInsights.totalPointGain || 0
+        }
+      } : scoreProjection,
       comprehensiveAnalysis,
       nextSteps
     });

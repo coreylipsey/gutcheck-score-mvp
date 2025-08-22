@@ -244,18 +244,18 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             
             <div className="space-y-3">
               <p className="text-gray-700 leading-relaxed">
-                {sessionData.geminiFeedback?.feedback && (
+                {sessionData.geminiFeedback?.keyInsights && (
                   showFullInsights ? (
-                    sessionData.geminiFeedback.feedback
+                    sessionData.geminiFeedback.keyInsights
                   ) : (
                     <>
-                      {sessionData.geminiFeedback.feedback.split(' ').slice(0, 15).join(' ')}...
+                      {sessionData.geminiFeedback.keyInsights.split(' ').slice(0, 15).join(' ')}...
                     </>
                   )
                 )}
               </p>
               
-              {sessionData.geminiFeedback?.feedback && (
+              {sessionData.geminiFeedback?.keyInsights && (
                 <button
                   onClick={() => setShowFullInsights(!showFullInsights)}
                   className="flex items-center space-x-1 text-sm font-medium transition-colors duration-200"
