@@ -216,15 +216,15 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
       feedback,
       competitiveAdvantage: dynamicInsights?.competitiveAdvantage,
       growthOpportunity: dynamicInsights?.growthOpportunity,
-      scoreProjection: scoreProjection || {
+      scoreProjection: {
         currentScore: Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number,
-        projectedScore: 0,
-        improvementPotential: 0,
+        projectedScore: dynamicInsights?.projectedScore || 0,
+        improvementPotential: dynamicInsights?.totalPointGain || 0,
         analysis: {
-          lowestCategory: 'unknown',
-          currentCategoryScore: 0,
-          realisticImprovements: [],
-          totalPointGain: 0
+          lowestCategory: dynamicInsights?.lowestCategory || 'unknown',
+          currentCategoryScore: dynamicInsights?.currentCategoryScore || 0,
+          realisticImprovements: dynamicInsights?.realisticImprovements || [],
+          totalPointGain: dynamicInsights?.totalPointGain || 0
         }
       },
       comprehensiveAnalysis,

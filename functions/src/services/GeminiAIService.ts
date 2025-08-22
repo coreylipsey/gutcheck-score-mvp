@@ -586,7 +586,9 @@ Return as JSON:
       return {
         ...parsed,
         realisticImprovements: improvementsAnalysis.realisticImprovements,
-        totalPointGain: improvementsAnalysis.totalPointGain
+        totalPointGain: improvementsAnalysis.totalPointGain,
+        lowestCategory: improvementsAnalysis.lowestCategory,
+        currentCategoryScore: improvementsAnalysis.currentCategoryScore
       };
     }
     
