@@ -115,9 +115,6 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
                 Your Competitive Advantage
               </h3>
               <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium" style={{ color: '#19C2A0' }}>
-                  {competitiveAdvantage?.category || 'Analyzing...'}
-                </p>
                 <span className="text-xs px-2 py-1 bg-green-200 text-green-800 rounded-full">
                   {competitiveAdvantage?.category || 'Analyzing...'}
                 </span>
@@ -161,9 +158,6 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
                 Biggest Growth Opportunity
               </h3>
               <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium" style={{ color: '#FF6B00' }}>
-                  {growthOpportunity?.category || 'Analyzing...'}
-                </p>
                 <span className="text-xs px-2 py-1 bg-orange-200 text-orange-800 rounded-full">
                   {growthOpportunity?.category || 'Analyzing...'}
                 </span>
