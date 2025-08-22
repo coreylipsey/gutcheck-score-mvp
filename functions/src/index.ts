@@ -217,8 +217,18 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     response.json({
       keyInsights,
       feedback,
-      competitiveAdvantage: dynamicInsights?.competitiveAdvantage,
-      growthOpportunity: dynamicInsights?.growthOpportunity,
+      competitiveAdvantage: dynamicInsights?.competitiveAdvantage || {
+        category: 'Unknown',
+        score: '0',
+        summary: 'Analysis not available',
+        specificStrengths: ['Strength analysis not available']
+      },
+      growthOpportunity: dynamicInsights?.growthOpportunity || {
+        category: 'Unknown',
+        score: '0',
+        summary: 'Analysis not available',
+        specificWeaknesses: ['Improvement analysis not available']
+      },
       scoreProjection: dynamicInsights?.projectedScore ? {
         currentScore: Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number,
         projectedScore: dynamicInsights.projectedScore,

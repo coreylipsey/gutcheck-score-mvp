@@ -43,6 +43,19 @@ function parseGeminiResponse(response: string): { score: number; explanation: st
 export async function generateKeyInsights(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
   const overallScore = Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number;
   
+  // Find highest and lowest scoring categories
+  const highestCategory = Object.entries(scores).reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) > (scores[b[0] as keyof typeof scores] as number) ? a : b);
+  const lowestCategory = Object.entries(scores).reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) < (scores[b[0] as keyof typeof scores] as number) ? a : b);
+  
+  // Map category names to display names
+  const categoryDisplayNames: Record<string, string> = {
+    'personalBackground': 'Personal Background',
+    'entrepreneurialSkills': 'Entrepreneurial Skills', 
+    'resources': 'Resources',
+    'behavioralMetrics': 'Behavioral Metrics',
+    'growthVision': 'Growth & Vision'
+  };
+  
   const prompt = `You are an expert business evaluator providing key insights from an entrepreneurial assessment.
 
 Assessment Overview:
@@ -55,9 +68,13 @@ Assessment Overview:
 - Industry: ${industry || 'General'}
 - Location: ${location || 'Unknown'}
 
-Write a 2-sentence executive summary that captures the most important insights about this entrepreneur's profile. Focus on the overall assessment picture, highlighting key strengths and critical areas for improvement. Be specific and actionable.
+Key Findings:
+- Highest Scoring Category: ${categoryDisplayNames[highestCategory[0]]} (${highestCategory[1]}/20)
+- Lowest Scoring Category: ${categoryDisplayNames[lowestCategory[0]]} (${lowestCategory[1]}/20)
 
-Keep it concise and impactful - maximum 200 characters total.`;
+Write a 2-sentence executive summary that captures the most important insights about this entrepreneur's profile. Focus on their key strengths and critical areas for improvement. Be specific and actionable.
+
+Keep it concise and impactful - maximum 200 characters total. Do NOT include specific numerical scores in the summary.`;
 
   const response = await callGemini(prompt, apiKey);
   return response;
