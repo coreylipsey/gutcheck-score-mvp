@@ -58,6 +58,8 @@ export async function generateKeyInsights(responses: any[], scores: any, apiKey:
   
   const prompt = `You are an expert business evaluator providing key insights from an entrepreneurial assessment.
 
+IMPORTANT: This assessment evaluates the ENTREPRENEUR/FOUNDER, not the company. Always refer to the individual entrepreneur using "you," "your," or "yourself" - never "this entrepreneur," "the founder," or third person.
+
 Assessment Overview:
 - Overall Score: ${overallScore}/100
 - Personal Background: ${scores.personalBackground}/20
@@ -72,7 +74,13 @@ Key Findings:
 - Highest Scoring Category: ${categoryDisplayNames[highestCategory[0]]} (${highestCategory[1]}/20)
 - Lowest Scoring Category: ${categoryDisplayNames[lowestCategory[0]]} (${lowestCategory[1]}/20)
 
-Write a 2-sentence executive summary that captures the most important insights about this entrepreneur's profile. Focus on their key strengths and critical areas for improvement. Be specific and actionable.
+Write a 2-sentence executive summary that captures the most important insights about your profile. Focus on your key strengths and critical areas for improvement. Be specific and actionable.
+
+LANGUAGE RULES:
+- ALWAYS use first person: "you," "your," "yourself" - never "this entrepreneur," "the founder," or third person
+- NEVER use "this company," "this entity," "the business," or "the organization"
+- Focus on personal skills, behaviors, and capabilities
+- Be consistent throughout - every sentence should use "you" language
 
 Keep it concise and impactful - maximum 200 characters total. Do NOT include specific numerical scores in the summary.`;
 
