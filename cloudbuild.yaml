@@ -29,8 +29,8 @@ steps:
       - 'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=gutcheck-score-mvp.firebasestorage.app'
       - 'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=286731768309'
       - 'NEXT_PUBLIC_FIREBASE_APP_ID=1:286731768309:web:daa2346433cefedc1e90bc'
-      - 'ASSESSMENT_AGENT_URL=https://us-central1-gutcheck-score-mvp.cloudfunctions.net/assessment-agent'
-      - 'OPEN_ENDED_SCORING_AGENT_URL=https://us-central1-gutcheck-score-mvp.cloudfunctions.net/open-ended-scoring-agent'
+      - 'NEXT_PUBLIC_USE_GEMINI_API=true'
+      - 'NEXT_PUBLIC_GEMINI_API_URL=https://us-central1-gutcheck-score-mvp.cloudfunctions.net'
 
   # Step 4: Build Firebase Functions
   - name: 'node:20'
@@ -48,6 +48,8 @@ steps:
         ls -la out/
         npx firebase-tools deploy --only hosting,functions --project ${_PROJECT_ID}
     dir: '.'
+    env:
+      - 'GEMINI_API_KEY=AIzaSyC0ZeeBKi4tod07bOnrB40hVOlWaFhfuzE'
 
 # Build timeout
 timeout: '1800s'
@@ -59,6 +61,4 @@ options:
 
 # Substitutions (will be set in Cloud Build trigger)
 substitutions:
-  _PROJECT_ID: 'gutcheck-score-mvp'
-  # DEPRECATED: Gemini API key no longer needed as we've switched to ADK agent
-  # _GEMINI_API_KEY: 'AIzaSyAUq0hEPlGnfkj6MJC-7et_gNim-YTyTzg' 
+  _PROJECT_ID: 'gutcheck-score-mvp' 
