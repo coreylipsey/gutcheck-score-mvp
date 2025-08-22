@@ -211,10 +211,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
                 Signal Readout
               </h4>
               <div className="text-sm text-gray-700 leading-relaxed">
-                {comprehensiveAnalysis.includes('Signal Readout:') ? 
-                  comprehensiveAnalysis.split('Strength Signals:')[0].replace('Signal Readout:', '').trim() :
-                  'Analysis in progress...'
-                }
+                {comprehensiveAnalysis?.signalReadout || 'Analysis in progress...'}
               </div>
             </div>
 
@@ -225,10 +222,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
                 Strength Signals
               </h4>
               <div className="text-sm text-gray-700 leading-relaxed">
-                {comprehensiveAnalysis.includes('Strength Signals:') && comprehensiveAnalysis.includes('Development Areas:') ? 
-                  comprehensiveAnalysis.split('Strength Signals:')[1].split('Development Areas:')[0].trim() :
-                  'Analysis in progress...'
-                }
+                {comprehensiveAnalysis?.strengthSignals || 'Analysis in progress...'}
               </div>
             </div>
 
@@ -239,11 +233,21 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
                 Development Areas
               </h4>
               <div className="text-sm text-gray-700 leading-relaxed">
-                {comprehensiveAnalysis.includes('Development Areas:') ? 
-                  comprehensiveAnalysis.split('Development Areas:')[1].trim() :
-                  'Analysis in progress...'
-                }
+                {comprehensiveAnalysis?.developmentAreas || 'Analysis in progress...'}
               </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Trajectory Indicators */}
+        {comprehensiveAnalysis?.trajectoryIndicators && (
+          <div className="mt-6 bg-white/60 rounded-lg p-6 border border-blue-200">
+            <h4 className="font-semibold text-sm text-gray-800 mb-3 flex items-center">
+              <TrendingUp className="w-4 h-4 mr-2" style={{ color: '#147AFF' }} />
+              Trajectory Indicators
+            </h4>
+            <div className="text-sm text-gray-700 leading-relaxed">
+              {comprehensiveAnalysis.trajectoryIndicators}
             </div>
           </div>
         )}

@@ -275,7 +275,7 @@ INSTRUCTIONS:
   }
 }
 
-export async function generateComprehensiveAnalysis(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
+export async function generateComprehensiveAnalysis(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
   
   const prompt = `You are a seasoned entrepreneurial scout, analyzing the signals from a founder's Gutcheck Assessment the way an NFL scout would evaluate a player's combine results and tape. Your role is not to prescribe or judge, but to surface signals, tendencies, and overlooked strengths/risks that help explain where this entrepreneur sits on their trajectory.
 
@@ -300,7 +300,15 @@ TASK: Produce a 2-3 paragraph scouting-style report that includes:
 3. **Development Areas** – note where signals suggest gaps or undervalued traits (e.g., limited capital access, inconsistent tracking, hesitation in risk-taking)
 4. **Trajectory Indicators** – suggest next moves or opportunities that could elevate their "market value" as an entrepreneur (like a coach pointing out how to turn raw talent into production)
 
-OUTPUT FORMAT: Plain text, 2-3 paragraphs
+OUTPUT FORMAT: Return as JSON with three structured sections
+
+Return as JSON:
+{
+  "signalReadout": "2-3 sentences analyzing your overall profile and score interpretation, like a scout explaining combine numbers",
+  "strengthSignals": "2-3 sentences highlighting your competitive advantages and unique tendencies, focusing on what you're doing well",
+  "developmentAreas": "2-3 sentences noting where signals suggest gaps or areas for improvement, with constructive guidance",
+  "trajectoryIndicators": "2-3 sentences suggesting next moves or opportunities that could elevate your 'market value' as an entrepreneur, like a coach pointing out how to turn raw talent into production"
+}
 
 TONE GUIDANCE:
 - Warm, constructive, growth-oriented — like a scout who genuinely wants the player to succeed
@@ -317,7 +325,17 @@ LANGUAGE RULES:
 - Be consistent throughout - every sentence should use "you" language`;
 
   const response = await callGemini(prompt, apiKey);
-  return response;
+  
+  try {
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return parsed;
+    }
+    throw new Error('Failed to parse AI response for comprehensive analysis');
+  } catch (error) {
+    throw new Error(`Comprehensive analysis generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 export async function generateNextStepsText(scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
