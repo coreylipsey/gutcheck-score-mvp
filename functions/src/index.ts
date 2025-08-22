@@ -142,7 +142,7 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     }
 
     // Generate enhanced feedback using the new AI functions with individual error handling
-    let keyInsights, feedback, dynamicInsights, scoreProjection, comprehensiveAnalysis, nextSteps;
+    let keyInsights: string | undefined, feedback: string | undefined, dynamicInsights: any | undefined, scoreProjection: any | undefined, comprehensiveAnalysis: any | undefined, nextSteps: string | undefined;
     
     try {
       // First, generate all AI feedback except Next Steps
@@ -174,35 +174,35 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
         keyInsights = await generateKeyInsights(responses, scores, apiKey, industry, location);
       } catch (e) {
         console.error('Error generating keyInsights:', e);
-        keyInsights = null;
+        keyInsights = undefined;
       }
       
       try {
         feedback = await generateFeedbackText(responses, scores, apiKey);
       } catch (e) {
         console.error('Error generating feedback:', e);
-        feedback = null;
+        feedback = undefined;
       }
       
       try {
         dynamicInsights = await generateDynamicInsights(responses, scores, apiKey, industry, location);
       } catch (e) {
         console.error('Error generating dynamicInsights:', e);
-        dynamicInsights = null;
+        dynamicInsights = undefined;
       }
       
       try {
         scoreProjection = await generateTruthfulScoreProjection(responses, scores, apiKey, industry, location);
       } catch (e) {
         console.error('Error generating scoreProjection:', e);
-        scoreProjection = null;
+        scoreProjection = undefined;
       }
       
       try {
         comprehensiveAnalysis = await generateComprehensiveAnalysis(responses, scores, apiKey, industry, location);
       } catch (e) {
         console.error('Error generating comprehensiveAnalysis:', e);
-        comprehensiveAnalysis = null;
+        comprehensiveAnalysis = undefined;
       }
       
       try {
