@@ -10,6 +10,21 @@ async function callGemini(prompt: string, apiKey: string): Promise<string> {
   return response.text();
 }
 
+// Call Gemini API with Search Grounding
+async function callGeminiWithSearch(prompt: string, apiKey: string): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  
+  // Configure with Google Search tool
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    tools: [{ googleSearchRetrieval: { dynamicRetrievalConfig: { mode: 'MODE_DYNAMIC', dynamicThreshold: 0.7 } } }]
+  });
+  
+  const response = await result.response;
+  return response.text();
+}
+
 // Parse Gemini response
 function parseGeminiResponse(response: string): { score: number; explanation: string } {
   try {
@@ -347,46 +362,35 @@ LANGUAGE RULES:
 }
 
 export async function generateNextStepsText(scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
-  const prompt = `Context:
-You are an expert business evaluator analyzing an entrepreneur's assessment results. Your goal is to extract actionable insights by identifying their personalized next steps based on their Gutcheck Score.
+  const prompt = `You are an expert business evaluator with access to real-time web search capabilities. Your goal is to find CURRENT, VERIFIED resources for an entrepreneur based on their assessment results.
 
-Assessment Categories & Scores:
+IMPORTANT: Use web search to find real, current resources. Do not make up or guess at resources.
 
-Personal Background Score: ${scores.personalBackground}/20
+Assessment Context:
+- Industry: ${industry || 'Creative & Media'}
+- Location: ${location || 'Delaware'}
+- Personal Background Score: ${scores.personalBackground}/20
+- Entrepreneurial Skills Score: ${scores.entrepreneurialSkills}/25
+- Resources Score: ${scores.resources}/20
+- Behavioral Metrics Score: ${scores.behavioralMetrics}/15
+- Growth & Vision Score: ${scores.growthVision}/20
 
-Entrepreneurial Skills Score: ${scores.entrepreneurialSkills}/25
+Use web search to find CURRENT, VERIFIED resources for this entrepreneur:
 
-Resources Score: ${scores.resources}/20
+MENTORSHIP: Search for active mentorship programs, incubators, accelerators, or networking groups in ${location} for ${industry} entrepreneurs. Find specific programs currently accepting participants. Look for local business development centers, industry associations, or startup communities.
 
-Behavioral Metrics Score: ${scores.behavioralMetrics}/15
+FUNDING: Search for current grants, funding opportunities, or business tools for ${industry} businesses in ${location}. Look for active application periods, government grants, industry-specific funding, or local economic development programs.
 
-Growth & Vision Score: ${scores.growthVision}/20
+LEARNING: Search for relevant courses, articles, or learning resources that address the entrepreneur's specific improvement areas. Focus on reputable platforms like Coursera, Udemy, local universities, or industry-specific training programs.
 
-Industry: ${industry || 'Creative & Media'}
+Return only verified, current resources with active links. Format as:
+Mentorship: [Specific program name with link]
+Funding: [Specific opportunity with link]  
+Learning: [Specific course/resource with link]
 
-Location: ${location || 'Delaware'}
+Keep each category under 200 characters. Only include resources you can verify through web search.`;
 
-Step 1: Generate Personalized Next Steps
-🔴 HARD RULE: MUST INCLUDE CURRENT, VALID, AND SPECIFIC LINKS
-Mentorship:
-Identify an active and credible mentorship program, incubator, accelerator, or networking group specific to the entrepreneur's exact industry and location. Verify that the link is active and the community is currently accepting new participants. If no local program exists, suggest an online mentorship community (not generic like Y Combinator or Techstars—find specific, niche communities like Slack groups, active LinkedIn groups, or industry-specific Reddit communities).
-Resources:
-Find current grants, funding opportunities, or business tools specifically relevant to their industry and location.
-Provide direct application links whenever available. Ensure the resource's link is valid and active. If local resources aren't found, recommend reputable online platforms offering grants or tools (e.g., Hello Alice, Fundera, local Chamber of Commerce funding pages).
-Learning:
-Recommend a currently available and relevant course, article, book, or video directly addressing their improvement areas.
-Source from highly regarded platforms (e.g., Coursera, Udemy, Amazon, Skillshare) or recent (within the last year) highly rated Medium articles, LinkedIn articles, or industry blogs. Confirm the link is accessible and current.
-Your response should feel tailored, actionable, and timely, resembling a personalized coaching conversation.
-Clearly label each step and category.
-Ensure all recommended links are verified and active before including them.
-max 200 characters for each category.
-No little hashtags or stars or any other weird characters, just the text.
-See below an example of how the output should look:
-Mentorship: Delaware Innovation Space
-Funding: Delaware Arts Grants
-Learning: Coursera's "Creative Entrepreneurship"`;
-
-  const response = await callGemini(prompt, apiKey);
+  const response = await callGeminiWithSearch(prompt, apiKey);
   return response;
 }
 
