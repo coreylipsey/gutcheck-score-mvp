@@ -93,7 +93,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
         <div className="inline-flex items-center space-x-3 px-6 py-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-full border border-green-200">
           <TrendingUp className="w-5 h-5 text-green-600" />
           <span className="font-medium text-green-800">
-            Following these recommendations could increase your score to {scoreProjection?.projectedScore}
+            Following these recommendations could increase your score {scoreProjection?.improvementPotential || 0} points!
           </span>
         </div>
       </div>
