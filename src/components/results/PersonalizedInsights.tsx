@@ -116,7 +116,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
               </h3>
               <div className="flex items-center space-x-2">
                 <span className="text-xs px-2 py-1 bg-green-200 text-green-800 rounded-full">
-                  {competitiveAdvantage?.category || 'Analyzing...'}
+                  {topStrength.name}
                 </span>
               </div>
             </div>
@@ -159,7 +159,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
               </h3>
               <div className="flex items-center space-x-2">
                 <span className="text-xs px-2 py-1 bg-orange-200 text-orange-800 rounded-full">
-                  {growthOpportunity?.category || 'Analyzing...'}
+                  {focusArea.name}
                 </span>
               </div>
             </div>
