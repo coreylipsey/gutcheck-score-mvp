@@ -497,13 +497,13 @@ ${contextSection}
 SEARCH STRATEGY - Find resources that specifically address these needs:
 
 MENTORSHIP (Priority: ${categoryPerformance.resources.priority}):
-Search for active mentorship programs, incubators, accelerators, or networking groups in ${location} for ${industry} entrepreneurs. Focus on programs that address: "${aiFeedback?.growthOpportunity?.specificWeaknesses?.join('", "') || 'general business development'}". Look for programs currently accepting participants with clear application processes.
+Search for active mentorship programs, incubators, accelerators, or networking groups in ${location} for ${industry} entrepreneurs. Focus on programs that address: "${aiFeedback?.growthOpportunity?.specificWeaknesses?.join('", "') || 'general business development'}". Look for programs currently accepting participants with clear application processes. IMPORTANT: Verify each URL leads directly to the specific program page, not just the organization homepage.
 
 FUNDING (Priority: ${categoryPerformance.resources.priority}):
-Search for current grants, funding opportunities, or business tools for ${industry} businesses in ${location}. Focus on opportunities that align with the entrepreneur's current stage and address: "${aiFeedback?.growthOpportunity?.summary || 'business development needs'}". Look for active application periods.
+Search for current grants, funding opportunities, or business tools for ${industry} businesses in ${location}. Focus on opportunities that align with the entrepreneur's current stage and address: "${aiFeedback?.growthOpportunity?.summary || 'business development needs'}". Look for active application periods. IMPORTANT: Verify each URL leads directly to the specific funding opportunity page, not just the organization's funding overview page.
 
 LEARNING (Priority: ${categoryPerformance.entrepreneurialSkills.priority}):
-Search for relevant courses, articles, or learning resources that directly address: "${aiFeedback?.comprehensiveAnalysis?.developmentAreas || 'entrepreneurial development'}". Focus on reputable platforms (Coursera, Udemy, local universities, industry associations) with current offerings that match the entrepreneur's skill level.
+Search for relevant courses, articles, or learning resources that directly address: "${aiFeedback?.comprehensiveAnalysis?.developmentAreas || 'entrepreneurial development'}". Focus on reputable platforms (Coursera, Udemy, local universities, industry associations) with current offerings that match the entrepreneur's skill level. IMPORTANT: Verify each URL leads directly to the specific course or resource page, not just the platform's course catalog.
 
 QUALITY CRITERIA:
 - Must be currently active/available
@@ -511,6 +511,16 @@ QUALITY CRITERIA:
 - Must be relevant to entrepreneur's industry and location
 - Must address specific needs identified in AI analysis
 - Must be from reputable sources
+
+URL VERIFICATION REQUIREMENTS:
+- BEFORE including any URL, you MUST verify it works by searching for it and clicking through
+- URLs must lead to the EXACT resource mentioned (not just the homepage)
+- URLs must be current and active (no 404 errors, no "site can't be reached")
+- URLs must point to the specific program/opportunity/course, not just the organization's main site
+- If a URL redirects to a different page, verify the redirect destination is still relevant
+- Prefer direct links to specific application pages or program details
+- Avoid URLs that require additional navigation to find the actual resource
+- If you cannot verify a URL works, DO NOT include that resource
 
 OUTPUT FORMAT - Return as JSON:
 {
@@ -531,7 +541,9 @@ OUTPUT FORMAT - Return as JSON:
   }
 }
 
-CRITICAL: Only include resources you can verify through web search. Each description should be under 150 characters.`;
+CRITICAL: Only include resources you can verify through web search. Each description should be under 150 characters. 
+
+MOST IMPORTANT: Before including any URL, you MUST test it by searching for it and clicking through to ensure it works and leads to the exact resource mentioned. If you cannot verify a URL works, DO NOT include that resource.`;
 
   const response = await callGeminiWithSearch(prompt, apiKey);
   
