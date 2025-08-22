@@ -110,7 +110,6 @@ import {
   generateDynamicInsights,
   generateTruthfulScoreProjection, 
   generateComprehensiveAnalysis, 
-  generateNextStepsText,
   generateNextStepsTextWithContext,
   callGemini,
   parseGeminiResponse 
@@ -256,7 +255,7 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
         }
       },
       comprehensiveAnalysis,
-      nextSteps
+      nextSteps: nextSteps || undefined
     });
 
   } catch (error) {
