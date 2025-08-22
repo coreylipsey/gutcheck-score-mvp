@@ -340,35 +340,6 @@ export async function generateRealisticImprovements(responses: any[], scores: an
     'q25': [5, 3, 2], // Yes=5, No=3, Not sure=2
   };
 
-  // Question text mapping for context
-  const questionTexts: Record<string, string> = {
-    'q1': 'What stage is your business currently in?',
-    'q2': 'Do you currently have any team members or collaborators?',
-    'q3': 'Tell me about your entrepreneurial journey so far.',
-    'q4': 'Have you previously tried to start a business?',
-    'q5': 'What best describes your motivation for starting your business?',
-    'q6': 'How would you rate your financial literacy?',
-    'q7': 'How frequently do you dedicate time to professional learning?',
-    'q8': 'Describe a time when you faced a major business challenge and how you addressed it.',
-    'q9': 'Which of the following milestones have you completed?',
-    'q10': 'How confident are you in your ability to pivot your business model if needed?',
-    'q11': 'What is your biggest challenge right now?',
-    'q12': 'How would you describe your current funding situation?',
-    'q13': 'How strong is your professional network?',
-    'q14': 'Do you have access to mentors or advisors?',
-    'q15': 'How often do you network with other entrepreneurs?',
-    'q16': 'How many hours per week do you spend on your business?',
-    'q17': 'How do you prioritize tasks and manage your time?',
-    'q18': 'Tell me about a time when you faced a major setback and how you responded.',
-    'q19': 'How much does fear of failure impact your decision-making?',
-    'q20': 'Have you ever had to restart or significantly pivot your business?',
-    'q21': 'What is your vision for the scale of your business?',
-    'q22': 'What is your preferred approach to funding growth?',
-    'q23': 'What is your ultimate vision for your business?',
-    'q24': 'How many different jobs or roles have you had in your career?',
-    'q25': 'Do you have a clear exit strategy for your business?'
-  };
-
   // Question options mapping
   const questionOptions: Record<string, string[]> = {
     'q1': ['Idea/Concept stage', 'Early operations with a few customers', 'Established and generating consistent revenue'],
@@ -521,7 +492,7 @@ Lowest Category Responses:
 ${lowestCategoryAnalysis.map(r => `- ${r.questionId}: "${r.response}"`).join('\n')}
 
 Realistic Improvements Analysis:
-${improvementsAnalysis.realisticImprovements.map(imp => 
+${improvementsAnalysis.realisticImprovements.map((imp: any) => 
   `- ${imp.questionId}: Currently "${imp.currentResponse}" (${imp.currentScore} points) → Suggested "${imp.suggestedImprovement}" (${imp.potentialScore} points) = +${imp.pointGain} points`
 ).join('\n')}
 
@@ -563,13 +534,13 @@ Return as JSON:
       projectedScore,
       competitiveAdvantage: {
         category: categoryDisplayNames[highestCategory[0]],
-        score: highestCategory[1].toString(),
+        score: (highestCategory[1] as number).toString(),
         summary: "Analysis based on your highest-scoring category",
         specificStrengths: ["Strength 1", "Strength 2", "Strength 3"]
       },
       growthOpportunity: {
         category: categoryDisplayNames[lowestCategory[0]],
-        score: lowestCategory[1].toString(),
+        score: (lowestCategory[1] as number).toString(),
         summary: "Analysis based on your lowest-scoring category",
         specificWeaknesses: ["Improvement 1", "Improvement 2", "Improvement 3"]
       },
@@ -581,13 +552,13 @@ Return as JSON:
       projectedScore,
       competitiveAdvantage: {
         category: categoryDisplayNames[highestCategory[0]],
-        score: highestCategory[1].toString(),
+        score: (highestCategory[1] as number).toString(),
         summary: "Analysis based on your highest-scoring category",
         specificStrengths: ["Strength 1", "Strength 2", "Strength 3"]
       },
       growthOpportunity: {
         category: categoryDisplayNames[lowestCategory[0]],
-        score: lowestCategory[1].toString(),
+        score: (lowestCategory[1] as number).toString(),
         summary: "Analysis based on your lowest-scoring category",
         specificWeaknesses: ["Improvement 1", "Improvement 2", "Improvement 3"]
       },

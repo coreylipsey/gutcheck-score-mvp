@@ -220,9 +220,9 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
       competitiveAdvantage: dynamicInsights?.competitiveAdvantage,
       growthOpportunity: dynamicInsights?.growthOpportunity,
       scoreProjection: dynamicInsights?.projectedScore ? {
-        currentScore: Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0),
+        currentScore: Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number,
         projectedScore: dynamicInsights.projectedScore,
-        improvementPotential: dynamicInsights.projectedScore - Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0),
+        improvementPotential: dynamicInsights.projectedScore - (Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number),
         analysis: {
           lowestCategory: dynamicInsights.realisticImprovements?.[0]?.questionId?.split('q')[1] ? 
             Object.keys(scores).find(cat => {
@@ -238,7 +238,7 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
               };
               return questionCategoryMap[dynamicInsights.realisticImprovements[0].questionId] === cat;
             }) : 'unknown',
-          currentCategoryScore: Object.values(scores).reduce((a: any, b: any) => Math.min(a as number, b as number), Infinity),
+          currentCategoryScore: Object.values(scores).reduce((a: any, b: any) => Math.min(a as number, b as number), Infinity) as number,
           realisticImprovements: dynamicInsights.realisticImprovements || [],
           totalPointGain: dynamicInsights.totalPointGain || 0
         }
