@@ -18,7 +18,7 @@ async function callGeminiWithSearch(prompt: string, apiKey: string): Promise<str
   // Configure with Google Search tool
   const result = await model.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    tools: [{ googleSearchRetrieval: { dynamicRetrievalConfig: { mode: 'MODE_DYNAMIC', dynamicThreshold: 0.7 } } }]
+    tools: [{ googleSearchRetrieval: { dynamicRetrievalConfig: { mode: 'MODE_DYNAMIC' as any, dynamicThreshold: 0.7 } } }]
   });
   
   const response = await result.response;

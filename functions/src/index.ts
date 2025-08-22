@@ -255,7 +255,7 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
         }
       },
       comprehensiveAnalysis,
-      nextSteps: nextSteps || undefined
+      nextSteps: nextSteps ?? undefined
     });
 
   } catch (error) {
