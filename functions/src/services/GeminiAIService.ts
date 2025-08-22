@@ -446,6 +446,15 @@ export async function generateDynamicInsights(responses: any[], scores: any, api
   const highestCategory = Object.entries(scores).reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) > (scores[b[0] as keyof typeof scores] as number) ? a : b);
   const lowestCategory = Object.entries(scores).reduce((a, b) => (scores[a[0] as keyof typeof scores] as number) < (scores[b[0] as keyof typeof scores] as number) ? a : b);
   
+  // Debug logging
+  console.log('generateDynamicInsights debug:', {
+    scores,
+    highestCategory,
+    lowestCategory,
+    highestCategoryKey: highestCategory[0],
+    lowestCategoryKey: lowestCategory[0]
+  });
+  
   // Get realistic improvements analysis
   const improvementsAnalysis = await generateRealisticImprovements(responses, scores, apiKey, industry, location);
   
@@ -461,6 +470,13 @@ export async function generateDynamicInsights(responses: any[], scores: any, api
     'behavioralMetrics': 'Behavioral Metrics',
     'growthVision': 'Growth & Vision'
   };
+  
+  // Debug category mapping
+  console.log('Category mapping debug:', {
+    highestCategoryKey: highestCategory[0],
+    mappedCategory: categoryDisplayNames[highestCategory[0]],
+    availableKeys: Object.keys(categoryDisplayNames)
+  });
   
   // Map question IDs to their categories
   const questionCategoryMap: Record<string, string> = {
@@ -537,51 +553,27 @@ Return as JSON:
 }`;
 
   const response = await callGemini(prompt, apiKey);
+  console.log('Raw Gemini response for dynamic insights:', response);
+  
   try {
     const jsonMatch = response.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
+      console.log('Parsed JSON from Gemini:', parsed);
       return {
         ...parsed,
         realisticImprovements: improvementsAnalysis.realisticImprovements,
         totalPointGain: improvementsAnalysis.totalPointGain
       };
     }
-    return {
-      projectedScore,
-      competitiveAdvantage: {
-        category: categoryDisplayNames[highestCategory[0]],
-        score: (highestCategory[1] as number).toString(),
-        summary: "Analysis based on your highest-scoring category",
-        specificStrengths: ["Strength 1", "Strength 2", "Strength 3"]
-      },
-      growthOpportunity: {
-        category: categoryDisplayNames[lowestCategory[0]],
-        score: (lowestCategory[1] as number).toString(),
-        summary: "Analysis based on your lowest-scoring category",
-        specificWeaknesses: ["Improvement 1", "Improvement 2", "Improvement 3"]
-      },
-      realisticImprovements: improvementsAnalysis.realisticImprovements,
-      totalPointGain: improvementsAnalysis.totalPointGain
-    };
+    
+    // If JSON parsing fails, throw an error instead of using fallback text
+    console.error('JSON parsing failed in generateDynamicInsights. Raw response:', response);
+    throw new Error('Failed to parse AI response for dynamic insights');
+    
   } catch (error) {
-    return {
-      projectedScore,
-      competitiveAdvantage: {
-        category: categoryDisplayNames[highestCategory[0]],
-        score: (highestCategory[1] as number).toString(),
-        summary: "Analysis based on your highest-scoring category",
-        specificStrengths: ["Strength 1", "Strength 2", "Strength 3"]
-      },
-      growthOpportunity: {
-        category: categoryDisplayNames[lowestCategory[0]],
-        score: (lowestCategory[1] as number).toString(),
-        summary: "Analysis based on your lowest-scoring category",
-        specificWeaknesses: ["Improvement 1", "Improvement 2", "Improvement 3"]
-      },
-      realisticImprovements: improvementsAnalysis.realisticImprovements,
-      totalPointGain: improvementsAnalysis.totalPointGain
-    };
+    console.error('Error in generateDynamicInsights:', error);
+    throw new Error(`Dynamic insights generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 

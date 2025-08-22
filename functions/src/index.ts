@@ -156,47 +156,47 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     } catch (error) {
       console.error('Error in Promise.all:', error);
       // Fallback to individual calls with error handling
-             try {
-         keyInsights = await generateKeyInsights(responses, scores, apiKey, industry, location);
-       } catch (e) {
-         console.error('Error generating key insights:', e);
-         keyInsights = null;
-       }
+      try {
+        keyInsights = await generateKeyInsights(responses, scores, apiKey, industry, location);
+      } catch (e) {
+        console.error('Error generating keyInsights:', e);
+        keyInsights = null;
+      }
       
-             try {
-         feedback = await generateFeedbackText(responses, scores, apiKey);
-       } catch (e) {
-         console.error('Error generating feedback:', e);
-         feedback = null;
-       }
+      try {
+        feedback = await generateFeedbackText(responses, scores, apiKey);
+      } catch (e) {
+        console.error('Error generating feedback:', e);
+        feedback = null;
+      }
       
-             try {
-         dynamicInsights = await generateDynamicInsights(responses, scores, apiKey, industry, location);
-       } catch (e) {
-         console.error('Error generating dynamic insights:', e);
-         dynamicInsights = null;
-       }
+      try {
+        dynamicInsights = await generateDynamicInsights(responses, scores, apiKey, industry, location);
+      } catch (e) {
+        console.error('Error generating dynamicInsights:', e);
+        dynamicInsights = null;
+      }
       
-             try {
-         scoreProjection = await generateTruthfulScoreProjection(responses, scores, apiKey, industry, location);
-       } catch (e) {
-         console.error('Error generating score projection:', e);
-         scoreProjection = null;
-       }
+      try {
+        scoreProjection = await generateTruthfulScoreProjection(responses, scores, apiKey, industry, location);
+      } catch (e) {
+        console.error('Error generating scoreProjection:', e);
+        scoreProjection = null;
+      }
       
-             try {
-         comprehensiveAnalysis = await generateComprehensiveAnalysis(responses, scores, apiKey, industry, location);
-       } catch (e) {
-         console.error('Error generating comprehensive analysis:', e);
-         comprehensiveAnalysis = null;
-       }
+      try {
+        comprehensiveAnalysis = await generateComprehensiveAnalysis(responses, scores, apiKey, industry, location);
+      } catch (e) {
+        console.error('Error generating comprehensiveAnalysis:', e);
+        comprehensiveAnalysis = null;
+      }
       
-             try {
-         nextSteps = await generateNextStepsText(scores, apiKey, industry, location);
-       } catch (e) {
-         console.error('Error generating next steps:', e);
-         nextSteps = null;
-       }
+      try {
+        nextSteps = await generateNextStepsText(scores, apiKey, industry, location);
+      } catch (e) {
+        console.error('Error generating nextSteps:', e);
+        nextSteps = null;
+      }
     }
 
     // Debug logging to see what's being returned
@@ -209,6 +209,18 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
       nextSteps: nextSteps ? 'present' : 'missing'
     });
     
+    // Debug dynamicInsights specifically
+    if (dynamicInsights) {
+      console.log('DynamicInsights details:', {
+        projectedScore: dynamicInsights.projectedScore,
+        competitiveAdvantage: dynamicInsights.competitiveAdvantage,
+        growthOpportunity: dynamicInsights.growthOpportunity,
+        totalPointGain: dynamicInsights.totalPointGain
+      });
+    } else {
+      console.log('DynamicInsights is null/undefined');
+    }
+
     if (comprehensiveAnalysis) {
       console.log('Comprehensive Analysis length:', comprehensiveAnalysis.length);
       console.log('Comprehensive Analysis preview:', comprehensiveAnalysis.substring(0, 100) + '...');
@@ -217,18 +229,8 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
     response.json({
       keyInsights,
       feedback,
-      competitiveAdvantage: dynamicInsights?.competitiveAdvantage || {
-        category: 'Unknown',
-        score: '0',
-        summary: 'Analysis not available',
-        specificStrengths: ['Strength analysis not available']
-      },
-      growthOpportunity: dynamicInsights?.growthOpportunity || {
-        category: 'Unknown',
-        score: '0',
-        summary: 'Analysis not available',
-        specificWeaknesses: ['Improvement analysis not available']
-      },
+      competitiveAdvantage: dynamicInsights?.competitiveAdvantage,
+      growthOpportunity: dynamicInsights?.growthOpportunity,
       scoreProjection: dynamicInsights?.projectedScore ? {
         currentScore: Object.values(scores).reduce((a: any, b: any) => (a as number) + (b as number), 0) as number,
         projectedScore: dynamicInsights.projectedScore,
