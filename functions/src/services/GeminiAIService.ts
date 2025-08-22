@@ -407,6 +407,51 @@ export async function generateNextStepsTextWithContext(
   }
 ): Promise<string> {
   
+  // Use existing scoring system to get performance levels (matching CategoryBreakdown.tsx)
+  const getCategoryPerformance = (score: number, max: number) => {
+    const percentage = (score / max) * 100;
+    
+    let level, priority;
+    if (percentage >= 80) {
+      level = 'Strong';
+      priority = 'LOW';
+    } else if (percentage >= 60) {
+      level = 'Developing';
+      priority = 'HIGH';
+    } else {
+      level = 'Needs Work';
+      priority = 'CRITICAL';
+    }
+    
+    return { level, priority };
+  };
+
+  // Get performance levels for each category
+  const categoryPerformance = {
+    personalFoundation: getCategoryPerformance(scores.personalBackground, 20),
+    entrepreneurialSkills: getCategoryPerformance(scores.entrepreneurialSkills, 25),
+    resources: getCategoryPerformance(scores.resources, 20),
+    behavioralMetrics: getCategoryPerformance(scores.behavioralMetrics, 15),
+    growthVision: getCategoryPerformance(scores.growthVision, 20)
+  };
+
+  // Find highest and lowest performing categories
+  const categories = [
+    { name: 'Personal Foundation', score: scores.personalBackground, max: 20, performance: categoryPerformance.personalFoundation },
+    { name: 'Entrepreneurial Skills', score: scores.entrepreneurialSkills, max: 25, performance: categoryPerformance.entrepreneurialSkills },
+    { name: 'Resources', score: scores.resources, max: 20, performance: categoryPerformance.resources },
+    { name: 'Behavioral Metrics', score: scores.behavioralMetrics, max: 15, performance: categoryPerformance.behavioralMetrics },
+    { name: 'Growth & Vision', score: scores.growthVision, max: 20, performance: categoryPerformance.growthVision }
+  ];
+
+  const highestCategory = categories.reduce((a, b) => 
+    (a.score / a.max) > (b.score / b.max) ? a : b
+  );
+  
+  const lowestCategory = categories.reduce((a, b) => 
+    (a.score / a.max) < (b.score / b.max) ? a : b
+  );
+
   const contextSection = aiFeedback ? `
 AI ANALYSIS CONTEXT:
 Key Insights: ${aiFeedback.keyInsights || 'Not available'}
@@ -423,35 +468,56 @@ Comprehensive Analysis:
 - Trajectory Indicators: ${aiFeedback.comprehensiveAnalysis?.trajectoryIndicators || 'Not available'}
 ` : '';
 
-  const prompt = `You are an expert business evaluator with access to real-time web search capabilities. Your goal is to find CURRENT, VERIFIED resources for an entrepreneur based on their assessment results and AI analysis.
+  const prompt = `You are an expert business development consultant with access to real-time web search capabilities. Your mission is to find the MOST RELEVANT, CURRENT, and ACTIONABLE resources for an entrepreneur based on their specific assessment profile and AI analysis.
 
-IMPORTANT: Use web search to find real, current resources. Do not make up or guess at resources.
+CRITICAL REQUIREMENTS:
+- Use web search to find REAL, VERIFIED resources only
+- Prioritize resources that directly address the entrepreneur's specific needs
+- Focus on resources with active application periods or enrollment
+- Ensure geographic and industry relevance
+- Provide resources that match the entrepreneur's current stage and capabilities
 
-Assessment Context:
+ASSESSMENT PROFILE:
 - Industry: ${industry || 'Creative & Media'}
 - Location: ${location || 'Delaware'}
-- Personal Background Score: ${scores.personalBackground}/20
-- Entrepreneurial Skills Score: ${scores.entrepreneurialSkills}/25
-- Resources Score: ${scores.resources}/20
-- Behavioral Metrics Score: ${scores.behavioralMetrics}/15
-- Growth & Vision Score: ${scores.growthVision}/20
+
+CATEGORY PERFORMANCE BREAKDOWN:
+- Personal Foundation: ${scores.personalBackground}/20 (${categoryPerformance.personalFoundation.level} - ${categoryPerformance.personalFoundation.priority} priority)
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25 (${categoryPerformance.entrepreneurialSkills.level} - ${categoryPerformance.entrepreneurialSkills.priority} priority)
+- Resources: ${scores.resources}/20 (${categoryPerformance.resources.level} - ${categoryPerformance.resources.priority} priority)
+- Behavioral Metrics: ${scores.behavioralMetrics}/15 (${categoryPerformance.behavioralMetrics.level} - ${categoryPerformance.behavioralMetrics.priority} priority)
+- Growth & Vision: ${scores.growthVision}/20 (${categoryPerformance.growthVision.level} - ${categoryPerformance.growthVision.priority} priority)
+
+PRIORITY FOCUS AREAS:
+- Highest Performing Category: ${highestCategory.name} (${highestCategory.performance.level}) - Leverage strengths
+- Lowest Performing Category: ${lowestCategory.name} (${lowestCategory.performance.level}) - Critical improvement area
 
 ${contextSection}
 
-Use web search to find CURRENT, VERIFIED resources that specifically address the AI-identified needs:
+SEARCH STRATEGY - Find resources that specifically address these needs:
 
-MENTORSHIP: Search for active mentorship programs, incubators, accelerators, or networking groups in ${location} for ${industry} entrepreneurs that address the specific growth areas identified. Find specific programs currently accepting participants.
+MENTORSHIP (Priority: ${categoryPerformance.resources.priority}):
+Search for active mentorship programs, incubators, accelerators, or networking groups in ${location} for ${industry} entrepreneurs. Focus on programs that address: "${aiFeedback?.growthOpportunity?.specificWeaknesses?.join('", "') || 'general business development'}". Look for programs currently accepting participants with clear application processes.
 
-FUNDING: Search for current grants, funding opportunities, or business tools for ${industry} businesses in ${location} that align with the entrepreneur's specific needs and growth trajectory.
+FUNDING (Priority: ${categoryPerformance.resources.priority}):
+Search for current grants, funding opportunities, or business tools for ${industry} businesses in ${location}. Focus on opportunities that align with the entrepreneur's current stage and address: "${aiFeedback?.growthOpportunity?.summary || 'business development needs'}". Look for active application periods.
 
-LEARNING: Search for relevant courses, articles, or learning resources that directly address the development areas and improvement opportunities identified in the AI analysis.
+LEARNING (Priority: ${categoryPerformance.entrepreneurialSkills.priority}):
+Search for relevant courses, articles, or learning resources that directly address: "${aiFeedback?.comprehensiveAnalysis?.developmentAreas || 'entrepreneurial development'}". Focus on reputable platforms (Coursera, Udemy, local universities, industry associations) with current offerings that match the entrepreneur's skill level.
 
-Return only verified, current resources with active links. Format as:
-Mentorship: [Specific program name with link]
-Funding: [Specific opportunity with link]  
-Learning: [Specific course/resource with link]
+QUALITY CRITERIA:
+- Must be currently active/available
+- Must have clear application/enrollment process
+- Must be relevant to entrepreneur's industry and location
+- Must address specific needs identified in AI analysis
+- Must be from reputable sources
 
-Keep each category under 200 characters. Only include resources you can verify through web search.`;
+OUTPUT FORMAT:
+Mentorship: [Program Name] - [Brief description of fit] (https://url.com)
+Funding: [Opportunity Name] - [Brief description of fit] (https://url.com)
+Learning: [Course/Resource Name] - [Brief description of fit] (https://url.com)
+
+Keep each line under 250 characters. Only include resources you can verify through web search.`;
 
   const response = await callGeminiWithSearch(prompt, apiKey);
   return response;
