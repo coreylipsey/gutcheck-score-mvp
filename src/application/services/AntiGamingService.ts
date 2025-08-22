@@ -19,7 +19,7 @@ export class AntiGamingService {
   private static readonly MAX_ANONYMOUS_ASSESSMENTS_PER_IP = 3; // Per 30 days
   private static readonly MAX_ANONYMOUS_ASSESSMENTS_PER_DEVICE = 2; // Per 30 days
   private static readonly SUSPICIOUS_SCORE_THRESHOLD = 85; // Very high scores are suspicious
-  private static readonly MIN_TIME_BETWEEN_ASSESSMENTS = 5 * 60 * 1000; // 5 minutes minimum
+  private static readonly MIN_TIME_BETWEEN_ASSESSMENTS = 7 * 24 * 60 * 60 * 1000; // 7 days minimum
 
   /**
    * Check if an anonymous assessment should be allowed

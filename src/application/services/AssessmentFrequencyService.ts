@@ -6,7 +6,7 @@ export interface AssessmentLimits {
 }
 
 export class AssessmentFrequencyService {
-  private static readonly DAYS_BETWEEN_ASSESSMENTS = 30; // One assessment per month
+  private static readonly DAYS_BETWEEN_ASSESSMENTS = 7; // One assessment per week
 
   static checkAssessmentLimits(assessments: Array<{ completedAt: string }>): AssessmentLimits {
     if (assessments.length === 0) {
@@ -65,7 +65,7 @@ export class AssessmentFrequencyService {
 
   static getAssessmentStatusMessage(limits: AssessmentLimits): string {
     if (limits.canTakeAssessment) {
-      return "You're ready to take your next monthly assessment!";
+      return "You're ready to take your next weekly assessment!";
     }
     
     if (limits.daysUntilNextAssessment === 1) {
