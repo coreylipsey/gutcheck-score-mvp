@@ -522,6 +522,22 @@ URL VERIFICATION REQUIREMENTS:
 - Avoid URLs that require additional navigation to find the actual resource
 - If you cannot verify a URL works, DO NOT include that resource
 
+MANDATORY URL TESTING PROCESS:
+1. Search for the specific resource (program name, grant name, course name)
+2. Click on the search result to visit the actual page
+3. Verify the page loads without errors (no 404, no "page not found")
+4. Confirm the page contains the specific resource mentioned in your title
+5. Copy the exact working URL from the browser address bar
+6. If any step fails, find a different resource or exclude this category
+
+SPECIFIC URL REQUIREMENTS:
+- For FUNDING: Must link to specific grant/loan application pages, not general funding overview pages
+- For MENTORSHIP: Must link to specific program application pages, not organization homepages
+- For LEARNING: Must link to specific course pages, not course catalogs or platform homepages
+- NO generic URLs like "example.com/funding" or "example.com/programs"
+- NO URLs that end with "/" or lead to directory listings
+- NO URLs that redirect to error pages or "page not found" messages
+
 OUTPUT FORMAT - Return as JSON:
 {
   "mentorship": {
@@ -543,7 +559,14 @@ OUTPUT FORMAT - Return as JSON:
 
 CRITICAL: Only include resources you can verify through web search. Each description should be under 150 characters. 
 
-MOST IMPORTANT: Before including any URL, you MUST test it by searching for it and clicking through to ensure it works and leads to the exact resource mentioned. If you cannot verify a URL works, DO NOT include that resource.`;
+MOST IMPORTANT: Before including any URL, you MUST test it by searching for it and clicking through to ensure it works and leads to the exact resource mentioned. If you cannot verify a URL works, DO NOT include that resource.
+
+FINAL VERIFICATION CHECK:
+- Every URL must be tested by clicking through from search results
+- Every URL must load a page with the specific resource mentioned in the title
+- Every URL must not show any error messages (404, "not found", "page unavailable")
+- If you cannot find a working URL for a resource, exclude that category entirely
+- Better to return fewer resources with working URLs than more resources with broken links`;
 
   const response = await callGeminiWithSearch(prompt, apiKey);
   
