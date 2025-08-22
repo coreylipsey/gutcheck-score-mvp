@@ -284,28 +284,44 @@ export async function generateComprehensiveAnalysis(responses: any[], scores: an
   const challengeResponse = openEndedResponses.find(r => r.questionId === 'q8')?.response || 'Not provided';
   const setbackResponse = openEndedResponses.find(r => r.questionId === 'q18')?.response || 'Not provided';
   
-  const prompt = `You are an expert entrepreneurship coach and evaluator. Based on a founder's responses to the four key questions below, generate a short paragraph (3-4 sentences) of encouraging and insightful feedback. 
+  const prompt = `You are a seasoned entrepreneurial scout, analyzing the signals from a founder's Gutcheck Assessment the way an NFL scout would evaluate a player's combine results and tape. Your role is not to prescribe or judge, but to surface signals, tendencies, and overlooked strengths/risks that help explain where this entrepreneur sits on their trajectory.
 
 IMPORTANT: This assessment evaluates the ENTREPRENEUR/FOUNDER, not the company. Always refer to the individual entrepreneur using "you," "your," or "the entrepreneur" - never "this company," "this entity," or "the business."
 
-Your role is to provide honest, constructive guidance that helps the founder recognize what they're doing well, where they can improve, and what next step would make the biggest difference. Use a warm, growth-oriented tone—like a coach who genuinely wants them to win. Be specific, but avoid jargon or over-generalization.
+ASSESSMENT DATA:
+${responses.map((r: any) => `
+Question ${r.questionId}: ${r.questionText}
+Response: ${r.response}
+`).join('\n')}
 
-Founder's Responses:
-- Vision Statement: ${visionResponse}
-- Entrepreneurial Journey: ${journeyResponse}
-- Business Challenge: ${challengeResponse}
-- Setback Response: ${setbackResponse}
+CURRENT SCORES:
+- Personal Background: ${scores.personalBackground}/20
+- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
+- Resources: ${scores.resources}/20
+- Behavioral Metrics: ${scores.behavioralMetrics}/15
+- Growth & Vision: ${scores.growthVision}/20
+
+TASK: Produce a 2-3 paragraph scouting-style report that includes:
+1. **Signal Readout** – interpret the score and explain what it means in context, like a scout explaining combine numbers
+2. **Strength Signals** – highlight competitive advantages or unique tendencies (e.g., resilience under pressure, strong networks, disciplined routines)
+3. **Development Areas** – note where signals suggest gaps or undervalued traits (e.g., limited capital access, inconsistent tracking, hesitation in risk-taking)
+4. **Trajectory Indicators** – suggest next moves or opportunities that could elevate their "market value" as an entrepreneur (like a coach pointing out how to turn raw talent into production)
+
+OUTPUT FORMAT: Plain text, 2-3 paragraphs
+
+TONE GUIDANCE:
+- Warm, constructive, growth-oriented — like a scout who genuinely wants the player to succeed
+- Honest but encouraging, balancing candor with motivation
+- Specific, concrete observations rather than generic praise/criticism
+- Use metaphors where helpful (e.g., "You've built a strong baseline, but your goal-tracking is like a quarterback with good instincts who hasn't yet mastered the playbook")
+- Never prescriptive — frame insights as signals and indicators, not verdicts
+- Make it feel personalized and authentic
 
 LANGUAGE RULES:
 - Always refer to the individual entrepreneur, not the company
 - Use "you," "your," "the entrepreneur," or "the founder"
 - NEVER use "this company," "this entity," "the business," or "the organization"
-- Focus on personal skills, behaviors, and capabilities
-
----
-
-Response Format:
-Return ONLY the response as plain text, without JSON formatting, markdown, or additional headers. Do NOT include the original responses or re-summarize them. Do NOT exceed 120 words. Make it feel personalized and authentic.`;
+- Focus on personal skills, behaviors, and capabilities`;
 
   const response = await callGemini(prompt, apiKey);
   return response;
