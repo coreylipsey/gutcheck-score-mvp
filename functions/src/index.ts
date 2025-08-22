@@ -220,7 +220,7 @@ export const generateFeedback = onRequest({ cors: true, invoker: "public" }, asy
         );
       } catch (e) {
         console.error('Error generating nextSteps:', e);
-        nextSteps = null;
+        nextSteps = undefined;
       }
     }
 
