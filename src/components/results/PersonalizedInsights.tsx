@@ -95,7 +95,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
           <span className="font-medium text-green-800">
             {scoreProjection?.improvementPotential ? 
               `Following these recommendations could increase your score ${scoreProjection.improvementPotential} points!` :
-              'AI analysis in progress...'
+              ''
             }
           </span>
         </div>
@@ -124,7 +124,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
           
           <div className="flex-1">
             <p className="text-gray-700 leading-relaxed font-medium mb-4">
-              {competitiveAdvantage?.summary || 'AI analysis in progress...'}
+              {competitiveAdvantage?.summary}
             </p>
             
             {/* Specific strengths list */}
@@ -167,7 +167,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
           
           <div className="flex-1">
             <p className="text-gray-700 leading-relaxed font-medium mb-4">
-              {growthOpportunity?.summary || 'AI analysis in progress...'}
+              {growthOpportunity?.summary}
             </p>
             
             {/* Areas for improvement list */}
@@ -211,7 +211,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
                 Signal Readout
               </h4>
               <div className="text-sm text-gray-700 leading-relaxed">
-                {comprehensiveAnalysis?.signalReadout || 'Analysis in progress...'}
+                {comprehensiveAnalysis?.signalReadout}
               </div>
             </div>
 
@@ -222,7 +222,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
                 Strength Signals
               </h4>
               <div className="text-sm text-gray-700 leading-relaxed">
-                {comprehensiveAnalysis?.strengthSignals || 'Analysis in progress...'}
+                {comprehensiveAnalysis?.strengthSignals}
               </div>
             </div>
 
@@ -233,7 +233,7 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
                 Development Areas
               </h4>
               <div className="text-sm text-gray-700 leading-relaxed">
-                {comprehensiveAnalysis?.developmentAreas || 'Analysis in progress...'}
+                {comprehensiveAnalysis?.developmentAreas}
               </div>
             </div>
           </div>

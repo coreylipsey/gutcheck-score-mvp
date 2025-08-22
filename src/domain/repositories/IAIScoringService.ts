@@ -39,7 +39,12 @@ export interface AIFeedback {
       totalPointGain: number;
     };
   };
-  comprehensiveAnalysis: string;
+  comprehensiveAnalysis: {
+    signalReadout: string;
+    strengthSignals: string;
+    developmentAreas: string;
+    trajectoryIndicators: string;
+  };
   nextSteps: string;
 }
 

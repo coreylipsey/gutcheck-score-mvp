@@ -110,7 +110,12 @@ export class GeminiAssessmentService implements IAIScoringService {
             totalPointGain: 0
           }
         },
-        comprehensiveAnalysis: result.comprehensiveAnalysis || '',
+        comprehensiveAnalysis: result.comprehensiveAnalysis || {
+          signalReadout: '',
+          strengthSignals: '',
+          developmentAreas: '',
+          trajectoryIndicators: ''
+        },
         nextSteps: result.nextSteps || ''
       };
     } catch (error) {
