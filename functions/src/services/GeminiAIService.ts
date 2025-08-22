@@ -311,10 +311,10 @@ TONE GUIDANCE:
 - Make it feel personalized and authentic
 
 LANGUAGE RULES:
-- Always refer to the individual entrepreneur, not the company
-- Use "you," "your," "the entrepreneur," or "the founder"
+- ALWAYS use first person: "you," "your," "yourself" - never "the entrepreneur," "the founder," or third person
 - NEVER use "this company," "this entity," "the business," or "the organization"
-- Focus on personal skills, behaviors, and capabilities`;
+- Focus on personal skills, behaviors, and capabilities
+- Be consistent throughout - every sentence should use "you" language`;
 
   const response = await callGemini(prompt, apiKey);
   return response;

@@ -202,9 +202,51 @@ export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps)
           </h3>
         </div>
         
-        <div className="space-y-4 text-gray-700 leading-relaxed">
-          {comprehensiveAnalysis && <p>{comprehensiveAnalysis}</p>}
-        </div>
+        {comprehensiveAnalysis && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Signal Readout */}
+            <div className="bg-white/60 rounded-lg p-6 border border-blue-200">
+              <h4 className="font-semibold text-sm text-gray-800 mb-3 flex items-center">
+                <Target className="w-4 h-4 mr-2" style={{ color: '#147AFF' }} />
+                Signal Readout
+              </h4>
+              <div className="text-sm text-gray-700 leading-relaxed">
+                {comprehensiveAnalysis.includes('Signal Readout:') ? 
+                  comprehensiveAnalysis.split('Strength Signals:')[0].replace('Signal Readout:', '').trim() :
+                  'Analysis in progress...'
+                }
+              </div>
+            </div>
+
+            {/* Strength Signals */}
+            <div className="bg-white/60 rounded-lg p-6 border border-blue-200">
+              <h4 className="font-semibold text-sm text-gray-800 mb-3 flex items-center">
+                <Lightbulb className="w-4 h-4 mr-2" style={{ color: '#147AFF' }} />
+                Strength Signals
+              </h4>
+              <div className="text-sm text-gray-700 leading-relaxed">
+                {comprehensiveAnalysis.includes('Strength Signals:') && comprehensiveAnalysis.includes('Development Areas:') ? 
+                  comprehensiveAnalysis.split('Strength Signals:')[1].split('Development Areas:')[0].trim() :
+                  'Analysis in progress...'
+                }
+              </div>
+            </div>
+
+            {/* Development Areas */}
+            <div className="bg-white/60 rounded-lg p-6 border border-blue-200">
+              <h4 className="font-semibold text-sm text-gray-800 mb-3 flex items-center">
+                <Zap className="w-4 h-4 mr-2" style={{ color: '#147AFF' }} />
+                Development Areas
+              </h4>
+              <div className="text-sm text-gray-700 leading-relaxed">
+                {comprehensiveAnalysis.includes('Development Areas:') ? 
+                  comprehensiveAnalysis.split('Development Areas:')[1].trim() :
+                  'Analysis in progress...'
+                }
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
