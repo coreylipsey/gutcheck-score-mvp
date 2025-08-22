@@ -268,18 +268,7 @@ INSTRUCTIONS:
     throw new Error('No JSON found in response');
   } catch (error) {
     console.error('Error parsing score projection response:', error);
-    // Fallback to conservative estimate
-    return {
-      currentScore: overallScore,
-      projectedScore: Math.min(100, (overallScore as number) + 3),
-      improvementPotential: 3,
-      analysis: {
-        lowestCategory: "Unknown",
-        currentCategoryScore: 0,
-        realisticImprovements: [],
-        totalPointGain: 3
-      }
-    };
+    throw new Error(`Score projection generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
