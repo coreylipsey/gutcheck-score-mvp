@@ -202,7 +202,9 @@ No little hashtags or stars or any other weird characters, just the text.`;
 export async function generateTruthfulScoreProjection(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
   const overallScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score as number), 0);
   
-  const prompt = `You are an expert business consultant calculating realistic score improvements.
+  const prompt = `You are an expert entrepreneurship consultant calculating realistic score improvements for an individual entrepreneur.
+
+IMPORTANT: This assessment evaluates the ENTREPRENEUR/FOUNDER, not the company. Always refer to the individual entrepreneur using "you," "your," or "the entrepreneur" - never "this company," "this entity," or "the business."
 
 ASSESSMENT DATA:
 ${responses.map((r: any) => `
@@ -219,7 +221,7 @@ CURRENT SCORES:
 - Overall Score: ${overallScore}/100
 
 TASK: 
-1. Identify the lowest-scoring category (Biggest Growth Opportunity)
+1. Identify the lowest-scoring category (Biggest Growth Opportunity for the entrepreneur)
 2. Analyze specific responses in that category
 3. Calculate realistic point improvements based on the scoring rubric
 4. Sum the improvements to get the projected score
@@ -252,11 +254,12 @@ OUTPUT FORMAT (JSON):
 }
 
 INSTRUCTIONS:
-- Only suggest improvements that are realistically achievable
+- Only suggest improvements that are realistically achievable for the entrepreneur
 - Base projections on actual response changes, not hypothetical scenarios
 - Be conservative - under-promise and over-deliver
 - Focus on the lowest-scoring category first
-- Provide specific, actionable recommendations`;
+- Provide specific, actionable recommendations for the entrepreneur
+- Use "you" or "your" language when referring to the entrepreneur`;
 
   const response = await callGemini(prompt, apiKey);
   
@@ -283,6 +286,8 @@ export async function generateComprehensiveAnalysis(responses: any[], scores: an
   
   const prompt = `You are an expert entrepreneurship coach and evaluator. Based on a founder's responses to the four key questions below, generate a short paragraph (3-4 sentences) of encouraging and insightful feedback. 
 
+IMPORTANT: This assessment evaluates the ENTREPRENEUR/FOUNDER, not the company. Always refer to the individual entrepreneur using "you," "your," or "the entrepreneur" - never "this company," "this entity," or "the business."
+
 Your role is to provide honest, constructive guidance that helps the founder recognize what they're doing well, where they can improve, and what next step would make the biggest difference. Use a warm, growth-oriented tone—like a coach who genuinely wants them to win. Be specific, but avoid jargon or over-generalization.
 
 Founder's Responses:
@@ -290,6 +295,12 @@ Founder's Responses:
 - Entrepreneurial Journey: ${journeyResponse}
 - Business Challenge: ${challengeResponse}
 - Setback Response: ${setbackResponse}
+
+LANGUAGE RULES:
+- Always refer to the individual entrepreneur, not the company
+- Use "you," "your," "the entrepreneur," or "the founder"
+- NEVER use "this company," "this entity," "the business," or "the organization"
+- Focus on personal skills, behaviors, and capabilities
 
 ---
 
@@ -532,7 +543,9 @@ export async function generateDynamicInsights(responses: any[], scores: any, api
     category: questionCategoryMap[r.questionId]
   }));
   
-  const prompt = `You are an expert business evaluator analyzing assessment responses to generate dynamic insights.
+  const prompt = `You are an expert entrepreneurship evaluator analyzing an individual entrepreneur's assessment responses to generate dynamic insights.
+
+IMPORTANT: This assessment evaluates the ENTREPRENEUR/FOUNDER, not the company. Always refer to the individual entrepreneur using "you," "your," or "the entrepreneur" - never "this company," "this entity," or "the business."
 
 Assessment Context:
 - Industry: ${industry || 'Creative & Media'}
@@ -556,9 +569,15 @@ ${improvementsAnalysis.realisticImprovements.map((imp: any) =>
 
 Generate dynamic insights based on the actual responses and realistic improvements:
 
-1. For Competitive Advantage (highest category): Create 3 specific bullet points based on the actual responses that show their strengths. Do NOT include point values or question numbers in parentheses.
-2. For Growth Opportunity (lowest category): Create 3 specific bullet points based on the realistic improvements analysis, focusing on the most impactful changes. Do NOT include point values or question numbers in parentheses.
+1. For Competitive Advantage (highest category): Create 3 specific bullet points based on the actual responses that show the entrepreneur's strengths. Use "you" or "your" language. Do NOT include point values or question numbers in parentheses.
+2. For Growth Opportunity (lowest category): Create 3 specific bullet points based on the realistic improvements analysis, focusing on the most impactful changes for the entrepreneur. Use "you" or "your" language. Do NOT include point values or question numbers in parentheses.
 3. Projected Score: ${projectedScore}
+
+LANGUAGE RULES:
+- Always refer to the individual entrepreneur, not the company
+- Use "you," "your," "the entrepreneur," or "the founder"
+- NEVER use "this company," "this entity," "the business," or "the organization"
+- Focus on personal skills, behaviors, and capabilities
 
 Return as JSON:
 {
@@ -566,14 +585,14 @@ Return as JSON:
   "competitiveAdvantage": {
     "category": "${categoryDisplayNames[highestCategory[0]]}",
     "score": "${highestCategory[1]}",
-    "summary": "1-2 sentence summary based on actual responses",
-    "specificStrengths": ["3 specific bullet points based on actual responses - no points or question numbers"]
+    "summary": "1-2 sentence summary about the entrepreneur's strengths based on actual responses",
+    "specificStrengths": ["3 specific bullet points about the entrepreneur's strengths - use 'you' language - no points or question numbers"]
   },
   "growthOpportunity": {
     "category": "${categoryDisplayNames[lowestCategory[0]]}",
     "score": "${lowestCategory[1]}",
-    "summary": "1-2 sentence summary based on realistic improvements",
-    "specificWeaknesses": ["3 specific bullet points based on realistic improvements analysis - no points or question numbers"]
+    "summary": "1-2 sentence summary about the entrepreneur's growth opportunities based on realistic improvements",
+    "specificWeaknesses": ["3 specific bullet points about the entrepreneur's growth areas - use 'you' language - no points or question numbers"]
   }
 }`;
 
