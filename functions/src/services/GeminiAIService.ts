@@ -200,87 +200,25 @@ No little hashtags or stars or any other weird characters, just the text.`;
 }
 
 export async function generateTruthfulScoreProjection(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<any> {
-  const overallScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score as number), 0);
+  const currentScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score as number), 0);
   
-  const prompt = `You are an expert business consultant calculating realistic score improvements.
-
-ASSESSMENT DATA:
-${responses.map((r: any) => `
-Question ${r.questionId}: ${r.questionText}
-Response: ${r.response}
-`).join('\n')}
-
-CURRENT SCORES:
-- Personal Background: ${scores.personalBackground}/20
-- Entrepreneurial Skills: ${scores.entrepreneurialSkills}/25
-- Resources & Network: ${scores.resources}/20
-- Behavioral Metrics: ${scores.behavioralMetrics}/15
-- Growth & Vision: ${scores.growthVision}/20
-- Overall Score: ${overallScore}/100
-
-TASK: 
-1. Identify the lowest-scoring category (Biggest Growth Opportunity)
-2. Analyze specific responses in that category
-3. Calculate realistic point improvements based on the scoring rubric
-4. Sum the improvements to get the projected score
-
-SCORING RUBRIC:
-- Multiple choice: Specific point values (e.g., "Weekly"=5, "Monthly"=4, "Occasionally"=3)
-- Open-ended: AI scored 1-5 based on quality and depth
-
-OUTPUT FORMAT (JSON):
-{
-  "currentScore": ${overallScore},
-  "projectedScore": 68,
-  "improvementPotential": 3,
-  "analysis": {
-    "lowestCategory": "Entrepreneurial Skills",
-    "currentCategoryScore": 15,
-    "realisticImprovements": [
-      {
-        "questionId": "q17",
-        "currentResponse": "Occasionally",
-        "currentScore": 3,
-        "suggestedImprovement": "Weekly",
-        "potentialScore": 4,
-        "pointGain": 1,
-        "reasoning": "Moving from occasional to weekly goal tracking"
-      }
-    ],
-    "totalPointGain": 3
-  }
-}
-
-INSTRUCTIONS:
-- Only suggest improvements that are realistically achievable
-- Base projections on actual response changes, not hypothetical scenarios
-- Be conservative - under-promise and over-deliver
-- Focus on the lowest-scoring category first
-- Provide specific, actionable recommendations`;
-
-  const response = await callGemini(prompt, apiKey);
+  // Get the realistic improvements that are already calculated
+  const improvementsAnalysis = await generateRealisticImprovements(responses, scores, apiKey, industry, location);
   
-  try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
+  // Calculate projected score: current score + total point gain from improvements
+  const projectedScore = Math.min(100, currentScore + improvementsAnalysis.totalPointGain);
+  
+  return {
+    currentScore: currentScore,
+    projectedScore: projectedScore,
+    improvementPotential: improvementsAnalysis.totalPointGain,
+    analysis: {
+      lowestCategory: improvementsAnalysis.lowestCategory,
+      currentCategoryScore: improvementsAnalysis.currentCategoryScore,
+      realisticImprovements: improvementsAnalysis.realisticImprovements,
+      totalPointGain: improvementsAnalysis.totalPointGain
     }
-    throw new Error('No JSON found in response');
-  } catch (error) {
-    console.error('Error parsing score projection response:', error);
-    // Fallback to conservative estimate
-    return {
-      currentScore: overallScore,
-      projectedScore: Math.min(100, (overallScore as number) + 3),
-      improvementPotential: 3,
-      analysis: {
-        lowestCategory: "Unknown",
-        currentCategoryScore: 0,
-        realisticImprovements: [],
-        totalPointGain: 3
-      }
-    };
-  }
+  };
 }
 
 export async function generateComprehensiveAnalysis(responses: any[], scores: any, apiKey: string, industry?: string, location?: string): Promise<string> {
