@@ -4,8 +4,11 @@ import { FirestoreUserRepository } from '../repositories/FirestoreUserRepository
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository';
 import { FirestoreTokenRepository } from '../repositories/FirestoreTokenRepository';
 import { GeminiAssessmentService } from '../services/GeminiAssessmentService';
+import { LoggingService } from '../services/LoggingService';
+import { ErrorHandlerService } from '../services/ErrorHandlerService';
 import { ScoringService } from '../../application/services/ScoringService';
 import { TokenService } from '../../application/services/TokenService';
+import { DashboardService } from '../../application/services/DashboardService';
 import { CalculateAssessmentScore } from '../../application/use-cases/CalculateAssessmentScore';
 import { SaveAssessmentSession } from '../../application/use-cases/SaveAssessmentSession';
 import { GenerateAIFeedback } from '../../application/use-cases/GenerateAIFeedback';
@@ -19,6 +22,13 @@ export function setupDependencies(): void {
   const container = Container.getInstance();
 
   // Register infrastructure services
+  container.register('ILoggingService', () => 
+    LoggingService.getInstance()
+  );
+
+  container.register('IErrorHandlerService', () => 
+    ErrorHandlerService.getInstance()
+  );
   // Use Gemini Assessment Service (restored from ADK)
   container.register('IAIScoringService', () => 
     new GeminiAssessmentService()
@@ -47,6 +57,10 @@ export function setupDependencies(): void {
 
   container.register('TokenService', () => 
     new TokenService(container.resolve('ITokenRepository'))
+  );
+
+  container.register('DashboardService', () => 
+    DashboardService.getInstance()
   );
 
   // Register use cases

@@ -19,18 +19,6 @@ const getPerformanceLevel = (score: number, max: number) => {
 };
 
 export function PersonalizedInsights({ sessionData }: PersonalizedInsightsProps) {
-  // Debug logging
-  console.log('PersonalizedInsights received sessionData:', {
-    hasGeminiFeedback: !!sessionData.geminiFeedback,
-    comprehensiveAnalysis: sessionData.geminiFeedback?.comprehensiveAnalysis ? 'present' : 'missing',
-    competitiveAdvantage: sessionData.geminiFeedback?.competitiveAdvantage ? 'present' : 'missing',
-    growthOpportunity: sessionData.geminiFeedback?.growthOpportunity ? 'present' : 'missing',
-    scoreProjection: sessionData.geminiFeedback?.scoreProjection ? 'present' : 'missing'
-  });
-  
-  if (sessionData.geminiFeedback?.comprehensiveAnalysis) {
-    console.log('Comprehensive Analysis in component, length:', sessionData.geminiFeedback.comprehensiveAnalysis.length);
-  }
   
   // Check if AI feedback is available
   const competitiveAdvantage = sessionData.geminiFeedback?.competitiveAdvantage;

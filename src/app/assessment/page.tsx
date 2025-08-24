@@ -8,7 +8,7 @@ import { ASSESSMENT_QUESTIONS } from '@/domain/entities/Assessment';
 import { AssessmentResponse } from '@/domain/entities/Assessment';
 import { useAssessment } from '@/presentation/hooks/useAssessment';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
-import { DashboardService } from '@/app/services/DashboardService';
+import { DashboardService } from '@/application/services/DashboardService';
 
 export default function AssessmentPage() {
   const router = useRouter();

@@ -49,7 +49,6 @@ export class GetUserTokenInfo {
         transactionHistory
       };
     } catch (error) {
-      console.error('Error getting user token info:', error);
       return {
         success: false,
         tokenBalance: 0,

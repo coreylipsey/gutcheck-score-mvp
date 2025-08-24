@@ -81,19 +81,15 @@ function validateScoringSystemIntegrity(): boolean {
 
   // Validate question count
   if (ASSESSMENT_QUESTIONS.length !== 25) {
-    console.error('❌ CRITICAL: Must have exactly 25 questions');
     return false;
   }
 
   // Validate category weights
   for (const [category, weight] of Object.entries(expectedWeights)) {
     if (CATEGORY_WEIGHTS[category as AssessmentCategory] !== weight) {
-      console.error(`❌ CRITICAL: Category weight mismatch for ${category}`);
       return false;
     }
   }
-
-  console.log('✅ Scoring system integrity validated successfully');
   return true;
 }
 

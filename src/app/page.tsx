@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '../presentation/providers/AuthProvider';
-import { DashboardService } from './services/DashboardService';
+import { DashboardService } from '@/application/services/DashboardService';
 
 export default function Home() {
   const { user, logout } = useAuthContext();

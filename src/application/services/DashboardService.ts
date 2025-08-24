@@ -2,6 +2,9 @@ import { Container } from '@/infrastructure/di/container';
 import { IAssessmentRepository } from '@/domain/repositories/IAssessmentRepository';
 import { TokenService } from '@/application/services/TokenService';
 import { AssessmentFrequencyService } from '@/application/services/AssessmentFrequencyService';
+import { ILoggingService } from '@/infrastructure/services/LoggingService';
+import { IErrorHandlerService } from '@/infrastructure/services/ErrorHandlerService';
+import { DatabaseError } from '@/domain/errors/ApplicationError';
 
 export interface AssessmentHistoryDTO {
   sessionId: string;
@@ -70,8 +73,13 @@ export interface DashboardDataDTO {
 
 export class DashboardService {
   private static instance: DashboardService;
+  private logger: ILoggingService;
+  private errorHandler: IErrorHandlerService;
 
-  private constructor() {}
+  private constructor() {
+    this.logger = Container.getInstance().resolve<ILoggingService>('ILoggingService');
+    this.errorHandler = Container.getInstance().resolve<IErrorHandlerService>('IErrorHandlerService');
+  }
 
   static getInstance(): DashboardService {
     if (!DashboardService.instance) {
@@ -114,8 +122,13 @@ export class DashboardService {
         featureAccess: featureAccess.toFeatureAccess().features
       };
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      throw new Error('Failed to load dashboard data');
+      const appError = new DatabaseError(
+        'Failed to load dashboard data',
+        'DashboardService.getDashboardData',
+        { userId, originalError: error }
+      );
+      this.logger.error('Error fetching dashboard data', appError, 'DashboardService');
+      throw appError;
     }
   }
 
@@ -142,8 +155,13 @@ export class DashboardService {
         featureAccess: featureAccess.toFeatureAccess().features
       };
     } catch (error) {
-      console.error('Error refreshing token data:', error);
-      throw new Error('Failed to refresh token data');
+      const appError = new DatabaseError(
+        'Failed to refresh token data',
+        'DashboardService.refreshTokenData',
+        { userId, originalError: error }
+      );
+      this.logger.error('Error refreshing token data', appError, 'DashboardService');
+      throw appError;
     }
   }
-} 
+}

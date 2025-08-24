@@ -1,13 +1,16 @@
 import { IAIScoringService, AIScoringResult, AIFeedback } from '../../domain/repositories/IAIScoringService';
 import { AssessmentCategory } from '../../domain/value-objects/Category';
+import { ILoggingService } from './LoggingService';
 
 export class GeminiAssessmentService implements IAIScoringService {
   private readonly geminiApiUrl: string;
+  private logger: ILoggingService;
 
   constructor() {
     this.geminiApiUrl = process.env.NEXT_PUBLIC_GEMINI_API_URL || 'https://us-central1-gutcheck-score-mvp.cloudfunctions.net';
+    this.logger = LoggingService.getInstance();
     
-    console.log('Gemini AssessmentService initialized:', {
+    this.logger.info('Gemini AssessmentService initialized', 'GeminiAssessmentService', {
       geminiApiUrl: this.geminiApiUrl
     });
   }
@@ -18,7 +21,7 @@ export class GeminiAssessmentService implements IAIScoringService {
     questionText: string
   ): Promise<AIScoringResult> {
     try {
-      console.log(`Scoring open-ended question ${questionId} with Gemini API`);
+      this.logger.info(`Scoring open-ended question ${questionId} with Gemini API`, 'GeminiAssessmentService');
       
       // Map question ID to question type for the Gemini API
       const questionType = this.getQuestionType(questionId);
@@ -45,7 +48,7 @@ export class GeminiAssessmentService implements IAIScoringService {
         explanation: result.explanation
       };
     } catch (error) {
-      console.error('Gemini API scoring error:', error);
+      this.logger.error('Gemini API scoring error', error instanceof Error ? error : new Error(String(error)), 'GeminiAssessmentService');
       // Re-throw the error to make API failures immediately visible
       throw error;
     }
@@ -58,7 +61,7 @@ export class GeminiAssessmentService implements IAIScoringService {
     location?: string
   ): Promise<AIFeedback> {
     try {
-      console.log('Gemini AssessmentService.generateFeedback called:', {
+      this.logger.info('Gemini AssessmentService.generateFeedback called', 'GeminiAssessmentService', {
         responsesCount: responses.length,
         scores,
         industry,
@@ -119,7 +122,7 @@ export class GeminiAssessmentService implements IAIScoringService {
         nextSteps: result.nextSteps || ''
       };
     } catch (error) {
-      console.error('Gemini API feedback generation error:', error);
+      this.logger.error('Gemini API feedback generation error', error instanceof Error ? error : new Error(String(error)), 'GeminiAssessmentService');
       // Re-throw the error to make API failures immediately visible
       throw error;
     }

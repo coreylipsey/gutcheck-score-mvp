@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '../../presentation/providers/AuthProvider';
+import { FirebaseFunctionsService } from '../../presentation/services/FirebaseFunctionsService';
 
 interface ClaimScoreModalProps {
   isOpen: boolean;
@@ -32,25 +33,20 @@ export function ClaimScoreModal({ isOpen, onClose, onClaimSuccess, sessionId }: 
 
     setLoading(true);
     try {
-      // Call Cloud Function instead of API route
-      const { getFunctions, httpsCallable } = await import('firebase/functions');
-      const functions = getFunctions();
-      const claimScore = httpsCallable(functions, 'claimScore');
-
-      const result = await claimScore({
+      const firebaseFunctionsService = FirebaseFunctionsService.getInstance();
+      const result = await firebaseFunctionsService.claimScore({
         sessionId,
         userId: user.uid,
       });
 
-      const data = result.data as any;
-      if (data.success) {
+      if (result.success) {
         setClaimed(true);
         onClaimSuccess();
       } else {
-        throw new Error('Failed to claim score');
+        throw new Error(result.error || 'Failed to claim score');
       }
     } catch (error) {
-      console.error('Error claiming score:', error);
+      // Error handled by the service
     } finally {
       setLoading(false);
     }

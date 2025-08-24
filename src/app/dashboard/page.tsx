@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
-import { DashboardService } from '@/app/services/DashboardService';
+import { DashboardService } from '@/application/services/DashboardService';
 import { ProgressGraph } from '@/components/dashboard/ProgressGraph';
 import { MonthlyInsights } from '@/components/dashboard/MonthlyInsights';
 import { TokenBalanceIndicator } from '@/components/tokens/TokenBalanceIndicator';
@@ -14,7 +14,7 @@ import { TransactionHistory } from '@/components/tokens/TransactionHistory';
 import { Brain, TrendingUp, Users, FileText, Zap, Target } from 'lucide-react';
 import { ComingSoonOverlay } from '@/components/dashboard/ComingSoonOverlay';
 
-import { AssessmentHistoryDTO } from '@/app/services/DashboardService';
+import { AssessmentHistoryDTO } from '@/application/services/DashboardService';
 
 function DashboardContent() {
   const [assessmentHistory, setAssessmentHistory] = useState<AssessmentHistoryDTO[]>([]);

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { AssessmentHistoryDTO } from '@/app/services/DashboardService';
+import { AssessmentHistoryDTO } from '@/application/services/DashboardService';
 
 interface MonthlyInsightsProps {
   lastAssessment: AssessmentHistoryDTO | null;
