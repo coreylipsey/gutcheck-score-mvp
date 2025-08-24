@@ -6,7 +6,7 @@ export interface AssessmentLimits {
 }
 
 export class AssessmentFrequencyService {
-  private static readonly DAYS_BETWEEN_ASSESSMENTS = 7; // One assessment per week
+  private static readonly DAYS_BETWEEN_ASSESSMENTS = 30;
 
   static checkAssessmentLimits(assessments: Array<{ completedAt: string }>): AssessmentLimits {
     if (assessments.length === 0) {
