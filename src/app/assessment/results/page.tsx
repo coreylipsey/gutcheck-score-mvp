@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
+
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Container } from '@/infrastructure/di/container';

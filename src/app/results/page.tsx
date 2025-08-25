@@ -2,6 +2,9 @@
 import { ShareScoreButton } from '@/components/results/ShareScoreButton';
 import { DownloadReportButton } from '@/components/results/DownloadReportButton';
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 export default function ResultsPage({
   searchParams,
 }: {
