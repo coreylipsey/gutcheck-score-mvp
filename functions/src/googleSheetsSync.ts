@@ -77,8 +77,10 @@ export const syncAssessmentToSheets = onDocumentCreated(
 
       console.log(`Successfully synced session ${sessionId} to Google Sheets`);
 
-      // Update cohort metrics
+      // Update partner and cohort data
       if (sessionData.partnerMetadata?.partnerId && sessionData.partnerMetadata?.cohortId) {
+        await updatePartnerData(sessionData.partnerMetadata);
+        await updateCohortData(sessionData.partnerMetadata);
         await updateCohortMetrics(sessionData.partnerMetadata.partnerId, sessionData.partnerMetadata.cohortId);
       }
 
@@ -161,6 +163,98 @@ export const syncOutcomeToSheets = onDocumentUpdated(
     }
   });
 
+// Update partner data in Google Sheets
+async function updatePartnerData(partnerMetadata: any) {
+  if (!sheets || !sheetsSpreadsheetId) {
+    return;
+  }
+
+  try {
+    // Check if partner already exists
+    const partnerResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetsSpreadsheetId,
+      range: 'Partners!A:F'
+    });
+
+    const partnerRows = partnerResponse.data.values || [];
+    const partnerIndex = partnerRows.findIndex((row: any[]) => row[0] === partnerMetadata.partnerId);
+
+    if (partnerIndex === -1) {
+      // Add new partner
+      const partnerData = [
+        partnerMetadata.partnerId,
+        partnerMetadata.partnerName,
+        '', // Partner Email (not available in session data)
+        'active',
+        new Date().toISOString(),
+        '' // Notes
+      ];
+
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: sheetsSpreadsheetId,
+        range: 'Partners!A:F',
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: {
+          values: [partnerData]
+        }
+      });
+
+      console.log(`Added new partner ${partnerMetadata.partnerName} to Google Sheets`);
+    }
+  } catch (error) {
+    console.error(`Failed to update partner data for ${partnerMetadata.partnerId}:`, error);
+  }
+}
+
+// Update cohort data in Google Sheets
+async function updateCohortData(partnerMetadata: any) {
+  if (!sheets || !sheetsSpreadsheetId) {
+    return;
+  }
+
+  try {
+    // Check if cohort already exists
+    const cohortResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetsSpreadsheetId,
+      range: 'Cohorts!A:J'
+    });
+
+    const cohortRows = cohortResponse.data.values || [];
+    const cohortIndex = cohortRows.findIndex((row: any[]) => row[0] === partnerMetadata.cohortId);
+
+    if (cohortIndex === -1) {
+      // Add new cohort
+      const cohortData = [
+        partnerMetadata.cohortId,
+        partnerMetadata.partnerId,
+        partnerMetadata.cohortName,
+        '', // Start Date
+        '', // End Date
+        0,  // Total Assessments
+        0,  // Completed Assessments
+        0,  // Completion Rate
+        0,  // Average Score
+        0   // Tagged Outcomes
+      ];
+
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: sheetsSpreadsheetId,
+        range: 'Cohorts!A:J',
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: {
+          values: [cohortData]
+        }
+      });
+
+      console.log(`Added new cohort ${partnerMetadata.cohortName} to Google Sheets`);
+    }
+  } catch (error) {
+    console.error(`Failed to update cohort data for ${partnerMetadata.cohortId}:`, error);
+  }
+}
+
 // Update cohort metrics in Google Sheets
 async function updateCohortMetrics(partnerId: string, cohortId: string) {
   if (!sheets || !sheetsSpreadsheetId) {
@@ -190,42 +284,34 @@ async function updateCohortMetrics(partnerId: string, cohortId: string) {
     // Find existing cohort record in Cohorts sheet
     const cohortResponse = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetsSpreadsheetId,
-      range: 'Cohorts!A:E'
+      range: 'Cohorts!A:J'
     });
 
     const cohortRows = cohortResponse.data.values || [];
     const cohortIndex = cohortRows.findIndex((row: any[]) => row[0] === cohortId);
 
-    const cohortData = [
-      cohortId,
-      totalAssessments,
-      completedAssessments,
-      completionRate,
-      averageScore,
-      taggedOutcomes
-    ];
-
     if (cohortIndex > 0) {
-      // Update existing record
+      // Update only the metrics columns (F-J) for existing record
+      const metricsData = [
+        totalAssessments,
+        completedAssessments,
+        completionRate,
+        averageScore,
+        taggedOutcomes
+      ];
+
       await sheets.spreadsheets.values.update({
         spreadsheetId: sheetsSpreadsheetId,
-        range: `Cohorts!A${cohortIndex + 1}:F${cohortIndex + 1}`,
+        range: `Cohorts!F${cohortIndex + 1}:J${cohortIndex + 1}`,
         valueInputOption: 'RAW',
         requestBody: {
-          values: [cohortData]
+          values: [metricsData]
         }
       });
+
+      console.log(`Updated metrics for cohort ${cohortId}`);
     } else {
-      // Append new record
-      await sheets.spreadsheets.values.append({
-        spreadsheetId: sheetsSpreadsheetId,
-        range: 'Cohorts!A:F',
-        valueInputOption: 'RAW',
-        insertDataOption: 'INSERT_ROWS',
-        requestBody: {
-          values: [cohortData]
-        }
-      });
+      console.log(`Cohort ${cohortId} not found in sheet - metrics will be updated when cohort is created`);
     }
 
   } catch (error) {

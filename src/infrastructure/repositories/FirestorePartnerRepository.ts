@@ -121,9 +121,9 @@ export class FirestorePartnerRepository implements IPartnerRepository {
 
   generateAssessmentUrl(cohortId: string, partnerId?: string): string {
     if (partnerId) {
-      return `https://app.gutcheck.ai/assessment?partner_id=${partnerId}&cohort_id=${cohortId}`;
+      return `https://gutcheck-score-mvp.web.app/assessment?partner_id=${partnerId}&cohort_id=${cohortId}`;
     }
-    return `https://app.gutcheck.ai/assessment?cohort_id=${cohortId}`;
+    return `https://gutcheck-score-mvp.web.app/assessment?cohort_id=${cohortId}`;
   }
 
   private generatePartnerId(partnerName: string): string {

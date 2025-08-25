@@ -19,6 +19,7 @@ export default function AssessmentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [location, setLocation] = useState('');
   const [industry, setIndustry] = useState('');
+  const [consentForML, setConsentForML] = useState(false);
   const [assessmentLimits, setAssessmentLimits] = useState<{
     canTakeAssessment: boolean;
     nextAvailableDate: string | null;
@@ -60,10 +61,11 @@ export default function AssessmentPage() {
     checkAssessmentLimits();
   }, [user]);
 
-  // Step 0 is location/industry, then questions start at step 1
-  const isLocationStep = currentStep === 0;
-  const currentQuestion = isLocationStep ? null : ASSESSMENT_QUESTIONS[currentStep - 1];
-  const totalQuestions = ASSESSMENT_QUESTIONS.length + 1; // +1 for location step
+  // Step 0 is consent, Step 1 is location/industry, then questions start at step 2
+  const isConsentStep = currentStep === 0;
+  const isLocationStep = currentStep === 1;
+  const currentQuestion = isLocationStep ? null : ASSESSMENT_QUESTIONS[currentStep - 2];
+  const totalQuestions = ASSESSMENT_QUESTIONS.length + 2; // +1 for consent step, +1 for location step
   const progress = ((currentStep + 1) / totalQuestions) * 100;
 
   const handleResponse = (response: string | number | string[]) => {
@@ -88,8 +90,16 @@ export default function AssessmentPage() {
   };
 
   const canProceed = () => {
+    if (isConsentStep) {
+      return consentForML;
+    }
+    
     if (isLocationStep) {
       return location.trim() && industry.trim();
+    }
+
+    if (isConsentStep) {
+      return true; // User can proceed regardless of consent choice
     }
 
     if (!currentQuestion) return false;
@@ -182,6 +192,7 @@ export default function AssessmentPage() {
           behavioralMetrics: scores.behavioralMetrics,
           growthVision: scores.growthVision,
         },
+        consentForML,
         geminiFeedback,
         userId: user?.uid, // Use authenticated user ID if available
       });
@@ -200,6 +211,32 @@ export default function AssessmentPage() {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  const renderConsentStep = () => (
+    <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          Help Improve Our AI Model
+        </h2>
+        <p className="text-gray-600 mb-6">
+          Your assessment responses can help us improve our AI model to better serve future entrepreneurs. 
+          This data will be used anonymously for machine learning research.
+        </p>
+        <div className="flex items-center space-x-3">
+          <input
+            type="checkbox"
+            id="ml-consent"
+            checked={consentForML}
+            onChange={(e) => setConsentForML(e.target.checked)}
+            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <label htmlFor="ml-consent" className="text-sm text-gray-700">
+            I Agree
+          </label>
+        </div>
+      </div>
+    </div>
+  );
 
   const renderLocationStep = () => (
     <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
@@ -416,7 +453,7 @@ export default function AssessmentPage() {
                 Assessment
               </h1>
               <p className="text-sm text-gray-600">
-                {isLocationStep ? 'Step 1 of 2: Business Information' : `Question ${currentStep} of ${totalQuestions}`}
+                {isConsentStep ? 'Step 1 of 3: Data Consent' : isLocationStep ? 'Step 2 of 3: Business Information' : `Question ${currentStep - 1} of ${totalQuestions - 2}`}
               </p>
             </div>
           </div>
@@ -452,7 +489,9 @@ export default function AssessmentPage() {
         )}
 
         {/* Content */}
-        {isLocationStep ? (
+        {isConsentStep ? (
+          renderConsentStep()
+        ) : isLocationStep ? (
           renderLocationStep()
         ) : (
           <div className="bg-white rounded-lg shadow-lg p-8 mb-8">

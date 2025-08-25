@@ -56,6 +56,7 @@ export function useAssessment() {
     scores: AssessmentScores;
     starRating: number;
     categoryBreakdown: Record<string, number>;
+    consentForML: boolean;
     geminiFeedback?: {
       feedback: string;
       competitiveAdvantage: {

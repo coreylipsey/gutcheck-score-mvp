@@ -25,7 +25,7 @@ export const createPartnerCohort = onCall(async (request) => {
     // Generate unique IDs
     const partnerId = generatePartnerId(partnerName);
     const cohortId = generateCohortId(cohortName);
-    const assessmentUrl = `https://app.gutcheck.ai/assessment?partner_id=${partnerId}&cohort_id=${cohortId}`;
+    const assessmentUrl = `https://gutcheck-score-mvp.web.app/assessment?partner_id=${partnerId}&cohort_id=${cohortId}`;
 
     // Create partner record
     const partnerRef = db.collection('partners').doc(partnerId);

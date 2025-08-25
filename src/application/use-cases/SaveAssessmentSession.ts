@@ -7,6 +7,7 @@ export interface SaveAssessmentSessionRequest {
   scores: AssessmentScores;
   starRating: number;
   categoryBreakdown: Record<string, number>;
+  consentForML: boolean;
   geminiFeedback?: {
     feedback: string;
     competitiveAdvantage: {
@@ -82,7 +83,7 @@ export class SaveAssessmentSession {
       categoryBreakdown: request.categoryBreakdown,
       geminiFeedback: request.geminiFeedback,
       outcomeTrackingReady: true,
-      consentForML: true,
+      consentForML: request.consentForML,
     };
 
     return await this.assessmentRepository.save(session);
