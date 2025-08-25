@@ -45,8 +45,8 @@ npx ts-node scripts/seedTestData.ts
 - [ ] **Breakthrough Tag**: Successfully tagged with notes
 - [ ] **Stagnation Tag**: Successfully tagged with notes
 - [ ] **Firestore Write**: Outcome data written correctly
-- [ ] **Airtable Sync**: Outbox pattern working (if Airtable available)
-- [ ] **Error Handling**: Graceful failure when Airtable down
+- [ ] **Google Sheets Sync**: Outbox pattern working
+- [ ] **Error Handling**: Graceful failure when Google Sheets API down
 
 ### ✅ Metrics Generation
 - [ ] **Pilot Metrics Callable**: Returns correct data
@@ -119,10 +119,10 @@ npm test -- tests/security/firestoreRules.spec.ts
 - [ ] **Usage Analytics**: Partner activity tracked
 
 ### ✅ Error Recovery
-- [ ] **Airtable Outbox**: Retry mechanism working
+- [ ] **Google Sheets Outbox**: Retry mechanism working
 - [ ] **Exponential Backoff**: Proper retry timing
 - [ ] **Alert System**: Failed syncs trigger alerts
-- [ ] **Graceful Degradation**: System works without Airtable
+- [ ] **Graceful Degradation**: System works without Google Sheets
 
 ---
 
@@ -173,7 +173,7 @@ npm test -- tests/security/firestoreRules.spec.ts
 ### **Day 2**
 - [ ] Test outcome tagging workflow
 - [ ] Run security rules tests
-- [ ] Verify Airtable sync (if available)
+- [ ] Verify Google Sheets sync
 
 ### **Day 3**
 - [ ] Implement badge generation
