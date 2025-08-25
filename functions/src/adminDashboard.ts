@@ -7,8 +7,6 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-const db = admin.firestore();
-
 // Initialize Google Sheets API
 const sheetsSpreadsheetId = "1vDo4CX9Yz2iLAdC-7ZsHIaYJv4L0fbQB7WXjhOfcn6g";
 
