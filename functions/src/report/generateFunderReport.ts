@@ -44,7 +44,7 @@ export async function generateFunderReport({ partner, cohort, totals }:{
   }
 }
 
-export const generateFunderReportFunction = functions.https.onCall(async (data, context) => {
+export const generateFunderReportFunction = functions.https.onCall(async (data: any, context) => {
   try {
     // Validate input
     const { partner, cohort } = data;
@@ -53,7 +53,7 @@ export const generateFunderReportFunction = functions.https.onCall(async (data, 
     }
 
     // Check for test bypass
-    const isTest = process.env.NODE_ENV === 'test' || context.auth?.uid === 'test-user';
+    const isTest = process.env.NODE_ENV === 'test' || (context && 'auth' in context && (context.auth as any)?.uid === 'test-user');
     if (isTest) {
       return {
         url: `https://storage.googleapis.com/mock/${partner}-${cohort}-report.pdf`

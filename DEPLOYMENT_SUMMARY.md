@@ -15,6 +15,11 @@
 - **Security Hardening** - Firestore rules with partner/user isolation
 - **Analytics Integration** - Click tracking for pilot insights
 
+### ✅ Build Fixes
+- **Next.js Build Error** - Fixed searchParams static generation issue
+- **Suspense Boundaries** - Properly configured for useSearchParams
+- **Static Generation** - Pages now build successfully
+
 ### ✅ Technical Infrastructure
 - **Cloud Functions** - Badge and report generation
 - **API Endpoints** - RESTful endpoints for artifacts
@@ -55,6 +60,8 @@
 - [x] **Tags:** v0.3.0-rc deployed
 - [x] **Repository:** Up to date
 - [x] **No Conflicts:** Clean merge
+- [x] **Build Fix:** Next.js build error resolved
+- [x] **Static Generation:** Pages properly configured
 
 ---
 

@@ -41,7 +41,7 @@ export async function saveBadge({ userId, partnerId, cohortId, svg }:{
   }
 }
 
-export const generateBadge = functions.https.onCall(async (data, context) => {
+export const generateBadge = functions.https.onCall(async (data: any, context) => {
   try {
     // Validate input
     const { score, stars, partner, cohort, userId } = data;
@@ -50,7 +50,7 @@ export const generateBadge = functions.https.onCall(async (data, context) => {
     }
 
     // Check for test bypass
-    const isTest = process.env.NODE_ENV === 'test' || context.auth?.uid === 'test-user';
+    const isTest = process.env.NODE_ENV === 'test' || (context && 'auth' in context && (context.auth as any)?.uid === 'test-user');
     if (isTest) {
       return {
         url: `https://storage.googleapis.com/mock/${partner}-${cohort}-${userId}-badge.svg`
