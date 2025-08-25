@@ -1,6 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { Suspense } from 'react';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { initializeApp } from 'firebase/app';
