@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { initializeApp } from 'firebase/app';
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 // Initialize Firebase for client-side
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
