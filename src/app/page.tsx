@@ -64,6 +64,9 @@ export default function Home() {
                   <Link href="/dashboard" className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
                     Dashboard
                   </Link>
+                  <Link href="/admin" className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
+                    Admin
+                  </Link>
                   <button
                     onClick={logout}
                     className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap"

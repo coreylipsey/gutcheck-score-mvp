@@ -894,3 +894,8 @@ export {
   getPilotMetrics,
   generateShareableBadge
 } from './partnerCohort';
+
+// Export admin dashboard functions
+export {
+  getAdminDashboardData
+} from './adminDashboard';
