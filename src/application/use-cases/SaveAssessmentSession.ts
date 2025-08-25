@@ -40,7 +40,12 @@ export interface SaveAssessmentSessionRequest {
         totalPointGain: number;
       };
     };
-    comprehensiveAnalysis: string;
+    comprehensiveAnalysis: {
+      signalReadout: string;
+      strengthSignals: string;
+      developmentAreas: string;
+      trajectoryIndicators: string;
+    };
     nextSteps: {
       mentorship: {
         title: string;

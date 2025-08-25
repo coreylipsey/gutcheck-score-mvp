@@ -1,54 +1,90 @@
-rules_version='2';
-
+rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    // Allow users to read and write their own data
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+  match /databases/{db}/documents {
+
+    function isAuthed() { 
+      return request.auth != null; 
     }
     
-    // Assessment Sessions - Allow anonymous access by sessionId
+    function isAdmin() {
+      return isAuthed() && request.auth.token.admin == true;
+    }
+    
+    function authedEmail() {
+      return isAuthed() ? request.auth.token.email : null;
+    }
+    
+    // Accept partner email on either field name (null-safe)
+    function partnerEmailOf(resourceData) {
+      return resourceData.partnerEmail != null
+        ? resourceData.partnerEmail
+        : (resourceData.email != null ? resourceData.email : null);
+    }
+    
+    // Check if partner can access resource (null-safe)
+    function isPartnerFor(resourceData) {
+      let email = partnerEmailOf(resourceData);
+      return email != null && authedEmail() != null && authedEmail() == email;
+    }
+
+    function isOwner(userId) {
+      return isAuthed() && request.auth.uid == userId;
+    }
+
+    // Only allow partners to touch outcomeTracking; everything else immutable.
+    function outcomeOnlyChanged() {
+      let diff = request.resource.data.diff(resource.data);
+      // no removals
+      return diff.removedKeys().size() == 0
+        // Only "outcomeTracking" and "updatedAt" can be added/changed
+        && (diff.addedKeys().hasOnly(["outcomeTracking", "updatedAt"]) || diff.addedKeys().size() == 0)
+        && (diff.changedKeys().hasOnly(["outcomeTracking", "updatedAt"]) || diff.changedKeys().size() == 0);
+    }
+
+    // --- assessmentSessions ---
     match /assessmentSessions/{sessionId} {
-      allow create: if true; // Anyone can create a session
-      allow read: if true; // Allow reading by sessionId (for anonymous users)
-      allow write: if request.auth != null && 
-        (resource.data.userId == request.auth.uid || 
-         (resource.data.userId == null && request.resource.data.userId == request.auth.uid)); // Allow claiming anonymous sessions
+      allow read: if isAuthed() && (
+        // end-user can read own session
+        (resource.data.userId != null && isOwner(resource.data.userId))
+        ||
+        // partner can read sessions tagged with their partnerId or email
+        isPartnerFor(resource.data.partnerMetadata)
+      );
+
+      // end-user/app creates; partners never create via client in MVP
+      allow create: if true; // created via client flow (or emulator); server also bypasses
+
+      // user may update own (e.g., progress); partners may update *only* outcomeTracking
+      allow update: if (
+        (resource.data.userId != null && isOwner(resource.data.userId)) ||
+        (isPartnerFor(resource.data.partnerMetadata) && outcomeOnlyChanged())
+      );
+
+      // no deletes from clients in MVP
+      allow delete: if false;
     }
-    
-    // Open-Ended Scores - Allow anonymous access by sessionId
-    match /openEndedScores/{scoreId} {
-      allow create: if true; // Anyone can create scores
-      allow read: if true; // Allow reading by sessionId (for anonymous users)
-      allow write: if request.auth != null && 
-        resource.data.userId == request.auth.uid; // Only authenticated owner can update
+
+    // Primary collection
+    match /partnerCohorts/{cohortId} {
+      allow read: if isPartnerFor(resource.data) || isAdmin();
+      allow write: if false; // keep immutable from client
     }
-    
-    // Allow reading of assessment questions (public data)
-    match /assessmentQuestions/{questionId} {
-      allow read: if true;
+
+    // Legacy alias (for tests / older UI)
+    match /cohorts/{cohortId} {
+      allow read: if isPartnerFor(resource.data) || isAdmin();
+      allow write: if false;
     }
-    
-    // Token Balance - Users can only access their own token balance
-    match /tokenBalances/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+    // Partners collection
+    match /partners/{partnerId} {
+      allow read: if isPartnerFor(resource.data) || isAdmin();
+      allow write: if false;
     }
-    
-    // Token Transactions - Users can only access their own transactions
-    match /tokenTransactions/{transactionId} {
-      allow read, write: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
-    }
-    
-    // Token Purchases - Users can only access their own purchases
-    match /tokenPurchases/{purchaseId} {
-      allow read, write: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
-    }
-    
-    // Feature Access - Users can only access their own feature access
-    match /featureAccess/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+    // --- Lock down everything else by default ---
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

@@ -1,4 +1,5 @@
 import { AssessmentSession } from '../entities/Assessment';
+import { OutcomeTag } from '../value-objects/OutcomeTracking';
 
 export interface IAssessmentRepository {
   save(session: AssessmentSession): Promise<string>;
@@ -15,4 +16,9 @@ export interface IAssessmentRepository {
     userId?: string
   ): Promise<string>;
   getSessionOpenEndedScores(sessionId: string): Promise<Record<string, unknown>[]>;
+  
+  // NEW: Partner-specific query methods
+  findByPartnerCohort(partnerId: string, cohortId: string): Promise<AssessmentSession[]>;
+  countByPartnerCohort(partnerId: string, cohortId: string): Promise<{ total: number; completed: number; tagged: number }>;
+  findByOutcomeStatus(status: OutcomeTag): Promise<AssessmentSession[]>;
 } 

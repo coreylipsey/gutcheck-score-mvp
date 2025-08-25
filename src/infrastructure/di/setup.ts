@@ -1,5 +1,6 @@
 import { Container } from './container';
 import { FirestoreAssessmentRepository } from '../repositories/FirestoreAssessmentRepository';
+import { FirestorePartnerRepository } from '../repositories/FirestorePartnerRepository';
 import { FirestoreUserRepository } from '../repositories/FirestoreUserRepository';
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository';
 import { FirestoreTokenRepository } from '../repositories/FirestoreTokenRepository';
@@ -11,6 +12,8 @@ import { TokenService } from '../../application/services/TokenService';
 import { DashboardService } from '../../application/services/DashboardService';
 import { CalculateAssessmentScore } from '../../application/use-cases/CalculateAssessmentScore';
 import { SaveAssessmentSession } from '../../application/use-cases/SaveAssessmentSession';
+import { CreatePartnerCohort } from '../../application/use-cases/CreatePartnerCohort';
+import { GetPilotMetrics } from '../../application/use-cases/GetPilotMetrics';
 import { GenerateAIFeedback } from '../../application/use-cases/GenerateAIFeedback';
 import { CalculateQuestionScores } from '../../application/use-cases/CalculateQuestionScores';
 import { AuthenticateUser } from '../../application/use-cases/AuthenticateUser';
@@ -36,6 +39,10 @@ export function setupDependencies(): void {
 
   container.register('IAssessmentRepository', () => 
     new FirestoreAssessmentRepository()
+  );
+
+  container.register('IPartnerRepository', () => 
+    new FirestorePartnerRepository()
   );
 
   container.register('IUserRepository', () => 
@@ -73,6 +80,14 @@ export function setupDependencies(): void {
 
   container.register('SaveAssessmentSession', () => 
     new SaveAssessmentSession(container.resolve('IAssessmentRepository'))
+  );
+
+  container.register('CreatePartnerCohort', () => 
+    new CreatePartnerCohort(container.resolve('IPartnerRepository'))
+  );
+
+  container.register('GetPilotMetrics', () => 
+    new GetPilotMetrics(container.resolve('IAssessmentRepository'))
   );
 
   container.register('GenerateAIFeedback', () => 

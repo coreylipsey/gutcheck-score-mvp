@@ -119,7 +119,23 @@ export class GeminiAssessmentService implements IAIScoringService {
           developmentAreas: '',
           trajectoryIndicators: ''
         },
-        nextSteps: result.nextSteps || ''
+        nextSteps: result.nextSteps || {
+          mentorship: {
+            title: '',
+            description: '',
+            url: ''
+          },
+          funding: {
+            title: '',
+            description: '',
+            url: ''
+          },
+          learning: {
+            title: '',
+            description: '',
+            url: ''
+          }
+        }
       };
     } catch (error) {
       this.logger.error('Gemini API feedback generation error', error instanceof Error ? error : new Error(String(error)), 'GeminiAssessmentService');

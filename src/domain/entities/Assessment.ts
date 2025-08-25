@@ -1,5 +1,7 @@
 import { AssessmentCategory } from '../value-objects/Category';
 import { Question } from './Question';
+import { PartnerMetadata } from '../value-objects/PartnerMetadata';
+import { OutcomeTracking } from '../value-objects/OutcomeTracking';
 
 export interface AssessmentScores {
   personalBackground: number;
@@ -52,7 +54,12 @@ export interface AssessmentSession {
         totalPointGain: number;
       };
     };
-    comprehensiveAnalysis: string;
+    comprehensiveAnalysis: {
+      signalReadout: string;
+      strengthSignals: string;
+      developmentAreas: string;
+      trajectoryIndicators: string;
+    };
     nextSteps: {
       mentorship: {
         title: string;
@@ -73,6 +80,10 @@ export interface AssessmentSession {
   };
   outcomeTrackingReady: boolean;
   consentForML: boolean;
+  // NEW: Optional partner metadata (backward compatible)
+  partnerMetadata?: PartnerMetadata;
+  // NEW: Optional outcome tracking (backward compatible)
+  outcomeTracking?: OutcomeTracking;
 }
 
 export interface AssessmentResponse {
