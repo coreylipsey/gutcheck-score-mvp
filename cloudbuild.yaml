@@ -52,6 +52,7 @@ steps:
       - |
         ls -la
         ls -la .next/
+        npx firebase-tools experiments:enable webframeworks
         npx firebase-tools deploy --only hosting,functions --project ${_PROJECT_ID}
     dir: '.'
     env:
