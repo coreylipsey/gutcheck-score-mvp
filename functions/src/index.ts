@@ -899,3 +899,21 @@ export {
 export {
   getAdminDashboardData
 } from './adminDashboard';
+
+// Export user role management functions
+export {
+  getUserRole,
+  promoteToPartner,
+  checkPartnerAccess,
+  getUserAssessmentHistory,
+  createPartnerAccount
+} from './userRoles';
+
+// Export identity claims functions
+export {
+  syncUserClaims,
+  onRoleChange,
+  createUserRole,
+  getCurrentUserClaims,
+  refreshUserClaims
+} from './identityClaims';

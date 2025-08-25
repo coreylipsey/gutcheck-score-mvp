@@ -429,13 +429,22 @@ function AdminDashboard() {
                 <p className="text-gray-600 mb-4">
                   Use the partner onboarding form to create new cohorts and generate assessment links.
                 </p>
-                <a
-                  href="/partner"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#147AFF] to-[#19C2A0] text-white rounded-md hover:opacity-90 transition-opacity"
-                >
-                  <Plus className="w-4 h-4" />
-                  Go to Partner Onboarding
-                </a>
+                <div className="space-y-3">
+                  <a
+                    href="/partner"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#147AFF] to-[#19C2A0] text-white rounded-md hover:opacity-90 transition-opacity"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Go to Partner Onboarding
+                  </a>
+                  <a
+                    href="/admin/roles"
+                    className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    <Shield className="w-4 h-4" />
+                    Manage User Roles
+                  </a>
+                </div>
               </div>
             )}
           </div>

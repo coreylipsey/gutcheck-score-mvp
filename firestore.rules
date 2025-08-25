@@ -1,88 +1,158 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{db}/documents {
-
-    function isAuthed() { 
-      return request.auth != null; 
+  match /databases/{database}/documents {
+    
+    // Helper functions for access control
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function hasRole(role) {
+      return request.auth.token.roles != null && role in request.auth.token.roles;
+    }
+    
+    function hasAnyRole(roles) {
+      return request.auth.token.roles != null && 
+             request.auth.token.roles.hasAny(roles);
     }
     
     function isAdmin() {
-      return isAuthed() && request.auth.token.admin == true;
+      return hasRole('admin') || hasRole('security_admin');
     }
     
-    function authedEmail() {
-      return isAuthed() ? request.auth.token.email : null;
+    function isPartner() {
+      return hasRole('partner') || isAdmin();
     }
     
-    // Accept partner email on either field name (null-safe)
-    function partnerEmailOf(resourceData) {
-      return resourceData.partnerEmail != null
-        ? resourceData.partnerEmail
-        : (resourceData.email != null ? resourceData.email : null);
+    function isHenri() {
+      return hasRole('henri') || isPartner();
     }
     
-    // Check if partner can access resource (null-safe)
-    function isPartnerFor(resourceData) {
-      let email = partnerEmailOf(resourceData);
-      return email != null && authedEmail() != null && authedEmail() == email;
-    }
-
     function isOwner(userId) {
-      return isAuthed() && request.auth.uid == userId;
+      return request.auth.uid == userId;
     }
-
-    // Only allow partners to touch outcomeTracking; everything else immutable.
-    function outcomeOnlyChanged() {
-      let diff = request.resource.data.diff(resource.data);
-      // no removals
-      return diff.removedKeys().size() == 0
-        // Only "outcomeTracking" and "updatedAt" can be added/changed
-        && (diff.addedKeys().hasOnly(["outcomeTracking", "updatedAt"]) || diff.addedKeys().size() == 0)
-        && (diff.changedKeys().hasOnly(["outcomeTracking", "updatedAt"]) || diff.changedKeys().size() == 0);
+    
+    function isOrgMember(orgId) {
+      return request.auth.token.orgId == orgId || isAdmin();
     }
-
-    // --- assessmentSessions ---
-    match /assessmentSessions/{sessionId} {
-      allow read: if isAuthed() && (
-        // end-user can read own session
-        (resource.data.userId != null && isOwner(resource.data.userId))
-        ||
-        // partner can read sessions tagged with their partnerId or email
-        isPartnerFor(resource.data.partnerMetadata)
-      );
-
-      // end-user/app creates; partners never create via client in MVP
-      allow create: if true; // created via client flow (or emulator); server also bypasses
-
-      // user may update own (e.g., progress); partners may update *only* outcomeTracking
-      allow update: if (
-        (resource.data.userId != null && isOwner(resource.data.userId)) ||
-        (isPartnerFor(resource.data.partnerMetadata) && outcomeOnlyChanged())
-      );
-
-      // no deletes from clients in MVP
-      allow delete: if false;
+    
+    function isPartnerMember(partnerId) {
+      return request.auth.token.partnerId == partnerId || isAdmin();
     }
-
-    // Primary collection
-    match /partnerCohorts/{cohortId} {
-      allow read: if isPartnerFor(resource.data) || isAdmin();
-      allow write: if false; // keep immutable from client
+    
+    function hasScope(scope) {
+      return request.auth.token.scopes != null && scope in request.auth.token.scopes;
     }
-
-    // Legacy alias (for tests / older UI)
+    
+    function hasEntitlement(entitlement) {
+      return request.auth.token.entitlements != null && entitlement in request.auth.token.entitlements;
+    }
+    
+    // User roles collection - users can read their own role, admins can read all
+    match /userRoles/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow write: if isAdmin(); // Only admins can modify roles
+    }
+    
+    // Organizations collection - org members can read their org, admins can read all
+    match /organizations/{orgId} {
+      allow read: if isAuthenticated() && (isOrgMember(orgId) || isAdmin());
+      allow write: if isAdmin();
+    }
+    
+    // Partner cohorts - partner members can read/write their cohorts, admins can read all
     match /cohorts/{cohortId} {
-      allow read: if isPartnerFor(resource.data) || isAdmin();
-      allow write: if false;
+      allow read: if isAuthenticated() && (
+        isPartnerMember(resource.data.partnerId) || isAdmin()
+      );
+      allow write: if isAuthenticated() && (
+        isPartnerMember(resource.data.partnerId) || isAdmin()
+      );
     }
-
-    // Partners collection
+    
+    // Assessment sessions - users can read their own, partners can read their cohort's, admins can read all
+    match /assessmentSessions/{sessionId} {
+      allow read: if isAuthenticated() && (
+        isOwner(resource.data.userId) || 
+        (isPartner() && isPartnerMember(resource.data.partnerMetadata.partnerId)) ||
+        isAdmin()
+      );
+      allow create: if isAuthenticated() && (
+        isOwner(request.resource.data.userId) || isAdmin()
+      );
+      allow update: if isAuthenticated() && (
+        isOwner(resource.data.userId) || 
+        (isPartner() && isPartnerMember(resource.data.partnerMetadata.partnerId)) ||
+        isAdmin()
+      );
+    }
+    
+    // Partner data - partner members can read/write their data, admins can read all
     match /partners/{partnerId} {
-      allow read: if isPartnerFor(resource.data) || isAdmin();
-      allow write: if false;
+      allow read: if isAuthenticated() && (
+        isPartnerMember(partnerId) || isAdmin()
+      );
+      allow write: if isAuthenticated() && (
+        isPartnerMember(partnerId) || isAdmin()
+      );
     }
-
-    // --- Lock down everything else by default ---
+    
+    // Outcome tracking - partner members can read/write their outcomes, admins can read all
+    match /outcomeTracking/{outcomeId} {
+      allow read: if isAuthenticated() && (
+        isPartnerMember(resource.data.partnerId) || isAdmin()
+      );
+      allow write: if isAuthenticated() && (
+        isPartnerMember(resource.data.partnerId) || isAdmin()
+      );
+    }
+    
+    // Audit trail - admins only
+    match /auditTrail/{auditId} {
+      allow read, write: if isAdmin();
+    }
+    
+    // Google Sheets outbox - system only (for sync operations)
+    match /sheetsOutbox/{outboxId} {
+      allow read, write: if false; // Only accessible via Cloud Functions
+    }
+    
+    // User preferences - users can read/write their own
+    match /userPreferences/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // Token system - users can read their own tokens, admins can read all
+    match /tokens/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow write: if isAdmin(); // Only admins can modify tokens
+    }
+    
+    // Transaction history - users can read their own, admins can read all
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated() && (
+        isOwner(resource.data.userId) || isAdmin()
+      );
+      allow create: if isAuthenticated() && (
+        isOwner(request.resource.data.userId) || isAdmin()
+      );
+    }
+    
+    // Feature access - users can read their own, admins can read all
+    match /featureAccess/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow write: if isAdmin(); // Only admins can modify feature access
+    }
+    
+    // Partner memberships - org members can read their org's memberships, admins can read all
+    match /orgMemberships/{membershipId} {
+      allow read: if isAuthenticated() && (
+        isOrgMember(resource.data.orgId) || isAdmin()
+      );
+      allow write: if isAdmin(); // Only admins can modify memberships
+    }
+    
+    // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;
     }
