@@ -117,6 +117,12 @@ export default function Home() {
                 View Dashboard
               </Link>
             )}
+            <Link
+              href="/partner"
+              className="inline-flex items-center px-8 py-4 border border-green-300 text-lg font-medium rounded-lg text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+            >
+              Partner Onboarding
+            </Link>
           </div>
         </div>
 

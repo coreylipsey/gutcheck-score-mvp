@@ -35,5 +35,5 @@ export interface IPartnerRepository {
   findCohortById(cohortId: string): Promise<Cohort | null>;
   findCohortsByPartner(partnerId: string): Promise<Cohort[]>;
   updateCohortStatus(cohortId: string, status: Cohort['status']): Promise<void>;
-  generateAssessmentUrl(cohortId: string): string;
+  generateAssessmentUrl(cohortId: string, partnerId?: string): string;
 }

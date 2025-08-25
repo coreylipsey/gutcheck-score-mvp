@@ -887,3 +887,10 @@ export {
   syncOutcomeToSheets,
   manualSheetsSync
 } from './googleSheetsSync';
+
+// Export partner cohort functions
+export {
+  createPartnerCohort,
+  getPilotMetrics,
+  generateShareableBadge
+} from './partnerCohort';

@@ -36,7 +36,7 @@ export class FirestorePartnerRepository implements IPartnerRepository {
       partnerId: partnerId,
       partnerName: data.partnerName,
       expectedParticipants: data.expectedParticipants,
-      assessmentUrl: this.generateAssessmentUrl(cohortId),
+      assessmentUrl: this.generateAssessmentUrl(cohortId, partnerId),
       status: 'active',
       createdAt: new Date()
     };
@@ -119,7 +119,10 @@ export class FirestorePartnerRepository implements IPartnerRepository {
     await updateDoc(doc.ref, { status });
   }
 
-  generateAssessmentUrl(cohortId: string): string {
+  generateAssessmentUrl(cohortId: string, partnerId?: string): string {
+    if (partnerId) {
+      return `https://app.gutcheck.ai/assessment?partner_id=${partnerId}&cohort_id=${cohortId}`;
+    }
     return `https://app.gutcheck.ai/assessment?cohort_id=${cohortId}`;
   }
 
