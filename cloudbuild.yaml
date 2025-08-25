@@ -19,8 +19,8 @@ steps:
       - |
         npm run build
         ls -la
-        echo "Build completed, out directory contents:"
-        ls -la out/
+        echo "Build completed, .next directory contents:"
+        ls -la .next/
     dir: '.'
     env:
       - 'NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyAUq0hEPlGnfkj6MJC-7et_gNim-YTyTzg'
@@ -51,7 +51,7 @@ steps:
       - '-c'
       - |
         ls -la
-        ls -la out/
+        ls -la .next/
         npx firebase-tools deploy --only hosting,functions --project ${_PROJECT_ID}
     dir: '.'
     env:
