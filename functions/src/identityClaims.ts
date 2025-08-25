@@ -11,10 +11,12 @@ const db = admin.firestore();
 
 export interface UserClaims {
   roles: string[];
-  orgId?: string;
-  scopes: string[];
-  entitlements: string[];
-  partnerId?: string;
+  orgIds: string[];      // multi-tenant support
+  scopes: string[];      // optional fine-grained
+  entitlements: string[];// plan/features
+  suspended?: boolean;
+  email_verified?: boolean;
+  claims_ver: number;    // version tracking
   lastUpdated: number;
 }
 
@@ -22,10 +24,10 @@ export interface UserRole {
   userId: string;
   email: string;
   roles: string[];
-  orgId?: string;
-  partnerId?: string;
+  orgIds: string[];      // multi-tenant support
   scopes: string[];
   entitlements: string[];
+  suspended?: boolean;
   partnerData?: {
     organizationName: string;
     organizationType: string;
@@ -40,57 +42,58 @@ export interface UserRole {
   updatedAt: string;
 }
 
-// Sync Firestore roles to Firebase Custom Claims
-export const syncUserClaims = onCall(async (request) => {
-  try {
-    const { userId } = request.data;
-    
-    if (!userId) {
-      throw new HttpsError('invalid-argument', 'User ID is required');
-    }
+type RoleDoc = {
+  roles?: string[];
+  orgIds?: string[];      // multi-tenant support
+  scopes?: string[];      // optional fine-grained
+  entitlements?: string[];// plan/features
+  suspended?: boolean;
+};
 
-    // Get user role from Firestore
-    const userRoleDoc = await db.collection('userRoles').doc(userId).get();
-    
-    if (!userRoleDoc.exists) {
-      throw new HttpsError('not-found', 'User role not found');
-    }
+async function setClaims(uid: string, data: RoleDoc) {
+  const { 
+    roles = [], 
+    orgIds = [], 
+    scopes = [], 
+    entitlements = [], 
+    suspended = false 
+  } = data;
 
-    const userRole = userRoleDoc.data() as UserRole;
-    
-    // Build custom claims
-    const claims: UserClaims = {
-      roles: userRole.roles || ['henri'],
-      orgId: userRole.orgId,
-      scopes: userRole.scopes || [],
-      entitlements: userRole.entitlements || [],
-      partnerId: userRole.partnerId,
-      lastUpdated: Date.now()
-    };
+  // Merge with current claims to retain system fields if needed
+  const currentUser = await admin.auth().getUser(uid).catch(() => null);
+  const baseClaims: any = currentUser?.customClaims ?? {};
 
-    // Set custom claims on Firebase Auth user
-    await admin.auth().setCustomUserClaims(userId, claims);
+  const nextClaims = {
+    ...baseClaims,
+    roles,
+    orgIds,
+    scopes,
+    entitlements,
+    suspended,
+    // bump a version to help clients know to refresh
+    claims_ver: (baseClaims.claims_ver || 0) + 1,
+    lastUpdated: Date.now()
+  };
 
-    // Log the claim update for audit
-    await db.collection('auditTrail').add({
-      event: 'claims_updated',
-      userId,
-      claims,
-      timestamp: admin.firestore.FieldValue.serverTimestamp(),
-      triggeredBy: request.auth?.uid || 'system'
-    });
+  await admin.auth().setCustomUserClaims(uid, nextClaims);
 
-    return {
-      success: true,
-      claims,
-      message: 'User claims updated successfully'
-    };
+  // Annotation in Firestore for audit/search convenience
+  await db.collection('admin_claims_shadow').doc(uid).set({
+    uid, 
+    roles, 
+    orgIds, 
+    scopes, 
+    entitlements, 
+    suspended,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    claims_ver: nextClaims.claims_ver,
+  }, { merge: true });
 
-  } catch (error) {
-    console.error('Error syncing user claims:', error);
-    throw new HttpsError('internal', 'Failed to sync user claims');
-  }
-});
+  // Force token refresh next client call
+  await admin.auth().updateUser(uid, { disabled: false });
+
+  return nextClaims;
+}
 
 // Automatically sync claims when user role changes
 export const onRoleChange = onDocumentUpdated('userRoles/{userId}', async (event) => {
@@ -104,42 +107,41 @@ export const onRoleChange = onDocumentUpdated('userRoles/{userId}', async (event
       return;
     }
 
-    // Check if roles, orgId, or scopes changed
+    // Check if roles, orgIds, or scopes changed
     const rolesChanged = JSON.stringify(beforeData.roles) !== JSON.stringify(afterData.roles);
-    const orgChanged = beforeData.orgId !== afterData.orgId;
+    const orgIdsChanged = JSON.stringify(beforeData.orgIds) !== JSON.stringify(afterData.orgIds);
     const scopesChanged = JSON.stringify(beforeData.scopes) !== JSON.stringify(afterData.scopes);
+    const suspendedChanged = beforeData.suspended !== afterData.suspended;
 
-    if (rolesChanged || orgChanged || scopesChanged) {
+    if (rolesChanged || orgIdsChanged || scopesChanged || suspendedChanged) {
       console.log(`Role change detected for user ${userId}, syncing claims`);
 
       // Build new claims
-      const claims: UserClaims = {
-        roles: afterData.roles || ['henri'],
-        orgId: afterData.orgId,
+      const claims = await setClaims(userId, {
+        roles: afterData.roles || [],
+        orgIds: afterData.orgIds || [],
         scopes: afterData.scopes || [],
         entitlements: afterData.entitlements || [],
-        partnerId: afterData.partnerId,
-        lastUpdated: Date.now()
-      };
-
-      // Update Firebase Auth claims
-      await admin.auth().setCustomUserClaims(userId, claims);
-
-      // Log the automatic claim update
-      await db.collection('auditTrail').add({
-        event: 'claims_auto_synced',
-        userId,
-        claims,
-        changes: {
-          rolesChanged,
-          orgChanged,
-          scopesChanged
-        },
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        triggeredBy: 'system'
+        suspended: afterData.suspended || false
       });
 
-      console.log(`Claims synced for user ${userId}`);
+      // Append a tamper-evident audit event under each org
+      const batch = db.batch();
+      (afterData.orgIds ?? []).forEach((orgId: string) => {
+        const ref = db.doc(`orgs/${orgId}/audit/${db.collection('_').doc().id}`);
+        batch.set(ref, {
+          type: 'CLAIMS_UPDATED',
+          uid: userId,
+          roles: afterData.roles ?? [],
+          orgIds: afterData.orgIds ?? [],
+          actor: 'system:onRoleChange',
+          at: admin.firestore.FieldValue.serverTimestamp(),
+          claims_ver: claims.claims_ver
+        }, { merge: true });
+      });
+      await batch.commit();
+
+      console.log(`Claims synced for user ${userId}, version ${claims.claims_ver}`);
     }
 
   } catch (error) {
@@ -170,17 +172,13 @@ export const createUserRole = onDocumentCreated('userRoles/{userId}', async (eve
     console.log(`Creating claims for new user ${userId}`);
 
     // Build initial claims
-    const claims: UserClaims = {
+    const claims = await setClaims(userId, {
       roles: userRole.roles || ['henri'],
-      orgId: userRole.orgId,
+      orgIds: userRole.orgIds || [],
       scopes: userRole.scopes || [],
       entitlements: userRole.entitlements || [],
-      partnerId: userRole.partnerId,
-      lastUpdated: Date.now()
-    };
-
-    // Set initial claims
-    await admin.auth().setCustomUserClaims(userId, claims);
+      suspended: userRole.suspended || false
+    });
 
     // Log the claim creation
     await db.collection('auditTrail').add({
@@ -191,7 +189,7 @@ export const createUserRole = onDocumentCreated('userRoles/{userId}', async (eve
       triggeredBy: 'system'
     });
 
-    console.log(`Initial claims created for user ${userId}`);
+    console.log(`Initial claims created for user ${userId}, version ${claims.claims_ver}`);
 
   } catch (error) {
     console.error('Error creating initial claims:', error);
@@ -204,6 +202,54 @@ export const createUserRole = onDocumentCreated('userRoles/{userId}', async (eve
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
       triggeredBy: 'system'
     });
+  }
+});
+
+// Sync Firestore roles to Firebase Custom Claims (legacy support)
+export const syncUserClaims = onCall(async (request) => {
+  try {
+    const { userId } = request.data;
+    
+    if (!userId) {
+      throw new HttpsError('invalid-argument', 'User ID is required');
+    }
+
+    // Get user role from Firestore
+    const userRoleDoc = await db.collection('userRoles').doc(userId).get();
+    
+    if (!userRoleDoc.exists) {
+      throw new HttpsError('not-found', 'User role not found');
+    }
+
+    const userRole = userRoleDoc.data() as UserRole;
+    
+    // Build custom claims
+    const claims = await setClaims(userId, {
+      roles: userRole.roles || ['henri'],
+      orgIds: userRole.orgIds || [],
+      scopes: userRole.scopes || [],
+      entitlements: userRole.entitlements || [],
+      suspended: userRole.suspended || false
+    });
+
+    // Log the claim update for audit
+    await db.collection('auditTrail').add({
+      event: 'claims_updated',
+      userId,
+      claims,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      triggeredBy: request.auth?.uid || 'system'
+    });
+
+    return {
+      success: true,
+      claims,
+      message: 'User claims updated successfully'
+    };
+
+  } catch (error) {
+    console.error('Error syncing user claims:', error);
+    throw new HttpsError('internal', 'Failed to sync user claims');
   }
 });
 
@@ -248,8 +294,8 @@ export const refreshUserClaims = onCall(async (request) => {
     const adminUserRecord = await admin.auth().getUser(adminUserId!);
     const adminClaims = adminUserRecord.customClaims as UserClaims;
     
-    if (!adminClaims?.roles?.includes('admin')) {
-      throw new HttpsError('permission-denied', 'Only admins can refresh claims');
+    if (!adminClaims?.roles?.includes('admin') && !adminClaims?.roles?.includes('security_admin')) {
+      throw new HttpsError('permission-denied', 'Admin privileges required');
     }
 
     // Get user role from Firestore
@@ -262,17 +308,13 @@ export const refreshUserClaims = onCall(async (request) => {
     const userRole = userRoleDoc.data() as UserRole;
     
     // Build new claims
-    const claims: UserClaims = {
+    const claims = await setClaims(userId, {
       roles: userRole.roles || ['henri'],
-      orgId: userRole.orgId,
+      orgIds: userRole.orgIds || [],
       scopes: userRole.scopes || [],
       entitlements: userRole.entitlements || [],
-      partnerId: userRole.partnerId,
-      lastUpdated: Date.now()
-    };
-
-    // Update claims
-    await admin.auth().setCustomUserClaims(userId, claims);
+      suspended: userRole.suspended || false
+    });
 
     // Log the admin-triggered refresh
     await db.collection('auditTrail').add({
@@ -293,5 +335,38 @@ export const refreshUserClaims = onCall(async (request) => {
   } catch (error) {
     console.error('Error refreshing user claims:', error);
     throw new HttpsError('internal', 'Failed to refresh user claims');
+  }
+});
+
+// Optional HTTPS callable for admin-triggered refresh (legacy support)
+export const refreshClaims = onCall(async (request) => {
+  try {
+    const { uid } = request.data;
+    
+    if (!request.auth?.token?.roles?.includes('admin') && !request.auth?.token?.roles?.includes('security_admin')) {
+      throw new HttpsError('permission-denied', 'Admin privileges required');
+    }
+    
+    const snap = await db.doc(`userRoles/${uid}`).get();
+    if (!snap.exists) {
+      throw new HttpsError('not-found', 'Role doc missing');
+    }
+    
+    const userRole = snap.data() as UserRole;
+    const claims = await setClaims(uid, {
+      roles: userRole.roles || [],
+      orgIds: userRole.orgIds || [],
+      scopes: userRole.scopes || [],
+      entitlements: userRole.entitlements || [],
+      suspended: userRole.suspended || false
+    });
+    
+    return { 
+      ok: true, 
+      claims_ver: claims.claims_ver 
+    };
+  } catch (error) {
+    console.error('Error in refreshClaims:', error);
+    throw new HttpsError('internal', 'Failed to refresh claims');
   }
 });

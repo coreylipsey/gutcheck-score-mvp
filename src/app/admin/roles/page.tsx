@@ -15,7 +15,12 @@ import {
   AlertTriangle,
   Clock,
   Eye,
-  Settings
+  Settings,
+  Search,
+  UserCheck,
+  UserX,
+  Lock,
+  Unlock
 } from 'lucide-react';
 
 // Initialize Firebase for client-side
@@ -35,10 +40,10 @@ interface UserRole {
   userId: string;
   email: string;
   roles: string[];
-  orgId?: string;
-  partnerId?: string;
+  orgIds: string[];      // multi-tenant support
   scopes: string[];
   entitlements: string[];
+  suspended?: boolean;
   partnerData?: {
     organizationName: string;
     organizationType: string;
@@ -55,14 +60,15 @@ interface UserRole {
 
 interface RoleChangeRequest {
   id: string;
-  userId: string;
-  email: string;
+  uid: string;
+  orgId: string;
   requestedRoles: string[];
+  requestedOrgIds: string[];
+  status: 'pending' | 'approved' | 'denied';
+  createdAt: any;
   requestedBy: string;
-  requestedAt: string;
-  status: 'pending' | 'approved' | 'rejected';
   reviewedBy?: string;
-  reviewedAt?: string;
+  reviewedAt?: any;
   reason?: string;
 }
 
@@ -74,6 +80,9 @@ export default function AdminRoles() {
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [newRole, setNewRole] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [email, setEmail] = useState('');
+  const [userDoc, setUserDoc] = useState<any>(null);
+  const [orgId, setOrgId] = useState<string>('');
 
   useEffect(() => {
     fetchUserRoles();
@@ -89,6 +98,7 @@ export default function AdminRoles() {
           userId: 'user1',
           email: 'john@example.com',
           roles: ['henri'],
+          orgIds: [],
           scopes: [],
           entitlements: [],
           createdAt: '2025-01-01T00:00:00Z',
@@ -98,7 +108,7 @@ export default function AdminRoles() {
           userId: 'user2',
           email: 'partner@university.edu',
           roles: ['henri', 'partner'],
-          partnerId: 'partner1',
+          orgIds: ['orgA'],
           scopes: ['cohort_management'],
           entitlements: ['basic_analytics'],
           partnerData: {
@@ -122,9 +132,10 @@ export default function AdminRoles() {
       setRoleRequests([
         {
           id: 'req1',
-          userId: 'user3',
-          email: 'newpartner@college.edu',
+          uid: 'user3',
+          orgId: 'orgA',
           requestedRoles: ['partner'],
+          requestedOrgIds: ['orgA'],
           requestedBy: 'user3',
           requestedAt: '2025-01-01T10:00:00Z',
           status: 'pending'
@@ -137,31 +148,58 @@ export default function AdminRoles() {
     }
   };
 
-  const handleRoleChange = async (userId: string, newRoles: string[]) => {
+  const loadByEmail = async () => {
+    try {
+      // This would call a Cloud Function to lookup user by email
+      console.log(`Looking up user by email: ${email}`);
+      
+      // Mock response for demo
+      setUserDoc({
+        uid: 'user4',
+        email: email,
+        roles: ['henri'],
+        orgIds: [],
+        scopes: [],
+        entitlements: []
+      });
+    } catch (error) {
+      console.error('Error looking up user by email:', error);
+      setUserDoc(null);
+    }
+  };
+
+  const updateRoles = async (uid: string, roles: string[], orgIds: string[]) => {
     try {
       setSubmitting(true);
       
-      // This would call a Cloud Function to change user roles
-      console.log(`Changing roles for user ${userId} to:`, newRoles);
+      // This would call a Cloud Function to update user roles
+      console.log(`Updating roles for user ${uid}:`, { roles, orgIds });
+      
+      // Refresh claims
+      const refreshClaims = httpsCallable(functions, 'refreshClaims');
+      await refreshClaims({ uid });
+      
+      alert('Claims refreshed successfully');
       
       // Refresh the user roles list
       await fetchUserRoles();
-      setSelectedUser(null);
-      setNewRole('');
+      setUserDoc(null);
+      setEmail('');
       
     } catch (error) {
-      console.error('Error changing user roles:', error);
+      console.error('Error updating user roles:', error);
+      alert('Error updating user roles');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleRoleRequest = async (requestId: string, approved: boolean) => {
+  const handleRoleRequest = async (request: RoleChangeRequest, approved: boolean) => {
     try {
       setSubmitting(true);
       
       // This would call a Cloud Function to approve/reject role requests
-      console.log(`${approved ? 'Approving' : 'Rejecting'} role request ${requestId}`);
+      console.log(`${approved ? 'Approving' : 'Rejecting'} role request ${request.id}`);
       
       // Refresh the role requests list
       await fetchRoleRequests();
@@ -178,8 +216,27 @@ export default function AdminRoles() {
       const refreshUserClaims = httpsCallable(functions, 'refreshUserClaims');
       await refreshUserClaims({ userId });
       console.log(`Claims refreshed for user ${userId}`);
+      alert('Claims refreshed successfully');
     } catch (error) {
       console.error('Error refreshing user claims:', error);
+      alert('Error refreshing claims');
+    }
+  };
+
+  const toggleUserSuspension = async (userId: string, suspended: boolean) => {
+    try {
+      setSubmitting(true);
+      
+      // This would call a Cloud Function to suspend/unsuspend user
+      console.log(`${suspended ? 'Suspending' : 'Unsuspending'} user ${userId}`);
+      
+      // Refresh the user roles list
+      await fetchUserRoles();
+      
+    } catch (error) {
+      console.error('Error toggling user suspension:', error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -251,14 +308,83 @@ export default function AdminRoles() {
             <div className="bg-white/95 backdrop-blur-sm border-0 rounded-lg shadow-sm p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Admins</p>
+                  <p className="text-sm font-medium text-gray-600">Suspended</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {userRoles.filter(u => u.roles.includes('admin')).length}
+                    {userRoles.filter(u => u.suspended).length}
                   </p>
                 </div>
-                <Settings className="w-6 h-6 text-[#0A1F44]" />
+                <UserX className="w-6 h-6 text-[#DC2626]" />
               </div>
             </div>
+          </div>
+
+          {/* Email Lookup Section */}
+          <div className="bg-white/95 backdrop-blur-sm border-0 rounded-lg shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Lookup by Email</h2>
+            <div className="flex gap-2 mb-4">
+              <input 
+                className="border border-gray-300 rounded-md p-2 flex-1" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="user@example.com" 
+              />
+              <button 
+                className="bg-[#147AFF] text-white px-4 py-2 rounded-md hover:bg-[#0A1F44] transition-colors"
+                onClick={loadByEmail}
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            </div>
+            
+            {userDoc && (
+              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">UID</p>
+                    <p className="text-sm text-gray-900">{userDoc.uid}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Email</p>
+                    <p className="text-sm text-gray-900">{userDoc.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Roles</p>
+                    <p className="text-sm text-gray-900">{(userDoc.roles || []).join(', ') || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Organizations</p>
+                    <p className="text-sm text-gray-900">{(userDoc.orgIds || []).join(', ') || '—'}</p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <button 
+                    className="bg-[#19C2A0] text-white px-3 py-1 rounded text-sm hover:bg-[#0F9B7A] transition-colors"
+                    onClick={() => updateRoles(userDoc.uid, Array.from(new Set([...(userDoc.roles || []), 'partner'])), userDoc.orgIds || [orgId])}
+                    disabled={submitting}
+                  >
+                    <UserCheck className="w-3 h-3 inline mr-1" />
+                    Grant Partner
+                  </button>
+                  <button 
+                    className="bg-[#147AFF] text-white px-3 py-1 rounded text-sm hover:bg-[#0A1F44] transition-colors"
+                    onClick={() => updateRoles(userDoc.uid, Array.from(new Set([...(userDoc.roles || []), 'admin'])), userDoc.orgIds || [orgId])}
+                    disabled={submitting}
+                  >
+                    <Shield className="w-3 h-3 inline mr-1" />
+                    Grant Admin
+                  </button>
+                  <button 
+                    className="bg-[#FF6B00] text-white px-3 py-1 rounded text-sm hover:bg-[#E55A00] transition-colors"
+                    onClick={() => updateRoles(userDoc.uid, Array.from(new Set([...(userDoc.roles || []), 'security_admin'])), userDoc.orgIds || [orgId])}
+                    disabled={submitting}
+                  >
+                    <Lock className="w-3 h-3 inline mr-1" />
+                    Grant Security Admin
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Role Management */}
@@ -277,13 +403,32 @@ export default function AdminRoles() {
                           <p className="font-medium text-gray-900">{userRole.email}</p>
                           <p className="text-sm text-gray-600">ID: {userRole.userId}</p>
                         </div>
-                        <button
-                          onClick={() => refreshUserClaims(userRole.userId)}
-                          className="p-2 text-gray-500 hover:text-gray-700"
-                          title="Refresh claims"
-                        >
-                          <RefreshCw className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => refreshUserClaims(userRole.userId)}
+                            className="p-2 text-gray-500 hover:text-gray-700"
+                            title="Refresh claims"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                          </button>
+                          {userRole.suspended ? (
+                            <button
+                              onClick={() => toggleUserSuspension(userRole.userId, false)}
+                              className="p-2 text-green-500 hover:text-green-700"
+                              title="Unsuspend user"
+                            >
+                              <Unlock className="w-4 h-4" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => toggleUserSuspension(userRole.userId, true)}
+                              className="p-2 text-red-500 hover:text-red-700"
+                              title="Suspend user"
+                            >
+                              <Lock className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                       
                       <div className="flex flex-wrap gap-2 mb-3">
@@ -292,6 +437,7 @@ export default function AdminRoles() {
                             key={role}
                             className={`px-2 py-1 text-xs rounded-full ${
                               role === 'admin' ? 'bg-red-100 text-red-800' :
+                              role === 'security_admin' ? 'bg-purple-100 text-purple-800' :
                               role === 'partner' ? 'bg-blue-100 text-blue-800' :
                               'bg-gray-100 text-gray-800'
                             }`}
@@ -299,7 +445,18 @@ export default function AdminRoles() {
                             {role}
                           </span>
                         ))}
+                        {userRole.suspended && (
+                          <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                            SUSPENDED
+                          </span>
+                        )}
                       </div>
+                      
+                      {userRole.orgIds && userRole.orgIds.length > 0 && (
+                        <div className="text-sm text-gray-600 mb-2">
+                          <p>Organizations: {userRole.orgIds.join(', ')}</p>
+                        </div>
+                      )}
                       
                       {userRole.partnerData && (
                         <div className="text-sm text-gray-600">
@@ -324,14 +481,15 @@ export default function AdminRoles() {
                     <div key={request.id} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <p className="font-medium text-gray-900">{request.email}</p>
-                          <p className="text-sm text-gray-600">Requested: {new Date(request.requestedAt).toLocaleDateString()}</p>
+                          <p className="font-medium text-gray-900">UID: {request.uid}</p>
+                          <p className="text-sm text-gray-600">Org: {request.orgId}</p>
+                          <p className="text-sm text-gray-600">Requested: {new Date(request.createdAt).toLocaleDateString()}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           {request.status === 'pending' && (
                             <>
                               <button
-                                onClick={() => handleRoleRequest(request.id, true)}
+                                onClick={() => handleRoleRequest(request, true)}
                                 disabled={submitting}
                                 className="p-2 bg-green-100 text-green-800 rounded-full hover:bg-green-200"
                                 title="Approve"
@@ -339,7 +497,7 @@ export default function AdminRoles() {
                                 <CheckCircle className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => handleRoleRequest(request.id, false)}
+                                onClick={() => handleRoleRequest(request, false)}
                                 disabled={submitting}
                                 className="p-2 bg-red-100 text-red-800 rounded-full hover:bg-red-200"
                                 title="Reject"
@@ -351,8 +509,8 @@ export default function AdminRoles() {
                           {request.status === 'approved' && (
                             <span className="text-green-600 text-sm">✓ Approved</span>
                           )}
-                          {request.status === 'rejected' && (
-                            <span className="text-red-600 text-sm">✗ Rejected</span>
+                          {request.status === 'denied' && (
+                            <span className="text-red-600 text-sm">✗ Denied</span>
                           )}
                         </div>
                       </div>
@@ -367,6 +525,12 @@ export default function AdminRoles() {
                           </span>
                         ))}
                       </div>
+                      
+                      {request.requestedOrgIds && request.requestedOrgIds.length > 0 && (
+                        <div className="text-sm text-gray-600 mt-2">
+                          <p>Requested Orgs: {request.requestedOrgIds.join(', ')}</p>
+                        </div>
+                      )}
                     </div>
                   ))}
                   
@@ -387,7 +551,7 @@ export default function AdminRoles() {
               <div className="space-y-3">
                 <div className="flex items-center gap-3 text-sm">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-600">Claims updated for user partner@university.edu</span>
+                  <span className="text-gray-600">Claims updated for user partner@university.edu (v2)</span>
                   <span className="text-gray-400">2 minutes ago</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
@@ -399,6 +563,11 @@ export default function AdminRoles() {
                   <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                   <span className="text-gray-600">User john@example.com promoted to partner</span>
                   <span className="text-gray-400">3 hours ago</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span className="text-gray-600">User spam@example.com suspended</span>
+                  <span className="text-gray-400">5 hours ago</span>
                 </div>
               </div>
             </div>

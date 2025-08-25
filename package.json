@@ -14,7 +14,8 @@
     "lint": "next lint",
     "test": "jest",
     "test:regression": "jest tests/regression/scoringContinuity.spec.ts",
-    "test:security": "jest tests/security/firestoreRules.spec.ts"
+    "test:security": "jest tests/security/firestoreRules.spec.ts",
+    "test:rules": "jest firestore.rules.spec.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

@@ -1,160 +1,189 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper functions for access control
-    function isAuthenticated() {
-      return request.auth != null;
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.token != null;
     }
-    
+
     function hasRole(role) {
-      return request.auth.token.roles != null && role in request.auth.token.roles;
+      return isSignedIn() && role in request.auth.token.roles;
     }
-    
-    function hasAnyRole(roles) {
-      return request.auth.token.roles != null && 
-             request.auth.token.roles.hasAny(roles);
+
+    function userOrgIds() {
+      // support single org (string) OR multi-tenant (array)
+      return (isSignedIn() && request.auth.token.orgIds != null)
+        ? request.auth.token.orgIds
+        : [];
     }
-    
-    function isAdmin() {
-      return hasRole('admin') || hasRole('security_admin');
+
+    function inSameOrg(orgId) {
+      return orgId in userOrgIds();
     }
-    
-    function isPartner() {
-      return hasRole('partner') || isAdmin();
+
+    function emailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
     }
-    
-    function isHenri() {
-      return hasRole('henri') || isPartner();
+
+    function notSuspended() {
+      return !('suspended' in request.auth.token) || request.auth.token.suspended != true;
     }
-    
-    function isOwner(userId) {
-      return request.auth.uid == userId;
+
+    // Default deny unless explicitly allowed
+    match /{document=**} {
+      allow read, write: if false;
     }
-    
-    function isOrgMember(orgId) {
-      return request.auth.token.orgId == orgId || isAdmin();
+
+    // === ORG-ROOTED DATA NAMESPACE ===
+    match /orgs/{orgId} {
+
+      // Org metadata (admins & security_admin only)
+      match /meta/{docId} {
+        allow read: if hasRole('admin') && inSameOrg(orgId);
+        allow write: if hasRole('security_admin') && inSameOrg(orgId);
+      }
+
+      // Cohorts (partners can access their org; admins full control)
+      match /cohorts/{cohortId} {
+        allow read: if inSameOrg(orgId) && (hasRole('partner') || hasRole('admin'));
+        allow create, update, delete: if inSameOrg(orgId) && hasRole('partner');
+      }
+
+      // Founder/participant records (row-level org containment)
+      match /founders/{founderId} {
+        allow read: if inSameOrg(orgId) && (hasRole('partner') || hasRole('analyst') || hasRole('admin'));
+        allow create, update: if inSameOrg(orgId) && (hasRole('partner') || hasRole('analyst'));
+        allow delete: if inSameOrg(orgId) && hasRole('admin');
+      }
+
+      // Scores (write-once by system agents; readable by org)
+      match /scores/{scoreId} {
+        allow read: if inSameOrg(orgId) && (hasRole('partner') || hasRole('analyst') || hasRole('admin'));
+        allow create: if inSameOrg(orgId) && (hasRole('system_writer') || hasRole('admin'));
+        allow update, delete: if inSameOrg(orgId) && hasRole('admin');
+      }
+
+      // Audit trail (append-only; admin read)
+      match /audit/{eventId} {
+        allow read: if inSameOrg(orgId) && hasRole('admin');
+        allow create: if inSameOrg(orgId) && (hasRole('system_writer') || hasRole('security_admin') || hasRole('admin'));
+        allow update, delete: if false;
+      }
+
+      // Role change requests (2-person approval)
+      match /role_change_requests/{reqId} {
+        allow read: if inSameOrg(orgId) && hasRole('admin');
+        allow create: if inSameOrg(orgId) && hasRole('admin'); // submit proposals
+        allow update: if inSameOrg(orgId) && hasRole('security_admin'); // approve/deny
+        allow delete: if false;
+      }
     }
-    
-    function isPartnerMember(partnerId) {
-      return request.auth.token.partnerId == partnerId || isAdmin();
+
+    // === USER PROFILES (non-tenant PII; minimal exposure) ===
+    match /users/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isSignedIn() && request.auth.uid == uid;
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow delete: if false;
     }
-    
-    function hasScope(scope) {
-      return request.auth.token.scopes != null && scope in request.auth.token.scopes;
+
+    // === GLOBAL ADMIN CONSOLE VIEW (index of orgs/users) ===
+    match /admin/{coll=**} {
+      allow read, write: if hasRole('platform_admin'); // platform-wide super-admin only
     }
-    
-    function hasEntitlement(entitlement) {
-      return request.auth.token.entitlements != null && entitlement in request.auth.token.entitlements;
-    }
-    
-    // User roles collection - users can read their own role, admins can read all
-    match /userRoles/{userId} {
-      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
-      allow write: if isAdmin(); // Only admins can modify roles
-    }
-    
-    // Organizations collection - org members can read their org, admins can read all
-    match /organizations/{orgId} {
-      allow read: if isAuthenticated() && (isOrgMember(orgId) || isAdmin());
-      allow write: if isAdmin();
-    }
-    
-    // Partner cohorts - partner members can read/write their cohorts, admins can read all
-    match /cohorts/{cohortId} {
-      allow read: if isAuthenticated() && (
-        isPartnerMember(resource.data.partnerId) || isAdmin()
-      );
-      allow write: if isAuthenticated() && (
-        isPartnerMember(resource.data.partnerId) || isAdmin()
-      );
-    }
-    
+
+    // === LEGACY SUPPORT (migrate to orgs/{orgId} structure) ===
     // Assessment sessions - users can read their own, partners can read their cohort's, admins can read all
     match /assessmentSessions/{sessionId} {
-      allow read: if isAuthenticated() && (
-        isOwner(resource.data.userId) || 
-        (isPartner() && isPartnerMember(resource.data.partnerMetadata.partnerId)) ||
-        isAdmin()
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.userId || 
+        (hasRole('partner') && request.auth.token.partnerId == resource.data.partnerMetadata.partnerId) ||
+        hasRole('admin')
       );
-      allow create: if isAuthenticated() && (
-        isOwner(request.resource.data.userId) || isAdmin()
+      allow create: if isSignedIn() && (
+        request.auth.uid == request.resource.data.userId || hasRole('admin')
       );
-      allow update: if isAuthenticated() && (
-        isOwner(resource.data.userId) || 
-        (isPartner() && isPartnerMember(resource.data.partnerMetadata.partnerId)) ||
-        isAdmin()
+      allow update: if isSignedIn() && (
+        request.auth.uid == resource.data.userId || 
+        (hasRole('partner') && request.auth.token.partnerId == resource.data.partnerMetadata.partnerId) ||
+        hasRole('admin')
       );
     }
-    
+
     // Partner data - partner members can read/write their data, admins can read all
     match /partners/{partnerId} {
-      allow read: if isAuthenticated() && (
-        isPartnerMember(partnerId) || isAdmin()
+      allow read: if isSignedIn() && (
+        request.auth.token.partnerId == partnerId || hasRole('admin')
       );
-      allow write: if isAuthenticated() && (
-        isPartnerMember(partnerId) || isAdmin()
+      allow write: if isSignedIn() && (
+        request.auth.token.partnerId == partnerId || hasRole('admin')
       );
     }
-    
+
     // Outcome tracking - partner members can read/write their outcomes, admins can read all
     match /outcomeTracking/{outcomeId} {
-      allow read: if isAuthenticated() && (
-        isPartnerMember(resource.data.partnerId) || isAdmin()
+      allow read: if isSignedIn() && (
+        request.auth.token.partnerId == resource.data.partnerId || hasRole('admin')
       );
-      allow write: if isAuthenticated() && (
-        isPartnerMember(resource.data.partnerId) || isAdmin()
+      allow write: if isSignedIn() && (
+        request.auth.token.partnerId == resource.data.partnerId || hasRole('admin')
       );
     }
-    
+
+    // User roles collection - users can read their own role, admins can read all
+    match /userRoles/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || hasRole('admin'));
+      allow write: if hasRole('admin'); // Only admins can modify roles
+    }
+
     // Audit trail - admins only
     match /auditTrail/{auditId} {
-      allow read, write: if isAdmin();
+      allow read, write: if hasRole('admin');
     }
-    
+
     // Google Sheets outbox - system only (for sync operations)
     match /sheetsOutbox/{outboxId} {
       allow read, write: if false; // Only accessible via Cloud Functions
     }
-    
+
     // User preferences - users can read/write their own
     match /userPreferences/{userId} {
-      allow read, write: if isAuthenticated() && isOwner(userId);
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
-    
+
     // Token system - users can read their own tokens, admins can read all
     match /tokens/{userId} {
-      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
-      allow write: if isAdmin(); // Only admins can modify tokens
+      allow read: if isSignedIn() && (request.auth.uid == userId || hasRole('admin'));
+      allow write: if hasRole('admin'); // Only admins can modify tokens
     }
-    
+
     // Transaction history - users can read their own, admins can read all
     match /transactions/{transactionId} {
-      allow read: if isAuthenticated() && (
-        isOwner(resource.data.userId) || isAdmin()
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.userId || hasRole('admin')
       );
-      allow create: if isAuthenticated() && (
-        isOwner(request.resource.data.userId) || isAdmin()
+      allow create: if isSignedIn() && (
+        request.auth.uid == request.resource.data.userId || hasRole('admin')
       );
     }
-    
+
     // Feature access - users can read their own, admins can read all
     match /featureAccess/{userId} {
-      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
-      allow write: if isAdmin(); // Only admins can modify feature access
+      allow read: if isSignedIn() && (request.auth.uid == userId || hasRole('admin'));
+      allow write: if hasRole('admin'); // Only admins can modify feature access
     }
-    
+
     // Partner memberships - org members can read their org's memberships, admins can read all
     match /orgMemberships/{membershipId} {
-      allow read: if isAuthenticated() && (
-        isOrgMember(resource.data.orgId) || isAdmin()
+      allow read: if isSignedIn() && (
+        request.auth.token.orgId == resource.data.orgId || hasRole('admin')
       );
-      allow write: if isAdmin(); // Only admins can modify memberships
+      allow write: if hasRole('admin'); // Only admins can modify memberships
     }
-    
-    // Default deny all other collections
-    match /{document=**} {
-      allow read, write: if false;
+
+    // Global preconditions (apply at top of tree if you prefer)
+    function baseline() {
+      return isSignedIn() && emailVerified() && notSuspended();
     }
   }
 }
