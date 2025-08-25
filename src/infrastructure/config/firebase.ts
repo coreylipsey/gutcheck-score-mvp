@@ -26,9 +26,18 @@ const createRealFirebase = () => {
   };
 };
 
-// Export based on environment
-const { db, auth } = process.env.NODE_ENV === 'test' 
-  ? createMockFirebase() 
-  : createRealFirebase();
+// Only initialize Firebase on the client side and not during build
+let db: any = null;
+let auth: any = null;
+
+if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'test') {
+  const firebaseInstance = createRealFirebase();
+  db = firebaseInstance.db;
+  auth = firebaseInstance.auth;
+} else if (process.env.NODE_ENV === 'test') {
+  const mockInstance = createMockFirebase();
+  db = mockInstance.db;
+  auth = mockInstance.auth;
+}
 
 export { db, auth }; 
