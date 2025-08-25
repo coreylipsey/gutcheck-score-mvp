@@ -1,15 +1,11 @@
 'use client';
 import { ShareScoreButton } from '@/components/results/ShareScoreButton';
 import { DownloadReportButton } from '@/components/results/DownloadReportButton';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-// Force dynamic rendering for this page
-export const dynamic = 'force-dynamic';
-
-export default function ResultsPage({
-  searchParams,
-}: {
-  searchParams: { sess?: string; partner_id?: string; cohort_id?: string };
-}) {
+function ResultsContent() {
+  const searchParams = useSearchParams();
   // Mock data for testing - in real app this would come from the session
   const mockScore = 85;
   const mockStars = 4.2;
@@ -62,10 +58,18 @@ export default function ResultsPage({
 
       {/* Debug Info */}
       <div className="text-sm text-gray-500 bg-gray-50 rounded-lg p-4">
-        <p>Session: {searchParams.sess || 'No session ID'}</p>
-        <p>Partner: {searchParams.partner_id || 'No partner ID'}</p>
-        <p>Cohort: {searchParams.cohort_id || 'No cohort ID'}</p>
+        <p>Session: {searchParams.get('sess') || 'No session ID'}</p>
+        <p>Partner: {searchParams.get('partner_id') || 'No partner ID'}</p>
+        <p>Cohort: {searchParams.get('cohort_id') || 'No cohort ID'}</p>
       </div>
     </main>
+  );
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResultsContent />
+    </Suspense>
   );
 }
