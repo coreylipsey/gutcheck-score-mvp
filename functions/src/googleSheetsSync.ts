@@ -1,7 +1,6 @@
 import * as admin from 'firebase-admin';
 import { google } from 'googleapis';
 import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
-import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 
 // Initialize Firebase Admin
@@ -244,84 +243,13 @@ async function storeInOutbox(outboxData: any) {
   }
 }
 
-// Retry failed syncs from outbox
-export const retrySheetsSync = onSchedule(
-  'every 1 hours',
-  async (event) => {
-    if (!sheets || !sheetsSpreadsheetId) {
-      console.log('Google Sheets not configured - skipping retry');
-      return;
-    }
-
-    try {
-      const outboxSnapshot = await db.collection('sheetsOutbox')
-        .where('createdAt', '<=', admin.firestore.Timestamp.fromDate(new Date(Date.now() - 1000 * 60 * 60))) // 1 hour old
-        .limit(10)
-        .get();
-
-      for (const doc of outboxSnapshot.docs) {
-        const outboxData = doc.data();
-
-        try {
-          if (outboxData.type === 'assessment_sync' && outboxData.sessionData) {
-            // Retry assessment sync
-            const rowData = [
-              outboxData.sessionId,
-              outboxData.sessionData.userId || '',
-              outboxData.sessionData.partnerMetadata?.partnerId || '',
-              outboxData.sessionData.partnerMetadata?.cohortId || '',
-              outboxData.sessionData.scores?.overallScore || 0,
-              outboxData.sessionData.starRating || 1,
-              JSON.stringify(outboxData.sessionData.categoryBreakdown || {}),
-              outboxData.sessionData.completedAt?.toDate?.() || new Date(),
-              outboxData.sessionData.outcomeTrackingReady || false,
-              outboxData.sessionData.consentForML || false,
-              JSON.stringify(outboxData.sessionData.partnerMetadata || {})
-            ];
-
-            await sheets.spreadsheets.values.append({
-              spreadsheetId: sheetsSpreadsheetId,
-              range: 'Assessment Sessions!A:K',
-              valueInputOption: 'RAW',
-              insertDataOption: 'INSERT_ROWS',
-              requestBody: {
-                values: [rowData]
-              }
-            });
-          } else if (outboxData.type === 'outcome_sync' && outboxData.outcomeData) {
-            // Retry outcome sync
-            const rowData = [
-              outboxData.sessionId,
-              outboxData.outcomeData.outcomeTag || '',
-              outboxData.outcomeData.outcomeNotes || '',
-              outboxData.outcomeData.taggedBy || '',
-              outboxData.outcomeData.taggedAt?.toDate?.() || new Date()
-            ];
-
-            await sheets.spreadsheets.values.append({
-              spreadsheetId: sheetsSpreadsheetId,
-              range: 'Outcome Tracking!A:E',
-              valueInputOption: 'RAW',
-              insertDataOption: 'INSERT_ROWS',
-              requestBody: {
-                values: [rowData]
-              }
-            });
-          }
-
-          // Remove from outbox on success
-          await doc.ref.delete();
-          console.log(`Successfully retried sync for ${outboxData.sessionId}`);
-
-        } catch (error) {
-          console.error(`Retry failed for ${outboxData.sessionId}:`, error);
-        }
-      }
-
-    } catch (error) {
-      console.error('Error in retry function:', error);
-    }
-  });
+// Retry failed syncs from outbox (commented out due to Cloud Scheduler permissions)
+// export const retrySheetsSync = onSchedule(
+//   'every 1 hours',
+//   async (event) => {
+//     // Implementation for retry logic
+//     // This can be enabled later when Cloud Scheduler permissions are properly configured
+//   });
 
 // Manual sync function for testing
 export const manualSheetsSync = onCall(async (request) => {
