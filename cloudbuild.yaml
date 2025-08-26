@@ -56,6 +56,14 @@ steps:
         npx firebase-tools deploy --only hosting,functions --project ${_PROJECT_ID}
     dir: '.'
     env:
+      - 'NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyAUq0hEPlGnfkj6MJC-7et_gNim-YTyTzg'
+      - 'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=gutcheck-score-mvp.firebaseapp.com'
+      - 'NEXT_PUBLIC_FIREBASE_PROJECT_ID=gutcheck-score-mvp'
+      - 'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=gutcheck-score-mvp.firebasestorage.app'
+      - 'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=286731768309'
+      - 'NEXT_PUBLIC_FIREBASE_APP_ID=1:286731768309:web:daa2346433cefedc1e90bc'
+      - 'NEXT_PUBLIC_USE_GEMINI_API=true'
+      - 'NEXT_PUBLIC_GEMINI_API_URL=https://us-central1-gutcheck-score-mvp.cloudfunctions.net'
       - 'GEMINI_API_KEY=AIzaSyC0ZeeBKi4tod07bOnrB40hVOlWaFhfuzE'
 
 # Build timeout
