@@ -114,19 +114,19 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
   });
 
   return (
-    <div className="text-center space-y-8">
+    <div className="text-center space-y-6 sm:space-y-8">
       {/* Hero Title */}
       <div className="space-y-3">
-        <h1 className="text-4xl md:text-5xl font-bold" style={{ color: '#0A1F44' }}>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold" style={{ color: '#0A1F44' }}>
           Your Gutcheck Score
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed px-4">
           A comprehensive assessment of your entrepreneurial readiness and fundability potential
         </p>
       </div>
 
       {/* Score Visualization */}
-      <div className="flex flex-col lg:flex-row items-center justify-center gap-12">
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-8 sm:gap-12">
         {/* FICO-Style Speedometer - REPLACED THE CIRCULAR WHEEL */}
         <div className="flex-shrink-0">
           <FicoStyleGauge
@@ -144,20 +144,20 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
         </div>
 
         {/* Score Insights - COMPLETELY UNTOUCHED */}
-        <div className="space-y-6 max-w-md">
+        <div className="space-y-4 sm:space-y-6 max-w-md w-full">
           {/* Assessment Results - NO CHANGES */}
           <div 
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 cursor-pointer hover:shadow-xl transition-all duration-300 relative"
+            className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 cursor-pointer hover:shadow-xl transition-all duration-300 relative"
             onMouseEnter={() => setShowStarDefinitions(true)}
             onMouseLeave={() => setShowStarDefinitions(false)}
             aria-label={`${currentStar?.stars || 0} out of 5 stars: ${currentStar?.label || 'N/A'}`}
           >
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center"
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center"
                    style={{ backgroundColor: '#FFC700' + '20' }}>
-                <Award className="w-5 h-5" style={{ color: '#FFC700' }} />
+                <Award className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#FFC700' }} />
               </div>
-              <h3 className="text-lg font-semibold" style={{ color: '#0A1F44' }}>
+              <h3 className="text-base sm:text-lg font-semibold" style={{ color: '#0A1F44' }}>
                 Assessment Results
               </h3>
             </div>
@@ -168,7 +168,7 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
                 {starThresholds.map((star, index) => (
                   <div
                     key={index}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+                    className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all duration-300 ${
                       currentStar?.stars && currentStar.stars >= star.stars
                         ? 'bg-yellow-400 text-yellow-900 shadow-lg'
                         : 'bg-gray-200 text-gray-400'
@@ -178,14 +178,14 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
                   </div>
                 ))}
               </div>
-              <p className="font-semibold text-lg" style={{ color: '#0A1F44' }}>
+              <p className="font-semibold text-base sm:text-lg" style={{ color: '#0A1F44' }}>
                 {currentStar?.label || 'N/A'}
               </p>
-              <div className="inline-block px-4 py-2 rounded-full text-lg font-bold text-white shadow-sm"
+              <div className="inline-block px-3 sm:px-4 py-1 sm:py-2 rounded-full text-sm sm:text-lg font-bold text-white shadow-sm"
                    style={{ backgroundColor: currentStar?.color || '#FFC700' }}>
                 {currentStar?.creditLabel || 'N/A'}
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 Score: {currentStar?.min || 0}-{currentStar?.max || 0}
               </p>
             </div>
@@ -193,12 +193,12 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             {/* Hover Overlay with Definitions */}
             {showStarDefinitions && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-50">
-                <h4 className="font-semibold mb-3 text-center" style={{ color: '#0A1F44' }}>
+                <h4 className="font-semibold mb-3 text-center text-sm sm:text-base" style={{ color: '#0A1F44' }}>
                   5-Star Rating System
                 </h4>
                 <div className="space-y-3">
                   {starThresholds.map((def, index) => (
-                    <div key={index} className="text-sm">
+                    <div key={index} className="text-xs sm:text-sm">
                       <div className="flex items-center space-x-2 mb-1">
                         <div className="flex items-center space-x-1">
                           {[1, 2, 3, 4, 5].map((star) => (
@@ -232,18 +232,18 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
           </div>
 
           {/* Key Insights - Expandable */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 sm:p-6 border border-blue-200">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-100">
-                <Info className="w-5 h-5" style={{ color: '#147AFF' }} />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-blue-100">
+                <Info className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#147AFF' }} />
               </div>
-              <h3 className="text-lg font-semibold" style={{ color: '#0A1F44' }}>
+              <h3 className="text-base sm:text-lg font-semibold" style={{ color: '#0A1F44' }}>
                 Key Insights
               </h3>
             </div>
             
             <div className="space-y-3">
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                 {sessionData.geminiFeedback?.keyInsights && (
                   showFullInsights ? (
                     sessionData.geminiFeedback.keyInsights
@@ -258,14 +258,14 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
               {sessionData.geminiFeedback?.keyInsights && (
                 <button
                   onClick={() => setShowFullInsights(!showFullInsights)}
-                  className="flex items-center space-x-1 text-sm font-medium transition-colors duration-200"
+                  className="flex items-center space-x-1 text-xs sm:text-sm font-medium transition-colors duration-200"
                   style={{ color: '#147AFF' }}
                 >
                   <span>{showFullInsights ? 'Show less' : 'Read more'}</span>
                   {showFullInsights ? (
-                    <ChevronUp className="w-4 h-4" />
+                    <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
                   ) : (
-                    <ChevronDown className="w-4 h-4" />
+                    <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                   )}
                 </button>
               )}
@@ -273,12 +273,12 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
           </div>
 
           {/* Next Star Goal - NO CHANGES */}
-          <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-6 border border-green-200">
+          <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-4 sm:p-6 border border-green-200">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-green-100">
-                <Target className="w-5 h-5" style={{ color: '#19C2A0' }} />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-green-100">
+                <Target className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#19C2A0' }} />
               </div>
-              <h3 className="text-lg font-semibold" style={{ color: '#0A1F44' }}>
+              <h3 className="text-base sm:text-lg font-semibold" style={{ color: '#0A1F44' }}>
                 Next Star Goal
               </h3>
             </div>
@@ -286,12 +286,12 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
             {nextStar ? (
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Progress to {nextStar.stars} Stars</span>
+                  <span className="text-gray-700 text-xs sm:text-sm">Progress to {nextStar.stars} Stars</span>
                   <div className="flex items-center space-x-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`w-4 h-4 ${
+                        className={`w-3 h-3 sm:w-4 sm:h-4 ${
                           star <= nextStar.stars 
                             ? 'fill-current text-yellow-400' 
                             : 'text-gray-300'
@@ -309,17 +309,17 @@ export function HeroScore({ sessionData }: HeroScoreProps) {
                     }}
                   />
                 </div>
-                <p className="text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-gray-600">
                   <strong style={{ color: '#19C2A0' }}>{pointsToNext} point{pointsToNext !== 1 ? 's' : ''}</strong> to next star
                 </p>
               </div>
             ) : (
               <div className="text-center">
                 <div className="text-2xl mb-2">🏆</div>
-                <p className="font-semibold" style={{ color: '#19C2A0' }}>
+                <p className="font-semibold text-sm sm:text-base" style={{ color: '#19C2A0' }}>
                   Maximum Star Level Achieved!
                 </p>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
                   You&apos;ve reached the pinnacle of entrepreneurial excellence
                 </p>
               </div>

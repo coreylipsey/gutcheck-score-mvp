@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '../presentation/providers/AuthProvider';
 import { DashboardService } from '@/application/services/DashboardService';
+import { Menu, X } from 'lucide-react';
 
 export default function Home() {
   const { user, logout } = useAuthContext();
@@ -14,6 +15,7 @@ export default function Home() {
     lastAssessmentDate: string | null;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Check assessment limits for logged-in users
   useEffect(() => {
@@ -55,59 +57,125 @@ export default function Home() {
                 <span className="text-xl sm:text-2xl font-bold text-[#0A1F44]">Gutcheck.AI</span>
               </Link>
             </div>
-            <nav className="flex space-x-4 sm:space-x-8">
-              <Link href="/assessment" className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
+            
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex space-x-6 lg:space-x-8">
+              <Link href="/assessment" className="text-sm lg:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
                 Take Assessment
               </Link>
               {user ? (
                 <>
-                  <Link href="/dashboard" className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
+                  <Link href="/dashboard" className="text-sm lg:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
                     Dashboard
                   </Link>
-                  <Link href="/admin" className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
+                  <Link href="/admin" className="text-sm lg:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
                     Admin
                   </Link>
                   <button
                     onClick={logout}
-                    className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap"
+                    className="text-sm lg:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap"
                   >
                     Sign Out
                   </button>
                 </>
               ) : (
-                <Link href="/auth" className="text-sm sm:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
+                <Link href="/auth" className="text-sm lg:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
                   Sign In
                 </Link>
               )}
             </nav>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="text-gray-500 hover:text-gray-900 focus:outline-none focus:text-gray-900"
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </button>
+            </div>
           </div>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-gray-200 py-4">
+              <nav className="flex flex-col space-y-4">
+                <Link 
+                  href="/assessment" 
+                  className="text-base text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Take Assessment
+                </Link>
+                {user ? (
+                  <>
+                    <Link 
+                      href="/dashboard" 
+                      className="text-base text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <Link 
+                      href="/admin" 
+                      className="text-base text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Admin
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="text-left text-base text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <Link 
+                    href="/auth" 
+                    className="text-base text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Sign In
+                  </Link>
+                )}
+              </nav>
+            </div>
+          )}
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight">
             Discover Your
             <span className="text-blue-600"> Entrepreneurial Potential</span>
           </h1>
-          <p className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="mt-4 sm:mt-6 text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
             Take the Gutcheck.AI assessment to get your personalized entrepreneurial readiness score, 
             AI-powered insights, and actionable next steps to accelerate your business growth.
           </p>
           
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-4 justify-center px-4">
             {user && assessmentLimits && !assessmentLimits.canTakeAssessment ? (
               <button
                 disabled
-                className="inline-flex items-center px-8 py-4 border border-gray-300 text-lg font-medium rounded-lg text-gray-400 bg-gray-100 cursor-not-allowed focus:outline-none transition-colors"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-gray-300 text-base sm:text-lg font-medium rounded-lg text-gray-400 bg-gray-100 cursor-not-allowed focus:outline-none transition-colors"
               >
                 {isLoading ? 'Checking...' : `Available in ${assessmentLimits.daysUntilNextAssessment} days`}
               </button>
             ) : (
               <Link
                 href="/assessment"
-                className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-transparent text-base sm:text-lg font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 Start Assessment
               </Link>
@@ -115,14 +183,14 @@ export default function Home() {
             {user && (
               <Link
                 href="/dashboard"
-                className="inline-flex items-center px-8 py-4 border border-gray-300 text-lg font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-gray-300 text-base sm:text-lg font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 View Dashboard
               </Link>
             )}
             <Link
               href="/partner"
-              className="inline-flex items-center px-8 py-4 border border-green-300 text-lg font-medium rounded-lg text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+              className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-green-300 text-base sm:text-lg font-medium rounded-lg text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
             >
               Partner Onboarding
             </Link>
@@ -130,11 +198,11 @@ export default function Home() {
         </div>
 
         {/* Features Section */}
-        <div className="mt-20">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+        <div className="mt-16 sm:mt-20">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-8 sm:mb-12 px-4">
             What You&apos;ll Get
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 px-4">
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
                 <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,7 +210,7 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Personalized Score</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-sm sm:text-base">
                 Get your Gutcheck.AI score across 5 key entrepreneurial dimensions with detailed breakdowns.
               </p>
             </div>
@@ -154,7 +222,7 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">AI-Powered Insights</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-sm sm:text-base">
                 Receive personalized feedback, strengths analysis, and actionable next steps powered by AI.
               </p>
             </div>
@@ -166,7 +234,7 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Action Plan</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-sm sm:text-base">
                 Get specific recommendations for mentorship, funding opportunities, and learning resources.
               </p>
             </div>
@@ -174,11 +242,11 @@ export default function Home() {
         </div>
 
         {/* Assessment Preview */}
-        <div className="mt-20 bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+        <div className="mt-16 sm:mt-20 bg-white rounded-lg shadow-lg p-6 sm:p-8 mx-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 text-center">
             Assessment Overview
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <div className="text-2xl font-bold text-blue-600">5</div>
               <div className="text-sm text-gray-600">Categories</div>

@@ -162,7 +162,7 @@ function ResultsContent() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4 sm:py-6">
             <Link href="/" className="flex items-center space-x-2">
               <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-[#147AFF] to-[#19C2A0] rounded-lg flex items-center justify-center">
@@ -174,7 +174,7 @@ function ResultsContent() {
               <h1 className="text-lg sm:text-xl font-bold text-gray-900">
                 {user?.displayName || 'Your Assessment'}
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 {sessionData?.completedAt ? 
                   new Date(sessionData.completedAt).toLocaleDateString('en-US', { 
                     year: 'numeric', 
@@ -189,8 +189,8 @@ function ResultsContent() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-12 lg:px-12 lg:py-20">
-        <div className="space-y-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 lg:px-8 lg:py-20">
+        <div className="space-y-16 sm:space-y-20">
           
           {/* Hero Score Section */}
           <section 
@@ -230,11 +230,11 @@ function ResultsContent() {
               aria-label="Save Your Score"
               className="scroll-mt-20"
             >
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+              <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
                 <div className="text-center">
-                  <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-[#147AFF] to-[#19C2A0] mb-6">
+                  <div className="mx-auto flex items-center justify-center h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-gradient-to-r from-[#147AFF] to-[#19C2A0] mb-4 sm:mb-6">
                     <svg
-                      className="h-8 w-8 text-white"
+                      className="h-6 w-6 sm:h-8 sm:w-8 text-white"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -247,23 +247,23 @@ function ResultsContent() {
                       />
                     </svg>
                   </div>
-                  <h2 className="text-3xl font-bold text-[#0A1F44] mb-4">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-[#0A1F44] mb-4">
                     Save Your Gutcheck Score
                   </h2>
-                  <p className="text-gray-600 mb-8 max-w-2xl mx-auto text-lg">
+                  <p className="text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto text-base sm:text-lg">
                     Create a free account to save your results, track your progress over time, 
                     and get personalized insights and recommendations for your entrepreneurial journey.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
                       onClick={() => setShowClaimModal(true)}
-                      className="px-8 py-4 bg-gradient-to-r from-[#147AFF] to-[#19C2A0] text-white rounded-xl hover:from-[#147AFF]/90 hover:to-[#19C2A0]/90 focus:outline-none focus:ring-2 focus:ring-[#147AFF] focus:ring-offset-2 transition-all font-bold shadow-lg"
+                      className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#147AFF] to-[#19C2A0] text-white rounded-xl hover:from-[#147AFF]/90 hover:to-[#19C2A0]/90 focus:outline-none focus:ring-2 focus:ring-[#147AFF] focus:ring-offset-2 transition-all font-bold shadow-lg text-sm sm:text-base"
                     >
                       Create Account & Save Score
                     </button>
                     <Link
                       href="/auth"
-                      className="px-8 py-4 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#147AFF] focus:ring-offset-2 transition-all font-semibold"
+                      className="px-6 sm:px-8 py-3 sm:py-4 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#147AFF] focus:ring-offset-2 transition-all font-semibold text-sm sm:text-base"
                     >
                       Sign In to Existing Account
                     </Link>

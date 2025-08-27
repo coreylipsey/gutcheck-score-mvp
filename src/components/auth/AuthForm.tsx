@@ -58,10 +58,10 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
         <div className="lg:block space-y-8 order-2 lg:order-1">
           <div className="space-y-6">
             <div className="space-y-4">
-              <h1 className="text-4xl lg:text-5xl font-bold text-[#0A1F44] leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0A1F44] leading-tight">
                 {mode === 'login' ? 'Welcome Back' : 'Join Gutcheck.AI'}
               </h1>
-              <p className="text-lg lg:text-xl text-gray-600 leading-relaxed">
+              <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed">
                 {mode === 'login' 
                   ? 'Access your entrepreneurial profile and continue building your reputation ledger. Your Gutcheck Score is waiting for you.'
                   : 'Start building your entrepreneurial reputation ledger. We make the entrepreneurially invisible, investable.'
@@ -70,9 +70,9 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
             </div>
 
             {/* Brand Tagline */}
-            <div className="bg-gradient-to-r from-[#147AFF] to-[#19C2A0] text-white p-6 rounded-2xl">
-              <h2 className="text-xl lg:text-2xl font-bold mb-2">FICO Score for Entrepreneurs</h2>
-              <p className="text-[#0A1F44]/90 font-medium">
+            <div className="bg-gradient-to-r from-[#147AFF] to-[#19C2A0] text-white p-4 sm:p-6 rounded-2xl">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2">FICO Score for Entrepreneurs</h2>
+              <p className="text-[#0A1F44]/90 font-medium text-sm sm:text-base">
                 {mode === 'login' 
                   ? 'Your entrepreneurial potential, quantified and visible.'
                   : "Show them what they can't see."
@@ -82,26 +82,26 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
           </div>
 
           {/* Value Proposition Card */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 lg:p-8 shadow-lg">
-            <h3 className="font-bold text-[#0A1F44] text-lg mb-6">
+          <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg">
+            <h3 className="font-bold text-[#0A1F44] text-base sm:text-lg mb-4 sm:mb-6">
               {mode === 'login' ? 'Your Progress Awaits' : "What You'll Unlock"}
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-gray-600">Assessments Completed</span>
-                <span className="font-semibold text-[#147AFF]">
+                <span className="text-gray-600 text-sm sm:text-base">Assessments Completed</span>
+                <span className="font-semibold text-[#147AFF] text-sm sm:text-base">
                   {mode === 'login' ? 'Ready to sync' : 'Track your progress'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600">Gutcheck Score</span>
-                <span className="font-semibold text-[#19C2A0]">
+                <span className="text-gray-600 text-sm sm:text-base">Gutcheck Score</span>
+                <span className="font-semibold text-[#19C2A0] text-sm sm:text-base">
                   {mode === 'login' ? 'Ready to calculate' : 'Monitor growth'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600">Growth Insights</span>
-                <span className="font-semibold text-[#FF6B00]">
+                <span className="text-gray-600 text-sm sm:text-base">Growth Insights</span>
+                <span className="font-semibold text-[#FF6B00] text-sm sm:text-base">
                   {mode === 'login' ? 'Ready to unlock' : 'AI-powered guidance'}
                 </span>
               </div>
@@ -111,12 +111,12 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
 
         {/* Auth Form */}
         <div className="w-full max-w-md mx-auto order-1 lg:order-2">
-          <div className="bg-white rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-100">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl lg:text-3xl font-bold text-[#0A1F44] mb-3">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border border-gray-100">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#0A1F44] mb-2 sm:mb-3">
                 {mode === 'login' ? 'Sign In' : 'Create Account'}
               </h2>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-sm sm:text-base">
                 {mode === 'login' 
                   ? 'Access your entrepreneurial profile'
                   : 'Start your entrepreneurial journey'
@@ -124,7 +124,7 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
               </p>
             </div>
 
-            <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 sm:space-y-6">
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-semibold text-[#0A1F44]">
                   Email Address
@@ -133,7 +133,7 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
                   {...register('email')}
                   type="email"
                   id="email"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-[#147AFF] focus:border-transparent transition-all"
+                  className="w-full px-3 sm:px-4 py-3 sm:py-4 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-[#147AFF] focus:border-transparent transition-all text-base"
                   placeholder="you@company.com"
                 />
                 {errors.email && (
@@ -141,15 +141,15 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
                 )}
               </div>
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <div className="space-y-2">
+                <label htmlFor="password" className="block text-sm font-semibold text-[#0A1F44]">
                   Password
                 </label>
                 <input
                   type="password"
                   id="password"
                   {...register('password')}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 sm:px-4 py-3 sm:py-4 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-[#147AFF] focus:border-transparent transition-all text-base"
                   placeholder="Enter your password"
                 />
                 {errors.password && (
@@ -166,7 +166,7 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-[#147AFF] to-[#19C2A0] text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-[#147AFF]/90 hover:to-[#19C2A0]/90 focus:outline-none focus:ring-2 focus:ring-[#147AFF] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+                className="w-full bg-gradient-to-r from-[#147AFF] to-[#19C2A0] text-white py-3 sm:py-4 px-6 rounded-xl font-bold text-base sm:text-lg hover:from-[#147AFF]/90 hover:to-[#19C2A0]/90 focus:outline-none focus:ring-2 focus:ring-[#147AFF] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -183,7 +183,7 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
             </form>
 
             {/* Divider */}
-            <div className="mt-8 mb-6">
+            <div className="mt-6 sm:mt-8 mb-4 sm:mb-6">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300"></div>
@@ -200,7 +200,7 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
                 type="button"
                 onClick={onGoogleSignIn}
                 disabled={loading}
-                className="w-full flex items-center justify-center px-6 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#147AFF] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold mb-6"
+                className="w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#147AFF] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold mb-4 sm:mb-6 text-sm sm:text-base"
               >
                 <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -212,8 +212,8 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
               </button>
             )}
 
-            <div className="mt-8 text-center">
-              <p className="text-gray-600">
+            <div className="mt-6 sm:mt-8 text-center">
+              <p className="text-gray-600 text-sm sm:text-base">
                 {mode === 'login' ? "Don't have an account? " : "Already have an account? "}
                 <button
                   onClick={onModeChange}
@@ -224,7 +224,7 @@ export function AuthForm({ mode, onSubmit, onModeChange, onForgotPassword, onGoo
               </p>
             </div>
 
-            <div className="mt-6 text-xs text-center text-gray-500">
+            <div className="mt-4 sm:mt-6 text-xs text-center text-gray-500">
               <p>
                 Secure authentication powered by enterprise-grade security
               </p>

@@ -190,28 +190,28 @@ function DashboardContent() {
                 )}
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto justify-end">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-4 w-full sm:w-auto">
               <TokenBalanceIndicator 
                 onPurchaseClick={() => setShowPurchaseModal(true)}
               />
               {assessmentLimits.canTakeAssessment ? (
                 <Link
                   href="/assessment"
-                  className="inline-flex items-center px-3 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 whitespace-nowrap"
+                  className="inline-flex items-center justify-center px-3 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 whitespace-nowrap w-full sm:w-auto"
                 >
                   Take New Assessment
                 </Link>
               ) : (
                 <button
                   disabled
-                  className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-lg text-gray-400 bg-gray-100 cursor-not-allowed whitespace-nowrap"
+                  className="inline-flex items-center justify-center px-3 sm:px-4 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-lg text-gray-400 bg-gray-100 cursor-not-allowed whitespace-nowrap w-full sm:w-auto"
                 >
                   Take New Assessment
                 </button>
               )}
               <button
                 onClick={logout}
-                className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 whitespace-nowrap"
+                className="inline-flex items-center justify-center px-3 sm:px-4 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 whitespace-nowrap w-full sm:w-auto"
               >
                 Sign Out
               </button>
@@ -221,17 +221,17 @@ function DashboardContent() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Welcome Section */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
             Welcome to Your Gutcheck.AI Dashboard
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 mb-6 text-sm sm:text-base">
             Track your entrepreneurial growth with monthly assessments and personalized insights.
           </p>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 sm:mb-8">
             <ProgressGraph assessments={assessmentHistory} />
             <MonthlyInsights 
               lastAssessment={assessmentHistory[0]}
@@ -246,9 +246,9 @@ function DashboardContent() {
           title="Premium Features Coming Soon"
           description="Our advanced AI-powered features are launching soon."
         >
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl text-[#0A1F44] font-bold">
+          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
+              <h2 className="text-xl sm:text-2xl text-[#0A1F44] font-bold mb-2 sm:mb-0">
                 Premium Features
               </h2>
               <span className="bg-[#147AFF]/10 text-[#147AFF] border-[#147AFF] px-3 py-1 rounded-full text-sm font-medium">
@@ -256,7 +256,7 @@ function DashboardContent() {
               </span>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {features.map((feature) => (
                 <FeatureCard
                   key={feature.id}
@@ -271,8 +271,8 @@ function DashboardContent() {
         </ComingSoonOverlay>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
                 <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -282,7 +282,7 @@ function DashboardContent() {
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 Monthly Assessment
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 mb-4 text-sm sm:text-base">
                 {assessmentLimits.canTakeAssessment 
                   ? "Take your monthly assessment to track your progress."
                   : `Next assessment available in ${assessmentLimits.daysUntilNextAssessment} days.`
@@ -290,7 +290,7 @@ function DashboardContent() {
               </p>
               <Link
                 href={assessmentLimits.canTakeAssessment ? "/assessment" : "#"}
-                className={`inline-flex items-center px-4 py-2 border text-sm font-medium rounded-lg ${
+                className={`inline-flex items-center justify-center px-4 py-2 border text-sm font-medium rounded-lg ${
                   assessmentLimits.canTakeAssessment
                     ? "border-transparent text-white bg-blue-600 hover:bg-blue-700"
                     : "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
@@ -306,7 +306,7 @@ function DashboardContent() {
             title="Progress Tracking Coming Soon"
             description="Advanced progress tracking and analytics will be available soon."
           >
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
               <div className="text-center">
                 <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 mb-4">
                   <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -316,12 +316,12 @@ function DashboardContent() {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   Track Progress
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 mb-4 text-sm sm:text-base">
                   Monitor your entrepreneurial growth over time with multiple assessments.
                 </p>
                 <button
                   disabled
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-400 bg-gray-100 cursor-not-allowed"
+                  className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-400 bg-gray-100 cursor-not-allowed"
                 >
                   Coming Soon
                 </button>

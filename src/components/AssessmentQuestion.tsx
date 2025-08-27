@@ -62,7 +62,7 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
       {question.options?.map((option, index) => (
         <label
           key={index}
-          className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors ${
+          className={`flex items-start p-4 sm:p-5 border rounded-lg cursor-pointer transition-colors ${
             value === option
               ? 'border-blue-500 bg-blue-50'
               : 'border-gray-200 hover:border-gray-300'
@@ -74,10 +74,10 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
             value={option}
             checked={value === option}
             onChange={() => handleMultipleChoiceChange(option)}
-            className="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+            className="mt-1 h-4 w-4 sm:h-5 sm:w-5 text-blue-600 border-gray-300 focus:ring-blue-500"
             aria-describedby={`option-${question.id}-${index}`}
           />
-          <span className="ml-3 text-gray-900" id={`option-${question.id}-${index}`}>{option}</span>
+          <span className="ml-3 text-gray-900 text-sm sm:text-base" id={`option-${question.id}-${index}`}>{option}</span>
         </label>
       ))}
     </div>
@@ -88,7 +88,7 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
       {question.options?.map((option, index) => (
         <label
           key={index}
-          className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors ${
+          className={`flex items-start p-4 sm:p-5 border rounded-lg cursor-pointer transition-colors ${
             selectedOptions.includes(option)
               ? 'border-blue-500 bg-blue-50'
               : 'border-gray-200 hover:border-gray-300'
@@ -100,10 +100,10 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
             value={option}
             checked={selectedOptions.includes(option)}
             onChange={() => handleMultiSelectChange(option)}
-            className="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 rounded"
+            className="mt-1 h-4 w-4 sm:h-5 sm:w-5 text-blue-600 border-gray-300 focus:ring-blue-500 rounded"
             aria-describedby={`option-${question.id}-${index}`}
           />
-          <span className="ml-3 text-gray-900" id={`option-${question.id}-${index}`}>{option}</span>
+          <span className="ml-3 text-gray-900 text-sm sm:text-base" id={`option-${question.id}-${index}`}>{option}</span>
         </label>
       ))}
       {selectedOptions.length > 0 && (
@@ -126,17 +126,17 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
             : "Rate your confidence level from 1 (Not at all confident) to 5 (Extremely confident)"
           }
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+          <span className="text-sm text-gray-500 text-center sm:text-left">
             {isFearOfFailure ? "1 - Not at all" : "1 - Not at all confident"}
           </span>
-          <div className="flex space-x-2" role="radiogroup" aria-label="Rating scale">
+          <div className="flex space-x-2 sm:space-x-3" role="radiogroup" aria-label="Rating scale">
             {[1, 2, 3, 4, 5].map((rating) => (
               <button
                 key={rating}
                 type="button"
                 onClick={() => handleLikertChange(rating)}
-                className={`w-12 h-12 rounded-full border-2 flex items-center justify-center font-semibold transition-colors ${
+                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 flex items-center justify-center font-semibold transition-colors text-sm sm:text-base ${
                   value === rating
                     ? 'border-blue-500 bg-blue-500 text-white'
                     : 'border-gray-300 text-gray-700 hover:border-blue-300'
@@ -148,7 +148,7 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
               </button>
             ))}
           </div>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 text-center sm:text-right">
             {isFearOfFailure ? "5 - Extremely" : "5 - Extremely confident"}
           </span>
         </div>
@@ -160,7 +160,7 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
     <div className="space-y-4" role="group" aria-labelledby={`question-${question.id}`}>
       {question.subHeading && (
         <div className="bg-gray-50 p-4 rounded-lg">
-          <p className="text-gray-700 italic">{question.subHeading}</p>
+          <p className="text-gray-700 italic text-sm sm:text-base">{question.subHeading}</p>
         </div>
       )}
       
@@ -168,7 +168,7 @@ export default function AssessmentQuestion({ question, value, onChange }: Assess
         value={textValue}
         onChange={(e) => handleTextChange(e.target.value)}
         placeholder="Please provide a detailed response..."
-        className={`w-full h-32 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
+        className={`w-full h-32 sm:h-40 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm sm:text-base ${
           !isValid && characterCount > 0 ? 'border-red-300 focus:ring-red-500' : ''
         }`}
         rows={6}

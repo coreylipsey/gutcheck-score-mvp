@@ -452,7 +452,7 @@ export default function AssessmentPage() {
               <h1 className="text-lg sm:text-xl font-bold text-gray-900">
                 Assessment
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 {isConsentStep ? 'Step 1 of 3: Data Consent' : isLocationStep ? 'Step 2 of 3: Business Information' : `Question ${currentStep - 1} of ${totalQuestions - 2}`}
               </p>
             </div>
@@ -460,15 +460,20 @@ export default function AssessmentPage() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
 
         {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="mb-6 sm:mb-8">
+          <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-blue-600 h-2 sm:h-3 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
+          </div>
+          <div className="mt-2 text-center">
+            <span className="text-sm text-gray-600">
+              {Math.round(progress)}% Complete
+            </span>
           </div>
         </div>
 
@@ -494,9 +499,9 @@ export default function AssessmentPage() {
         ) : isLocationStep ? (
           renderLocationStep()
         ) : (
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 sm:mb-8">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 leading-tight">
                 {currentQuestion?.text}
               </h2>
               {currentQuestion?.section && (
@@ -519,7 +524,7 @@ export default function AssessmentPage() {
           <button
             onClick={handlePrevious}
             disabled={currentStep === 0}
-            className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
           >
             Previous
           </button>
@@ -527,7 +532,7 @@ export default function AssessmentPage() {
           <button
             onClick={handleNext}
             disabled={!canProceed() || isSubmitting}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2 text-sm sm:text-base"
           >
             {isSubmitting && (
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
