@@ -1,6 +1,6 @@
 import { IAIScoringService, AIScoringResult, AIFeedback } from '../../domain/repositories/IAIScoringService';
 import { AssessmentCategory } from '../../domain/value-objects/Category';
-import { ILoggingService } from './LoggingService';
+import { ILoggingService, LoggingService } from './LoggingService';
 
 export class GeminiAssessmentService implements IAIScoringService {
   private readonly geminiApiUrl: string;

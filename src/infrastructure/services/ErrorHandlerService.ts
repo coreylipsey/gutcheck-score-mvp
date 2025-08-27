@@ -1,5 +1,5 @@
 import { ApplicationError, ErrorCode, AIServiceError, DatabaseError, TokenError, AssessmentError } from '../../domain/errors/ApplicationError';
-import { ILoggingService } from './LoggingService';
+import { ILoggingService, LoggingService } from './LoggingService';
 
 export interface ErrorResponse {
   success: false;
@@ -21,8 +21,6 @@ export class ErrorHandlerService implements IErrorHandlerService {
   private logger: ILoggingService;
 
   private constructor() {
-    // Import here to avoid circular dependency
-    const { LoggingService } = require('./LoggingService');
     this.logger = LoggingService.getInstance();
   }
 

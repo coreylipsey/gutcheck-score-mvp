@@ -1,10 +1,10 @@
-import { Container } from '@/infrastructure/di/container';
-import { IAssessmentRepository } from '@/domain/repositories/IAssessmentRepository';
-import { TokenService } from '@/application/services/TokenService';
-import { AssessmentFrequencyService } from '@/application/services/AssessmentFrequencyService';
-import { ILoggingService } from '@/infrastructure/services/LoggingService';
-import { IErrorHandlerService } from '@/infrastructure/services/ErrorHandlerService';
-import { DatabaseError } from '@/domain/errors/ApplicationError';
+import { AssessmentSession, IAssessmentRepository } from '../../domain/repositories/IAssessmentRepository';
+import { TokenService } from './TokenService';
+import { Container } from '../../infrastructure/di/container';
+import { ILoggingService } from '../../infrastructure/services/LoggingService';
+import { IErrorHandlerService } from '../../infrastructure/services/ErrorHandlerService';
+import { DatabaseError } from '../../domain/errors/ApplicationError';
+import { AssessmentFrequencyService } from './AssessmentFrequencyService';
 
 export interface AssessmentHistoryDTO {
   sessionId: string;
