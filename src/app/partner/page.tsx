@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { initializeApp } from 'firebase/app';
@@ -40,7 +41,7 @@ interface CohortCreationResponse {
   welcomeEmail: string;
 }
 
-export default function PartnerOnboarding() {
+function PartnerOnboardingContent() {
   const { user } = useAuthContext();
   const [formData, setFormData] = useState({
     partnerName: '',
@@ -422,6 +423,20 @@ export default function PartnerOnboarding() {
               </div>
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-red-800">Error</h4>
+                    <p className="text-sm text-red-700 mt-1">{error}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -435,30 +450,21 @@ export default function PartnerOnboarding() {
               ) : (
                 <>
                   <Target className="w-4 h-4" />
-                  Create Cohort & Get Assessment Link
+                  Create Partner Cohort
                 </>
               )}
             </button>
-
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-800 text-sm">{error}</p>
-              </div>
-            )}
           </form>
-
-          {/* Info Box */}
-          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-medium text-blue-800 mb-2">What happens next?</h4>
-            <ul className="text-sm text-blue-700 space-y-1">
-              <li>• You'll receive a unique assessment link for your cohort</li>
-              <li>• Share the link with your participants</li>
-              <li>• Monitor progress and scores in your admin dashboard</li>
-              <li>• Tag outcomes to contribute to ML model training</li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PartnerOnboarding() {
+  return (
+    <ProtectedRoute>
+      <PartnerOnboardingContent />
+    </ProtectedRoute>
   );
 }
