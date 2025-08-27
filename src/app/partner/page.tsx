@@ -252,7 +252,7 @@ export default function PartnerOnboarding() {
                     Send Welcome Email
                   </button>
                   <a
-                    href={`/partner/dashboard/${formData.partnerName.toLowerCase().replace(/\s+/g, '-')}`}
+                    href={`/partner/dashboard/${result.partnerId}`}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
                   >
                     <Building className="w-4 h-4" />

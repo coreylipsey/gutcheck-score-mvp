@@ -1,16 +1,32 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { initializeApp } from 'firebase/app';
 import { 
   Users, 
   TrendingUp, 
   FileText,
   Activity,
-  ExternalLink
+  ExternalLink,
+  AlertTriangle
 } from 'lucide-react';
+
+// Initialize Firebase for client-side
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+const app = initializeApp(firebaseConfig);
+const functions = getFunctions(app);
 
 interface PartnerData {
   partnerId: string;
@@ -43,6 +59,7 @@ interface DashboardMetrics {
 
 function PartnerDashboard() {
   const params = useParams();
+  const router = useRouter();
   const partnerId = params.partnerId as string;
   const { user } = useAuthContext();
   
@@ -55,9 +72,49 @@ function PartnerDashboard() {
     completionRate: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkPartnerAccess = async () => {
+      if (!user) return;
+
+      try {
+        const checkPartnerAccess = httpsCallable(functions, 'checkPartnerAccess');
+        const response = await checkPartnerAccess({ userId: user.uid });
+        const data = response.data as any;
+        
+        if (!data.hasAccess) {
+          setError('You do not have access to partner features. Please contact support.');
+          setHasAccess(false);
+          return;
+        }
+
+        // Check if user has access to this specific partner
+        if (data.userRole?.partnerData?.organizationName) {
+          const userPartnerId = data.userRole.partnerData.organizationName.toLowerCase().replace(/\s+/g, '-');
+          if (userPartnerId !== partnerId) {
+            setError('You do not have access to this partner dashboard.');
+            setHasAccess(false);
+            return;
+          }
+        }
+
+        setHasAccess(true);
+      } catch (error) {
+        console.error('Error checking partner access:', error);
+        setError('Failed to verify partner access.');
+        setHasAccess(false);
+      }
+    };
+
+    checkPartnerAccess();
+  }, [user, partnerId]);
 
   useEffect(() => {
     const fetchPartnerDashboardData = async () => {
+      if (!hasAccess) return;
+
       try {
         // Fetch partner-specific data
         const response = await fetch(`/api/partner/dashboard/${partnerId}`);
@@ -103,7 +160,7 @@ function PartnerDashboard() {
             averageScore: 82.7,
             taggedOutcomes: 12,
             status: 'completed',
-            assessmentUrl: `https://gutcheck-score-mvp.web.app/assessment?partner_id=${partnerId}&cohort_id=qc-summer-2025`
+            assessmentUrl: `https://gutcheck-score-mvp.web.app/assessment?partnerId=${partnerId}&cohort_id=qc-summer-2025`
           }
         ]);
         setMetrics({
@@ -117,10 +174,10 @@ function PartnerDashboard() {
       }
     };
 
-    if (partnerId) {
+    if (hasAccess && partnerId) {
       fetchPartnerDashboardData();
     }
-  }, [partnerId]);
+  }, [partnerId, hasAccess]);
 
   const MetricCard = ({ 
     title, 
@@ -164,6 +221,28 @@ function PartnerDashboard() {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
             <p className="mt-4 text-white">Loading partner dashboard...</p>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  if (error || hasAccess === false) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gradient-to-br from-[#0A1F44] to-[#147AFF] flex items-center justify-center">
+          <div className="max-w-md mx-auto text-center">
+            <div className="bg-white/95 backdrop-blur-sm border-0 rounded-lg shadow-sm p-8">
+              <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
+              <p className="text-gray-600 mb-6">{error || 'You do not have access to this partner dashboard.'}</p>
+              <button
+                onClick={() => router.push('/partner')}
+                className="px-4 py-2 bg-[#147AFF] text-white rounded-md hover:bg-[#0A1F44] transition-colors"
+              >
+                Go to Partner Onboarding
+              </button>
+            </div>
           </div>
         </div>
       </ProtectedRoute>
