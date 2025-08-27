@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthContext } from '../../presentation/providers/AuthProvider';
 import { AuthForm } from '../../components/auth/AuthForm';
@@ -21,7 +21,7 @@ interface RegisterData {
 
 type AuthFormData = LoginData | RegisterData;
 
-export default function AuthPage() {
+function AuthPageContent() {
   const [mode, setMode] = useState<AuthMode>('login');
   const [loading, setLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
@@ -146,5 +146,24 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-[#0A1F44] to-[#147AFF] flex items-center justify-center p-6">
+        <div className="max-w-md w-full">
+          <div className="bg-white/95 backdrop-blur-sm border-0 rounded-lg shadow-sm p-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#147AFF] mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading authentication...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <AuthPageContent />
+    </Suspense>
   );
 } 
