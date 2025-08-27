@@ -900,6 +900,13 @@ export {
   getAdminDashboardData
 } from './adminDashboard';
 
+// Export partner dashboard functions
+export {
+  getPartnerDashboardData,
+  getCohortAnalyticsData,
+  getParticipantReportData
+} from './partnerDashboard';
+
 // Export user role management functions
 export {
   getUserRole,
