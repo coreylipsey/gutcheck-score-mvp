@@ -23,6 +23,9 @@ export const getPartnerDashboardData = onCall(async (request) => {
     }
 
     const partnerData = partnerDoc.data();
+    if (!partnerData) {
+      throw new HttpsError('not-found', 'Partner data not found');
+    }
 
     // Get cohorts for this partner
     const cohortsQuery = await db.collection('cohorts')
@@ -31,10 +34,24 @@ export const getPartnerDashboardData = onCall(async (request) => {
 
     const cohorts = cohortsQuery.docs.map(doc => {
       const data = doc.data();
+      if (!data) {
+        return {
+          cohortId: doc.id,
+          partnerId: partnerId,
+          cohortName: 'Unknown Cohort',
+          totalAssessments: 0,
+          completedAssessments: 0,
+          completionRate: 0,
+          averageScore: 0,
+          taggedOutcomes: 0,
+          status: 'active' as const,
+          assessmentUrl: `https://gutcheck-score-mvp.web.app/assessment?partner_id=${partnerId}&cohort_id=${doc.id}`
+        };
+      }
       return {
         cohortId: doc.id,
-        partnerId: data.partnerId,
-        cohortName: data.name,
+        partnerId: data.partnerId || partnerId,
+        cohortName: data.name || 'Unknown Cohort',
         totalAssessments: data.expectedParticipants || 0,
         completedAssessments: 0, // Will be calculated below
         completionRate: 0, // Will be calculated below
@@ -50,14 +67,17 @@ export const getPartnerDashboardData = onCall(async (request) => {
       .where('partnerMetadata.partnerId', '==', partnerId)
       .get();
 
-    const sessions = sessionsQuery.docs.map(doc => doc.data());
+    const sessions = sessionsQuery.docs.map(doc => {
+      const data = doc.data();
+      return data || {};
+    });
 
     // Calculate metrics
     const totalParticipants = cohorts.reduce((sum, cohort) => sum + cohort.totalAssessments, 0);
     const totalCompleted = sessions.filter(s => s.completedAt).length;
     const averageScore = totalCompleted > 0 
       ? sessions.filter(s => s.completedAt && s.scores?.overallScore)
-          .reduce((sum, s) => sum + s.scores.overallScore, 0) / totalCompleted 
+          .reduce((sum, s) => sum + (s.scores?.overallScore || 0), 0) / totalCompleted 
       : 0;
     const completionRate = totalParticipants > 0 ? (totalCompleted / totalParticipants) * 100 : 0;
 
@@ -69,7 +89,7 @@ export const getPartnerDashboardData = onCall(async (request) => {
       const cohortCompleted = cohortSessions.filter(s => s.completedAt).length;
       const cohortAvgScore = cohortCompleted > 0 
         ? cohortSessions.filter(s => s.completedAt && s.scores?.overallScore)
-            .reduce((sum, s) => sum + s.scores.overallScore, 0) / cohortCompleted 
+            .reduce((sum, s) => sum + (s.scores?.overallScore || 0), 0) / cohortCompleted 
         : 0;
       const cohortCompletionRate = cohort.totalAssessments > 0 
         ? (cohortCompleted / cohort.totalAssessments) * 100 
@@ -89,10 +109,10 @@ export const getPartnerDashboardData = onCall(async (request) => {
       success: true,
       partner: {
         partnerId: partnerId,
-        partnerName: partnerData?.name || 'Unknown Partner',
-        partnerEmail: partnerData?.email || '',
-        status: partnerData?.status || 'active',
-        createdAt: partnerData?.createdAt?.toDate?.() || new Date(),
+        partnerName: partnerData.name || 'Unknown Partner',
+        partnerEmail: partnerData.email || '',
+        status: partnerData.status || 'active',
+        createdAt: partnerData.createdAt?.toDate?.() || new Date(),
         cohortsCount: updatedCohorts.length
       },
       cohorts: updatedCohorts,
@@ -126,6 +146,9 @@ export const getCohortAnalyticsData = onCall(async (request) => {
     }
 
     const cohortData = cohortDoc.data();
+    if (!cohortData) {
+      throw new HttpsError('not-found', 'Cohort data not found');
+    }
 
     // Get assessment sessions for this specific cohort
     const sessionsQuery = await db.collection('assessmentSessions')
@@ -133,14 +156,17 @@ export const getCohortAnalyticsData = onCall(async (request) => {
       .where('partnerMetadata.cohortId', '==', cohortId)
       .get();
 
-    const sessions = sessionsQuery.docs.map(doc => doc.data());
+    const sessions = sessionsQuery.docs.map(doc => {
+      const data = doc.data();
+      return data || {};
+    });
 
     // Calculate cohort metrics
-    const totalParticipants = cohortData?.expectedParticipants || 0;
+    const totalParticipants = cohortData.expectedParticipants || 0;
     const totalCompleted = sessions.filter(s => s.completedAt).length;
     const averageScore = totalCompleted > 0 
       ? sessions.filter(s => s.completedAt && s.scores?.overallScore)
-          .reduce((sum, s) => sum + s.scores.overallScore, 0) / totalCompleted 
+          .reduce((sum, s) => sum + (s.scores?.overallScore || 0), 0) / totalCompleted 
       : 0;
     const completionRate = totalParticipants > 0 ? (totalCompleted / totalParticipants) * 100 : 0;
 
@@ -151,9 +177,9 @@ export const getCohortAnalyticsData = onCall(async (request) => {
         id: `p${index + 1}`,
         name: session.userId ? `Participant ${index + 1}` : 'Anonymous',
         email: session.userId ? `${session.userId}@email.com` : 'anonymous@email.com',
-        score: session.scores.overallScore,
+        score: session.scores?.overallScore || 0,
         completedAt: session.completedAt?.toDate?.() || new Date(),
-        sessionId: session.sessionId
+        sessionId: session.sessionId || `session_${index + 1}`
       }));
 
     // Calculate score distribution
@@ -171,14 +197,14 @@ export const getCohortAnalyticsData = onCall(async (request) => {
       cohort: {
         cohortId: cohortId,
         partnerId: partnerId,
-        cohortName: cohortData?.name || 'Unknown Cohort',
+        cohortName: cohortData.name || 'Unknown Cohort',
         totalAssessments: totalParticipants,
         completedAssessments: totalCompleted,
         completionRate: completionRate,
         averageScore: averageScore,
         taggedOutcomes: sessions.filter(s => s.outcomeTracking?.outcomeTag).length,
-        status: cohortData?.status || 'active',
-        assessmentUrl: cohortData?.assessmentUrl || `https://gutcheck-score-mvp.web.app/assessment?partner_id=${partnerId}&cohort_id=${cohortId}`
+        status: cohortData.status || 'active',
+        assessmentUrl: cohortData.assessmentUrl || `https://gutcheck-score-mvp.web.app/assessment?partner_id=${partnerId}&cohort_id=${cohortId}`
       },
       participants: participants,
       metrics: {
@@ -212,10 +238,13 @@ export const getParticipantReportData = onCall(async (request) => {
     }
 
     const sessionData = sessionDoc.data();
+    if (!sessionData) {
+      throw new HttpsError('not-found', 'Assessment session data not found');
+    }
 
     // Verify this session belongs to the specified partner and cohort
-    if (sessionData?.partnerMetadata?.partnerId !== partnerId || 
-        sessionData?.partnerMetadata?.cohortId !== cohortId) {
+    if (sessionData.partnerMetadata?.partnerId !== partnerId || 
+        sessionData.partnerMetadata?.cohortId !== cohortId) {
       throw new HttpsError('permission-denied', 'Access denied to this assessment session');
     }
 
@@ -227,8 +256,10 @@ export const getParticipantReportData = onCall(async (request) => {
       const userDoc = await db.collection('users').doc(sessionData.userId).get();
       if (userDoc.exists) {
         const userData = userDoc.data();
-        participantName = userData?.displayName || userData?.email || 'Anonymous';
-        participantEmail = userData?.email || 'anonymous@email.com';
+        if (userData) {
+          participantName = userData.displayName || userData.email || 'Anonymous';
+          participantEmail = userData.email || 'anonymous@email.com';
+        }
       }
     }
 
