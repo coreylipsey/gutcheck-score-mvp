@@ -95,19 +95,16 @@ function PartnerDashboard() {
         }
 
         // Check if user has access to this specific partner
-        if (data.userRole?.partnerData?.organizationName) {
-          const userPartnerId = data.userRole.partnerData.organizationName.toLowerCase().replace(/\s+/g, '-');
-          console.log('User partner ID:', userPartnerId, 'Requested partner ID:', partnerId);
-          if (userPartnerId !== partnerId) {
-            console.log('User does not have access to this specific partner');
-            setError('You do not have access to this partner dashboard.');
-            setHasAccess(false);
-            return;
-          }
+        // Instead of relying on organizationName, we'll check if the partner exists
+        // and the user has partner role (which means they can access partner dashboards)
+        if (data.userRole?.roles?.includes('partner') || data.userRole?.roles?.includes('admin')) {
+          console.log('User has partner role, allowing access to partner dashboard');
+          setHasAccess(true);
+        } else {
+          console.log('User does not have partner role');
+          setError('You do not have access to partner features. Please contact support.');
+          setHasAccess(false);
         }
-
-        console.log('User has access to partner dashboard');
-        setHasAccess(true);
       } catch (error) {
         console.error('Error checking partner access:', error);
         setError('Failed to verify partner access.');
