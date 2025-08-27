@@ -80,11 +80,15 @@ function PartnerDashboard() {
       if (!user) return;
 
       try {
+        console.log('Checking partner access for user:', user.uid);
         const checkPartnerAccess = httpsCallable(functions, 'checkPartnerAccess');
         const response = await checkPartnerAccess({ userId: user.uid });
         const data = response.data as any;
         
+        console.log('Partner access response:', data);
+        
         if (!data.hasAccess) {
+          console.log('User does not have partner access');
           setError('You do not have access to partner features. Please contact support.');
           setHasAccess(false);
           return;
@@ -93,13 +97,16 @@ function PartnerDashboard() {
         // Check if user has access to this specific partner
         if (data.userRole?.partnerData?.organizationName) {
           const userPartnerId = data.userRole.partnerData.organizationName.toLowerCase().replace(/\s+/g, '-');
+          console.log('User partner ID:', userPartnerId, 'Requested partner ID:', partnerId);
           if (userPartnerId !== partnerId) {
+            console.log('User does not have access to this specific partner');
             setError('You do not have access to this partner dashboard.');
             setHasAccess(false);
             return;
           }
         }
 
+        console.log('User has access to partner dashboard');
         setHasAccess(true);
       } catch (error) {
         console.error('Error checking partner access:', error);
@@ -113,9 +120,11 @@ function PartnerDashboard() {
 
   useEffect(() => {
     const fetchPartnerDashboardData = async () => {
+      console.log('Fetching partner dashboard data. hasAccess:', hasAccess);
       if (!hasAccess) return;
 
       try {
+        console.log('Making API call to fetch partner dashboard data');
         // Fetch partner-specific data
         const response = await fetch(`/api/partner/dashboard/${partnerId}`);
         if (!response.ok) {
@@ -123,53 +132,15 @@ function PartnerDashboard() {
         }
         
         const data = await response.json();
+        console.log('Partner dashboard data received:', data);
         setPartner(data.partner);
         setCohorts(data.cohorts);
         setMetrics(data.metrics);
       } catch (error) {
         console.error('Error fetching partner dashboard data:', error);
-        // For now, use mock data
-        setPartner({
-          partnerId: partnerId,
-          partnerName: 'Queens College',
-          partnerEmail: 'ying.zhou@qc.cuny.edu',
-          status: 'active',
-          createdAt: '2025-08-20',
-          cohortsCount: 2
-        });
-        setCohorts([
-          {
-            cohortId: 'qc-fall-2025',
-            partnerId: partnerId,
-            cohortName: 'Fall 2025 Entrepreneurs',
-            totalAssessments: 24,
-            completedAssessments: 18,
-            completionRate: 75.0,
-            averageScore: 79.3,
-            taggedOutcomes: 18,
-            status: 'active',
-            assessmentUrl: `https://gutcheck-score-mvp.web.app/assessment?partner_id=${partnerId}&cohort_id=qc-fall-2025`
-          },
-          {
-            cohortId: 'qc-summer-2025',
-            partnerId: partnerId,
-            cohortName: 'Summer Pilot Cohort',
-            totalAssessments: 12,
-            completedAssessments: 12,
-            completionRate: 100.0,
-            averageScore: 82.7,
-            taggedOutcomes: 12,
-            status: 'completed',
-            assessmentUrl: `https://gutcheck-score-mvp.web.app/assessment?partnerId=${partnerId}&cohort_id=qc-summer-2025`
-          }
-        ]);
-        setMetrics({
-          totalParticipants: 36,
-          totalCompleted: 30,
-          averageScore: 81.0,
-          completionRate: 83.3
-        });
+        setError('Failed to load partner dashboard data. Please try again.');
       } finally {
+        console.log('Setting loading to false');
         setLoading(false);
       }
     };
@@ -227,7 +198,7 @@ function PartnerDashboard() {
     );
   }
 
-  if (error || hasAccess === false) {
+  if (error && hasAccess === false) {
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-gradient-to-br from-[#0A1F44] to-[#147AFF] flex items-center justify-center">

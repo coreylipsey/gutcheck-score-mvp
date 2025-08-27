@@ -32,48 +32,10 @@ export async function GET(
   } catch (error) {
     console.error('Error fetching partner dashboard data:', error);
     
-    // Return mock data as fallback
-    return NextResponse.json({
-      partner: {
-        partnerId: partnerId,
-        partnerName: 'Queens College',
-        partnerEmail: 'ying.zhou@qc.cuny.edu',
-        status: 'active',
-        createdAt: '2025-08-20',
-        cohortsCount: 2
-      },
-      cohorts: [
-        {
-          cohortId: 'qc-fall-2025',
-          partnerId: partnerId,
-          cohortName: 'Fall 2025 Entrepreneurs',
-          totalAssessments: 24,
-          completedAssessments: 18,
-          completionRate: 75.0,
-          averageScore: 79.3,
-          taggedOutcomes: 18,
-          status: 'active',
-          assessmentUrl: `https://gutcheck-score-mvp.web.app/assessment?partner_id=${partnerId}&cohort_id=qc-fall-2025`
-        },
-        {
-          cohortId: 'qc-summer-2025',
-          partnerId: partnerId,
-          cohortName: 'Summer Pilot Cohort',
-          totalAssessments: 12,
-          completedAssessments: 12,
-          completionRate: 100.0,
-          averageScore: 82.7,
-          taggedOutcomes: 12,
-          status: 'completed',
-          assessmentUrl: `https://gutcheck-score-mvp.web.app/assessment?partner_id=${partnerId}&cohort_id=qc-summer-2025`
-        }
-      ],
-      metrics: {
-        totalParticipants: 36,
-        totalCompleted: 30,
-        averageScore: 81.0,
-        completionRate: 83.3
-      }
-    });
+    // Return error instead of mock data
+    return NextResponse.json(
+      { error: 'Failed to fetch partner dashboard data' },
+      { status: 500 }
+    );
   }
 }
