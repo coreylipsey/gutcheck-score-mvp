@@ -163,6 +163,124 @@ export const syncOutcomeToSheets = onDocumentUpdated(
     }
   });
 
+// Sync partner to Google Sheets
+export const syncPartnerToSheets = onDocumentCreated(
+  'partners/{partnerId}',
+  async (event) => {
+    if (!sheets || !sheetsSpreadsheetId) {
+      console.log('Google Sheets not configured - skipping partner sync');
+      return;
+    }
+
+    const partnerData = event.data?.data();
+    const partnerId = event.params.partnerId;
+
+    if (!partnerData) {
+      console.log('No partner data found - skipping sync');
+      return;
+    }
+
+    try {
+      console.log(`Syncing partner ${partnerId} to Google Sheets`);
+
+      // Prepare row data for Partners sheet
+      const rowData = [
+        partnerId,
+        partnerData.name || '',
+        partnerData.email || '',
+        partnerData.status || 'active',
+        partnerData.createdAt?.toDate?.() || new Date(),
+        '' // Notes
+      ];
+
+      // Append to Partners sheet
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: sheetsSpreadsheetId,
+        range: 'Partners!A:F',
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: {
+          values: [rowData]
+        }
+      });
+
+      console.log(`Successfully synced partner ${partnerId} to Google Sheets`);
+
+    } catch (error) {
+      console.error(`Failed to sync partner ${partnerId} to Google Sheets:`, error);
+      
+      // Store in outbox for retry
+      await storeInOutbox({
+        type: 'partner_sync',
+        partnerId,
+        partnerData,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    }
+  });
+
+// Sync cohort to Google Sheets
+export const syncCohortToSheets = onDocumentCreated(
+  'cohorts/{cohortId}',
+  async (event) => {
+    if (!sheets || !sheetsSpreadsheetId) {
+      console.log('Google Sheets not configured - skipping cohort sync');
+      return;
+    }
+
+    const cohortData = event.data?.data();
+    const cohortId = event.params.cohortId;
+
+    if (!cohortData) {
+      console.log('No cohort data found - skipping sync');
+      return;
+    }
+
+    try {
+      console.log(`Syncing cohort ${cohortId} to Google Sheets`);
+
+      // Prepare row data for Cohorts sheet
+      const rowData = [
+        cohortId,
+        cohortData.partnerId || '',
+        cohortData.name || '',
+        '', // Start Date
+        '', // End Date
+        0,  // Total Assessments
+        0,  // Completed Assessments
+        0,  // Completion Rate
+        0,  // Average Score
+        0   // Tagged Outcomes
+      ];
+
+      // Append to Cohorts sheet
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: sheetsSpreadsheetId,
+        range: 'Cohorts!A:J',
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: {
+          values: [rowData]
+        }
+      });
+
+      console.log(`Successfully synced cohort ${cohortId} to Google Sheets`);
+
+    } catch (error) {
+      console.error(`Failed to sync cohort ${cohortId} to Google Sheets:`, error);
+      
+      // Store in outbox for retry
+      await storeInOutbox({
+        type: 'cohort_sync',
+        cohortId,
+        cohortData,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    }
+  });
+
 // Update partner data in Google Sheets
 async function updatePartnerData(partnerMetadata: any) {
   if (!sheets || !sheetsSpreadsheetId) {
@@ -391,6 +509,124 @@ export const manualSheetsSync = onCall(async (request) => {
 
   } catch (error) {
     console.error('Manual sync failed:', error);
+    throw new HttpsError('internal', 'Sync failed');
+  }
+});
+
+// Manual sync for existing partners and cohorts
+export const syncExistingDataToSheets = onCall(async (request) => {
+  if (!sheets || !sheetsSpreadsheetId) {
+    throw new HttpsError('failed-precondition', 'Google Sheets not configured');
+  }
+
+  try {
+    console.log('Starting manual sync of existing partners and cohorts');
+
+    // Sync all existing partners
+    const partnersSnapshot = await db.collection('partners').get();
+    let partnersSynced = 0;
+
+    for (const doc of partnersSnapshot.docs) {
+      const partnerData = doc.data();
+      const partnerId = doc.id;
+
+      try {
+        // Check if partner already exists in Google Sheets
+        const partnerResponse = await sheets.spreadsheets.values.get({
+          spreadsheetId: sheetsSpreadsheetId,
+          range: 'Partners!A:F'
+        });
+
+        const partnerRows = partnerResponse.data.values || [];
+        const partnerExists = partnerRows.some((row: any[]) => row[0] === partnerId);
+
+        if (!partnerExists) {
+          // Add new partner
+          const rowData = [
+            partnerId,
+            partnerData.name || '',
+            partnerData.email || '',
+            partnerData.status || 'active',
+            partnerData.createdAt?.toDate?.() || new Date(),
+            '' // Notes
+          ];
+
+          await sheets.spreadsheets.values.append({
+            spreadsheetId: sheetsSpreadsheetId,
+            range: 'Partners!A:F',
+            valueInputOption: 'RAW',
+            insertDataOption: 'INSERT_ROWS',
+            requestBody: {
+              values: [rowData]
+            }
+          });
+
+          partnersSynced++;
+          console.log(`Synced partner: ${partnerId}`);
+        }
+      } catch (error) {
+        console.error(`Failed to sync partner ${partnerId}:`, error);
+      }
+    }
+
+    // Sync all existing cohorts
+    const cohortsSnapshot = await db.collection('cohorts').get();
+    let cohortsSynced = 0;
+
+    for (const doc of cohortsSnapshot.docs) {
+      const cohortData = doc.data();
+      const cohortId = doc.id;
+
+      try {
+        // Check if cohort already exists in Google Sheets
+        const cohortResponse = await sheets.spreadsheets.values.get({
+          spreadsheetId: sheetsSpreadsheetId,
+          range: 'Cohorts!A:J'
+        });
+
+        const cohortRows = cohortResponse.data.values || [];
+        const cohortExists = cohortRows.some((row: any[]) => row[0] === cohortId);
+
+        if (!cohortExists) {
+          // Add new cohort
+          const rowData = [
+            cohortId,
+            cohortData.partnerId || '',
+            cohortData.name || '',
+            '', // Start Date
+            '', // End Date
+            0,  // Total Assessments
+            0,  // Completed Assessments
+            0,  // Completion Rate
+            0,  // Average Score
+            0   // Tagged Outcomes
+          ];
+
+          await sheets.spreadsheets.values.append({
+            spreadsheetId: sheetsSpreadsheetId,
+            range: 'Cohorts!A:J',
+            valueInputOption: 'RAW',
+            insertDataOption: 'INSERT_ROWS',
+            requestBody: {
+              values: [rowData]
+            }
+          });
+
+          cohortsSynced++;
+          console.log(`Synced cohort: ${cohortId}`);
+        }
+      } catch (error) {
+        console.error(`Failed to sync cohort ${cohortId}:`, error);
+      }
+    }
+
+    return { 
+      success: true, 
+      message: `Manual sync completed. Partners synced: ${partnersSynced}, Cohorts synced: ${cohortsSynced}` 
+    };
+
+  } catch (error) {
+    console.error('Manual sync of existing data failed:', error);
     throw new HttpsError('internal', 'Sync failed');
   }
 });

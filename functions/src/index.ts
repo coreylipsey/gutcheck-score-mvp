@@ -884,8 +884,11 @@ export const testMailchimpConnection = onCall(async (request) => {
 // Export Google Sheets sync functions
 export {
   syncAssessmentToSheets,
+  syncPartnerToSheets,
+  syncCohortToSheets,
   syncOutcomeToSheets,
-  manualSheetsSync
+  manualSheetsSync,
+  syncExistingDataToSheets
 } from './googleSheetsSync';
 
 // Export partner cohort functions
