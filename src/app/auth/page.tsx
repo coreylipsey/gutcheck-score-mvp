@@ -102,62 +102,53 @@ function AuthPageContent() {
     setMode('login');
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A1F44] to-[#147AFF] flex items-center justify-center p-6">
-      <div className="max-w-md w-full">
-        <div className="bg-white/95 backdrop-blur-sm border-0 rounded-lg shadow-sm p-8">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#147AFF] to-[#19C2A0] rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-white text-2xl font-bold">G</span>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {mode === 'reset' ? 'Reset Password' : mode === 'register' ? 'Create Account' : 'Welcome Back'}
-            </h1>
-            <p className="text-gray-600">
-              {mode === 'reset' 
-                ? 'Enter your email to reset your password'
-                : mode === 'register' 
-                ? 'Create your account to get started'
-                : 'Sign in to your account'
-              }
-            </p>
-          </div>
+  // If in reset mode, show the reset form
+  if (mode === 'reset') {
+    return <PasswordResetForm
+      onSubmit={handleResetSubmit}
+      onBack={handleBackToLogin}
+      loading={loading}
+      success={resetSuccess}
+    />;
+  }
 
-          {/* Auth Forms */}
-          {mode === 'reset' ? (
-            <PasswordResetForm
-              onSubmit={handleResetSubmit}
-              onBack={handleBackToLogin}
-              loading={loading}
-              success={resetSuccess}
-            />
-          ) : (
-            <AuthForm
-              mode={mode}
-              onSubmit={handleAuthSubmit}
-              onGoogleSignIn={handleGoogleSignIn}
-              onModeChange={handleModeChange}
-              onResetPassword={handleResetMode}
-              loading={loading}
-              error={error}
-            />
-          )}
-        </div>
-      </div>
-    </div>
+  // Otherwise show the main auth form
+  return (
+    <AuthForm
+      mode={mode}
+      onSubmit={handleAuthSubmit}
+      onGoogleSignIn={handleGoogleSignIn}
+      onModeChange={handleModeChange}
+      onResetPassword={handleResetMode}
+      loading={loading}
+      error={error}
+    />
   );
 }
 
 export default function AuthPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-[#0A1F44] to-[#147AFF] flex items-center justify-center p-6">
-        <div className="max-w-md w-full">
-          <div className="bg-white/95 backdrop-blur-sm border-0 rounded-lg shadow-sm p-8">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#147AFF] mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading authentication...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-7xl grid lg:grid-cols-2 gap-8 lg:gap-16 items-start lg:items-center">
+          <div className="lg:block space-y-8 order-2 lg:order-1">
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0A1F44] leading-tight">
+                  Welcome Back
+                </h1>
+                <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed">
+                  Access your entrepreneurial profile and continue building your reputation ledger.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="w-full max-w-md mx-auto order-1 lg:order-2">
+            <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border border-gray-100">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#147AFF] mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading authentication...</p>
+              </div>
             </div>
           </div>
         </div>
