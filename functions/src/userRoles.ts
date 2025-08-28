@@ -157,8 +157,6 @@ export const getUserAssessmentHistory = onCall(async (request) => {
       throw new HttpsError('invalid-argument', 'User ID is required');
     }
 
-    console.log('🔍 getUserAssessmentHistory called for userId:', userId);
-
     // Get user's email from userRoles
     const userRoleDoc = await db.collection('userRoles').doc(userId).get();
     let userEmail = null;
@@ -166,36 +164,25 @@ export const getUserAssessmentHistory = onCall(async (request) => {
     if (userRoleDoc.exists) {
       const userRole = userRoleDoc.data() as UserRole;
       userEmail = userRole.email;
-      console.log('📧 User email from userRoles:', userEmail);
-    } else {
-      console.log('❌ User role document not found for userId:', userId);
     }
 
+    let allAssessments = [];
+
     // Check for assessment sessions with userId
-    console.log('🔍 Searching for assessment sessions with userId:', userId);
     const userIdSessions = await db.collection('assessmentSessions')
       .where('userId', '==', userId)
-      .orderBy('completedAt', 'desc')
-      .limit(10)
       .get();
 
-    console.log('📊 Found userId sessions:', userIdSessions.size);
-
-    let allAssessments = userIdSessions.docs.map(doc => ({
+    allAssessments = userIdSessions.docs.map(doc => ({
       sessionId: doc.id,
       ...doc.data()
     }));
 
     // Also check for assessment sessions with email as userId (if email exists)
     if (userEmail) {
-      console.log('🔍 Searching for assessment sessions with email as userId:', userEmail);
       const emailSessions = await db.collection('assessmentSessions')
         .where('userId', '==', userEmail)
-        .orderBy('completedAt', 'desc')
-        .limit(10)
         .get();
-
-      console.log('📊 Found email sessions:', emailSessions.size);
 
       const emailAssessments = emailSessions.docs.map(doc => ({
         sessionId: doc.id,
@@ -210,9 +197,6 @@ export const getUserAssessmentHistory = onCall(async (request) => {
         }
       });
     }
-
-    console.log('📊 Total assessments found:', allAssessments.length);
-    console.log('📊 Assessment session IDs:', allAssessments.map(a => a.sessionId));
 
     return {
       assessmentCount: allAssessments.length,
