@@ -157,21 +157,67 @@ export const getUserAssessmentHistory = onCall(async (request) => {
       throw new HttpsError('invalid-argument', 'User ID is required');
     }
 
-    const assessmentSessions = await db.collection('assessmentSessions')
+    console.log('🔍 getUserAssessmentHistory called for userId:', userId);
+
+    // Get user's email from userRoles
+    const userRoleDoc = await db.collection('userRoles').doc(userId).get();
+    let userEmail = null;
+    
+    if (userRoleDoc.exists) {
+      const userRole = userRoleDoc.data() as UserRole;
+      userEmail = userRole.email;
+      console.log('📧 User email from userRoles:', userEmail);
+    } else {
+      console.log('❌ User role document not found for userId:', userId);
+    }
+
+    // Check for assessment sessions with userId
+    console.log('🔍 Searching for assessment sessions with userId:', userId);
+    const userIdSessions = await db.collection('assessmentSessions')
       .where('userId', '==', userId)
       .orderBy('completedAt', 'desc')
       .limit(10)
       .get();
 
-    const assessments = assessmentSessions.docs.map(doc => ({
+    console.log('📊 Found userId sessions:', userIdSessions.size);
+
+    let allAssessments = userIdSessions.docs.map(doc => ({
       sessionId: doc.id,
       ...doc.data()
     }));
 
+    // Also check for assessment sessions with email as userId (if email exists)
+    if (userEmail) {
+      console.log('🔍 Searching for assessment sessions with email as userId:', userEmail);
+      const emailSessions = await db.collection('assessmentSessions')
+        .where('userId', '==', userEmail)
+        .orderBy('completedAt', 'desc')
+        .limit(10)
+        .get();
+
+      console.log('📊 Found email sessions:', emailSessions.size);
+
+      const emailAssessments = emailSessions.docs.map(doc => ({
+        sessionId: doc.id,
+        ...doc.data()
+      }));
+
+      // Combine both results, avoiding duplicates
+      const existingSessionIds = new Set(allAssessments.map(a => a.sessionId));
+      emailAssessments.forEach(assessment => {
+        if (!existingSessionIds.has(assessment.sessionId)) {
+          allAssessments.push(assessment);
+        }
+      });
+    }
+
+    console.log('📊 Total assessments found:', allAssessments.length);
+    console.log('📊 Assessment session IDs:', allAssessments.map(a => a.sessionId));
+
     return {
-      assessmentCount: assessments.length,
-      assessments,
-      hasAssessmentData: assessments.length > 0
+      assessmentCount: allAssessments.length,
+      assessments: allAssessments,
+      hasAssessmentData: allAssessments.length > 0
     };
 
   } catch (error) {
