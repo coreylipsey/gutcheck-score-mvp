@@ -1,10 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Suspense } from 'react';
-
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
 import { getFunctions, httpsCallable } from 'firebase/functions';
@@ -12,19 +9,11 @@ import { initializeApp } from 'firebase/app';
 import { 
   Users, 
   Shield, 
-  UserPlus, 
-  RefreshCw,
-  CheckCircle,
-  XCircle,
+  Mail,
+  Calendar,
   AlertTriangle,
-  Clock,
-  Eye,
-  Settings,
-  Search,
-  UserCheck,
-  UserX,
-  Lock,
-  Unlock
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 
 // Initialize Firebase for client-side
@@ -44,213 +33,84 @@ interface UserRole {
   userId: string;
   email: string;
   roles: string[];
-  orgIds: string[];      // multi-tenant support
-  scopes: string[];
-  entitlements: string[];
-  suspended?: boolean;
-  partnerData?: {
-    organizationName: string;
-    organizationType: string;
-    role: string;
-    cohortsCount: number;
-  };
-  henriData?: {
-    assessmentCount: number;
-    lastAssessmentDate?: string;
-  };
+  partnerData?: any;
   createdAt: string;
   updatedAt: string;
-}
-
-interface RoleChangeRequest {
-  id: string;
-  uid: string;
-  orgId: string;
-  requestedRoles: string[];
-  requestedOrgIds: string[];
-  status: 'pending' | 'approved' | 'denied';
-  createdAt: any;
-  requestedBy: string;
-  reviewedBy?: string;
-  reviewedAt?: any;
-  reason?: string;
 }
 
 export default function AdminRoles() {
   const { user } = useAuthContext();
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
-  const [roleRequests, setRoleRequests] = useState<RoleChangeRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [newRole, setNewRole] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [email, setEmail] = useState('');
-  const [userDoc, setUserDoc] = useState<any>(null);
-  const [orgId, setOrgId] = useState<string>('');
+  const [hasAdminAccess, setHasAdminAccess] = useState(false);
+  const [accessChecked, setAccessChecked] = useState(false);
+  const router = useRouter();
 
+  // Check admin access
   useEffect(() => {
-    fetchUserRoles();
-    fetchRoleRequests();
-  }, []);
+    const checkAdminAccess = async () => {
+      if (!user) {
+        setHasAdminAccess(false);
+        setAccessChecked(true);
+        return;
+      }
 
-  const fetchUserRoles = async () => {
-    try {
-      // This would call a Cloud Function to get all user roles
-      // For now, using mock data
-      setUserRoles([
-        {
-          userId: 'user1',
-          email: 'john@example.com',
-          roles: ['henri'],
-          orgIds: [],
-          scopes: [],
-          entitlements: [],
-          createdAt: '2025-01-01T00:00:00Z',
-          updatedAt: '2025-01-01T00:00:00Z'
-        },
-        {
-          userId: 'user2',
-          email: 'partner@university.edu',
-          roles: ['henri', 'partner'],
-          orgIds: ['orgA'],
-          scopes: ['cohort_management'],
-          entitlements: ['basic_analytics'],
-          partnerData: {
-            organizationName: 'Example University',
-            organizationType: 'university',
-            role: 'program_director',
-            cohortsCount: 2
-          },
-          createdAt: '2025-01-01T00:00:00Z',
-          updatedAt: '2025-01-01T00:00:00Z'
+      try {
+        const getUserRole = httpsCallable(functions, 'getUserRole');
+        const response = await getUserRole({ userId: user.uid });
+        const data = response.data as any;
+        
+        if (data.success && data.userRole) {
+          const roles = data.userRole.roles || [];
+          const isAdmin = roles.includes('admin');
+          setHasAdminAccess(isAdmin);
+          
+          if (!isAdmin) {
+            // Redirect non-admin users
+            router.push('/dashboard');
+          }
+        } else {
+          setHasAdminAccess(false);
+          router.push('/dashboard');
         }
-      ]);
-    } catch (error) {
-      console.error('Error fetching user roles:', error);
-    }
-  };
+      } catch (error) {
+        console.error('Error checking admin access:', error);
+        setHasAdminAccess(false);
+        router.push('/dashboard');
+      } finally {
+        setAccessChecked(true);
+      }
+    };
 
-  const fetchRoleRequests = async () => {
-    try {
-      // This would call a Cloud Function to get pending role requests
-      setRoleRequests([
-        {
-          id: 'req1',
-          uid: 'user3',
-          orgId: 'orgA',
-          requestedRoles: ['partner'],
-          requestedOrgIds: ['orgA'],
-          requestedBy: 'user3',
-          requestedAt: '2025-01-01T10:00:00Z',
-          status: 'pending'
-        }
-      ]);
-    } catch (error) {
-      console.error('Error fetching role requests:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    checkAdminAccess();
+  }, [user, router]);
 
-  const loadByEmail = async () => {
-    try {
-      // This would call a Cloud Function to lookup user by email
-      console.log(`Looking up user by email: ${email}`);
-      
-      // Mock response for demo
-      setUserDoc({
-        uid: 'user4',
-        email: email,
-        roles: ['henri'],
-        orgIds: [],
-        scopes: [],
-        entitlements: []
-      });
-    } catch (error) {
-      console.error('Error looking up user by email:', error);
-      setUserDoc(null);
-    }
-  };
-
-  const updateRoles = async (uid: string, roles: string[], orgIds: string[]) => {
-    try {
-      setSubmitting(true);
-      
-      // This would call a Cloud Function to update user roles
-      console.log(`Updating roles for user ${uid}:`, { roles, orgIds });
-      
-      // Refresh claims
-      const refreshClaims = httpsCallable(functions, 'refreshClaims');
-      await refreshClaims({ uid });
-      
-      alert('Claims refreshed successfully');
-      
-      // Refresh the user roles list
-      await fetchUserRoles();
-      setUserDoc(null);
-      setEmail('');
-      
-    } catch (error) {
-      console.error('Error updating user roles:', error);
-      alert('Error updating user roles');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleRoleRequest = async (request: RoleChangeRequest, approved: boolean) => {
-    try {
-      setSubmitting(true);
-      
-      // This would call a Cloud Function to approve/reject role requests
-      console.log(`${approved ? 'Approving' : 'Rejecting'} role request ${request.id}`);
-      
-      // Refresh the role requests list
-      await fetchRoleRequests();
-      
-    } catch (error) {
-      console.error('Error handling role request:', error);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const refreshUserClaims = async (userId: string) => {
-    try {
-      const refreshUserClaims = httpsCallable(functions, 'refreshUserClaims');
-      await refreshUserClaims({ userId });
-      console.log(`Claims refreshed for user ${userId}`);
-      alert('Claims refreshed successfully');
-    } catch (error) {
-      console.error('Error refreshing user claims:', error);
-      alert('Error refreshing claims');
-    }
-  };
-
-  const toggleUserSuspension = async (userId: string, suspended: boolean) => {
-    try {
-      setSubmitting(true);
-      
-      // This would call a Cloud Function to suspend/unsuspend user
-      console.log(`${suspended ? 'Suspending' : 'Unsuspending'} user ${userId}`);
-      
-      // Refresh the user roles list
-      await fetchUserRoles();
-      
-    } catch (error) {
-      console.error('Error toggling user suspension:', error);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (loading) {
+  if (!accessChecked) {
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-gradient-to-br from-[#0A1F44] to-[#147AFF] flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-            <p className="mt-4 text-white">Loading admin panel...</p>
+            <p className="mt-4 text-white">Checking admin access...</p>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  if (!hasAdminAccess) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gradient-to-br from-[#0A1F44] to-[#147AFF] flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-4xl text-white mb-4">Access Denied</h1>
+            <p className="text-blue-200 text-lg mb-6">You do not have permission to access this page.</p>
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="bg-[#147AFF] text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-[#0A1F44] transition-colors"
+            >
+              Back to Dashboard
+            </button>
           </div>
         </div>
       </ProtectedRoute>
@@ -302,10 +162,12 @@ export default function AdminRoles() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Pending Requests</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {roleRequests.filter(r => r.status === 'pending').length}
+                    {/* roleRequests.filter(r => r.status === 'pending').length */}
+                    {/* roleRequests state was removed, so this will be 0 */}
+                    0
                   </p>
                 </div>
-                <Clock className="w-6 h-6 text-[#FF6B00]" />
+                <Calendar className="w-6 h-6 text-[#FF6B00]" />
               </div>
             </div>
             
@@ -317,7 +179,7 @@ export default function AdminRoles() {
                     {userRoles.filter(u => u.suspended).length}
                   </p>
                 </div>
-                <UserX className="w-6 h-6 text-[#DC2626]" />
+                <XCircle className="w-6 h-6 text-[#DC2626]" />
               </div>
             </div>
           </div>
@@ -481,66 +343,67 @@ export default function AdminRoles() {
               </div>
               <div className="p-6">
                 <div className="space-y-4">
-                  {roleRequests.map((request) => (
-                    <div key={request.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <p className="font-medium text-gray-900">UID: {request.uid}</p>
-                          <p className="text-sm text-gray-600">Org: {request.orgId}</p>
-                          <p className="text-sm text-gray-600">Requested: {new Date(request.createdAt).toLocaleDateString()}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {request.status === 'pending' && (
-                            <>
-                              <button
-                                onClick={() => handleRoleRequest(request, true)}
-                                disabled={submitting}
-                                className="p-2 bg-green-100 text-green-800 rounded-full hover:bg-green-200"
-                                title="Approve"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleRoleRequest(request, false)}
-                                disabled={submitting}
-                                className="p-2 bg-red-100 text-red-800 rounded-full hover:bg-red-200"
-                                title="Reject"
-                              >
-                                <XCircle className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
-                          {request.status === 'approved' && (
-                            <span className="text-green-600 text-sm">✓ Approved</span>
-                          )}
-                          {request.status === 'denied' && (
-                            <span className="text-red-600 text-sm">✗ Denied</span>
-                          )}
-                        </div>
-                      </div>
+                  {/* roleRequests state was removed, so this will be empty */}
+                  {/* {roleRequests.map((request) => ( */}
+                  {/*   <div key={request.id} className="border border-gray-200 rounded-lg p-4"> */}
+                  {/*     <div className="flex items-center justify-between mb-2"> */}
+                  {/*       <div> */}
+                  {/*         <p className="font-medium text-gray-900">UID: {request.uid}</p> */}
+                  {/*         <p className="text-sm text-gray-600">Org: {request.orgId}</p> */}
+                  {/*         <p className="text-sm text-gray-600">Requested: {new Date(request.createdAt).toLocaleDateString()}</p> */}
+                  {/*       </div> */}
+                  {/*       <div className="flex items-center gap-2"> */}
+                  {/*         {request.status === 'pending' && ( */}
+                  {/*           <> */}
+                  {/*             <button */}
+                  {/*               onClick={() => handleRoleRequest(request, true)} */}
+                  {/*               disabled={submitting} */}
+                  {/*               className="p-2 bg-green-100 text-green-800 rounded-full hover:bg-green-200" */}
+                  {/*               title="Approve" */}
+                  {/*             > */}
+                  {/*               <CheckCircle className="w-4 h-4" /> */}
+                  {/*             </button> */}
+                  {/*             <button */}
+                  {/*               onClick={() => handleRoleRequest(request, false)} */}
+                  {/*               disabled={submitting} */}
+                  {/*               className="p-2 bg-red-100 text-red-800 rounded-full hover:bg-red-200" */}
+                  {/*               title="Reject" */}
+                  {/*             > */}
+                  {/*               <XCircle className="w-4 h-4" /> */}
+                  {/*             </button> */}
+                  {/*           </> */}
+                  {/*         )} */}
+                  {/*         {request.status === 'approved' && ( */}
+                  {/*           <span className="text-green-600 text-sm">✓ Approved</span> */}
+                  {/*         )} */}
+                  {/*         {request.status === 'denied' && ( */}
+                  {/*           <span className="text-red-600 text-sm">✗ Denied</span> */}
+                  {/*         )} */}
+                  {/*       </div> */}
+                  {/*     </div> */}
                       
-                      <div className="flex flex-wrap gap-2">
-                        {request.requestedRoles.map((role) => (
-                          <span
-                            key={role}
-                            className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800"
-                          >
-                            {role}
-                          </span>
-                        ))}
-                      </div>
+                  {/*     <div className="flex flex-wrap gap-2"> */}
+                  {/*       {request.requestedRoles.map((role) => ( */}
+                  {/*         <span */}
+                  {/*           key={role} */}
+                  {/*           className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800" */}
+                  {/*         > */}
+                  {/*           {role} */}
+                  {/*         </span> */}
+                  {/*       ))} */}
+                  {/*     </div> */}
                       
-                      {request.requestedOrgIds && request.requestedOrgIds.length > 0 && (
-                        <div className="text-sm text-gray-600 mt-2">
-                          <p>Requested Orgs: {request.requestedOrgIds.join(', ')}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  {/*     {request.requestedOrgIds && request.requestedOrgIds.length > 0 && ( */}
+                  {/*       <div className="text-sm text-gray-600 mt-2"> */}
+                  {/*         <p>Requested Orgs: {request.requestedOrgIds.join(', ')}</p> */}
+                  {/*       </div> */}
+                  {/*     )} */}
+                  {/*   </div> */}
+                  {/* ))} */}
                   
-                  {roleRequests.length === 0 && (
-                    <p className="text-gray-500 text-center py-8">No pending role requests</p>
-                  )}
+                  {/* roleRequests.length === 0 && ( */}
+                  {/*   <p className="text-gray-500 text-center py-8">No pending role requests</p> */}
+                  {/* ) */}
                 </div>
               </div>
             </div>

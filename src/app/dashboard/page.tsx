@@ -11,10 +11,37 @@ import { TokenBalanceIndicator } from '@/components/tokens/TokenBalanceIndicator
 import { TokenPurchaseModal } from '@/components/tokens/TokenPurchaseModal';
 import { FeatureCard } from '@/components/tokens/FeatureCard';
 import { TransactionHistory } from '@/components/tokens/TransactionHistory';
-import { Brain, TrendingUp, Users, FileText, Zap, Target } from 'lucide-react';
+import { Brain, TrendingUp, Users, FileText, Zap, Target, Shield } from 'lucide-react';
 import { ComingSoonOverlay } from '@/components/dashboard/ComingSoonOverlay';
 
 import { AssessmentHistoryDTO } from '@/application/services/DashboardService';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { initializeApp } from 'firebase/app';
+import { 
+  BarChart3, 
+  TrendingUp, 
+  Users, 
+  Target, 
+  CheckCircle, 
+  Clock, 
+  Calendar,
+  ArrowRight,
+  Plus,
+  Shield
+} from 'lucide-react';
+
+// Initialize Firebase for client-side
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+const app = initializeApp(firebaseConfig);
+const functions = getFunctions(app);
 
 function DashboardContent() {
   const [assessmentHistory, setAssessmentHistory] = useState<AssessmentHistoryDTO[]>([]);
@@ -46,7 +73,35 @@ function DashboardContent() {
     'growth-projections': false
   });
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasAdminAccess, setHasAdminAccess] = useState(false);
   const { user, logout } = useAuthContext();
+
+  // Check user roles
+  useEffect(() => {
+    const checkUserRoles = async () => {
+      if (!user) {
+        setHasAdminAccess(false);
+        return;
+      }
+
+      try {
+        const getUserRole = httpsCallable(functions, 'getUserRole');
+        const response = await getUserRole({ userId: user.uid });
+        const data = response.data as any;
+        
+        if (data.success && data.userRole) {
+          const roles = data.userRole.roles || [];
+          setHasAdminAccess(roles.includes('admin'));
+        }
+      } catch (error) {
+        console.error('Error checking user roles:', error);
+        setHasAdminAccess(false);
+      }
+    };
+
+    checkUserRoles();
+  }, [user]);
 
   // Features array matching the design
   const features = [

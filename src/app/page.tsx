@@ -1,43 +1,93 @@
 'use client';
 
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { useAuthContext } from '../presentation/providers/AuthProvider';
-import { DashboardService } from '@/application/services/DashboardService';
+import Link from 'next/link';
+import { useAuthContext } from '@/presentation/providers/AuthProvider';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { initializeApp } from 'firebase/app';
 import { Menu, X } from 'lucide-react';
+
+// Initialize Firebase for client-side
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+const app = initializeApp(firebaseConfig);
+const functions = getFunctions(app);
 
 export default function Home() {
   const { user, logout } = useAuthContext();
-  const [assessmentLimits, setAssessmentLimits] = useState<{
-    canTakeAssessment: boolean;
-    nextAvailableDate: string | null;
-    daysUntilNextAssessment: number | null;
-    lastAssessmentDate: string | null;
-  } | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [assessmentLimits, setAssessmentLimits] = useState({
+    canTakeAssessment: true,
+    nextAvailableDate: null,
+    daysUntilNextAssessment: null,
+    lastAssessmentDate: null
+  });
+  const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [hasAdminAccess, setHasAdminAccess] = useState(false);
 
-  // Check assessment limits for logged-in users
+  // Check user roles
+  useEffect(() => {
+    const checkUserRoles = async () => {
+      if (!user) {
+        setUserRoles([]);
+        setHasAdminAccess(false);
+        return;
+      }
+
+      try {
+        const getUserRole = httpsCallable(functions, 'getUserRole');
+        const response = await getUserRole({ userId: user.uid });
+        const data = response.data as any;
+        
+        if (data.success && data.userRole) {
+          const roles = data.userRole.roles || [];
+          setUserRoles(roles);
+          setHasAdminAccess(roles.includes('admin'));
+        }
+      } catch (error) {
+        console.error('Error checking user roles:', error);
+        setUserRoles([]);
+        setHasAdminAccess(false);
+      }
+    };
+
+    checkUserRoles();
+  }, [user]);
+
   useEffect(() => {
     const checkAssessmentLimits = async () => {
-      if (user) {
-        setIsLoading(true);
-        try {
-          const dashboardService = DashboardService.getInstance();
-          const data = await dashboardService.getDashboardData(user.uid);
-          setAssessmentLimits(data.assessmentLimits);
-        } catch (error) {
-          console.error('Error checking assessment limits:', error);
-          // If there's an error, allow the assessment to proceed
-          setAssessmentLimits({
-            canTakeAssessment: true,
-            nextAvailableDate: null,
-            daysUntilNextAssessment: null,
-            lastAssessmentDate: null
-          });
-        }
+      if (!user) {
         setIsLoading(false);
+        return;
       }
+
+      try {
+        const checkAssessmentLimits = httpsCallable(functions, 'checkAssessmentLimits');
+        const response = await checkAssessmentLimits({ userId: user.uid });
+        const data = response.data as any;
+        
+        if (data.success) {
+          setAssessmentLimits(data.limits);
+        }
+      } catch (error) {
+        console.error('Error checking assessment limits:', error);
+        // If there's an error, allow the assessment to proceed
+        setAssessmentLimits({
+          canTakeAssessment: true,
+          nextAvailableDate: null,
+          daysUntilNextAssessment: null,
+          lastAssessmentDate: null
+        });
+      }
+      setIsLoading(false);
     };
 
     checkAssessmentLimits();
@@ -68,9 +118,11 @@ export default function Home() {
                   <Link href="/dashboard" className="text-sm lg:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
                     Dashboard
                   </Link>
-                  <Link href="/admin" className="text-sm lg:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
-                    Admin
-                  </Link>
+                  {hasAdminAccess && (
+                    <Link href="/admin" className="text-sm lg:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap">
+                      Admin
+                    </Link>
+                  )}
                   <button
                     onClick={logout}
                     className="text-sm lg:text-base text-gray-500 hover:text-gray-900 whitespace-nowrap"
@@ -120,13 +172,15 @@ export default function Home() {
                     >
                       Dashboard
                     </Link>
-                    <Link 
-                      href="/admin" 
-                      className="text-base text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Admin
-                    </Link>
+                    {hasAdminAccess && (
+                      <Link 
+                        href="/admin" 
+                        className="text-base text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Admin
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         logout();

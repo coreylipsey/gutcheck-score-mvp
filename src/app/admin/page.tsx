@@ -1,27 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Suspense } from 'react';
-
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { initializeApp } from 'firebase/app';
 import { 
   Users, 
   TrendingUp, 
-  CheckCircle, 
-  Clock, 
-  BarChart3, 
+  FileText,
   Activity,
-  RefreshCw,
-  Eye,
-  Calendar,
-  Target,
-  Plus,
   ExternalLink,
-  FileText
+  AlertTriangle,
+  RefreshCw,
+  Plus,
+  Shield
 } from 'lucide-react';
+
+// Initialize Firebase for client-side
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+const app = initializeApp(firebaseConfig);
+const functions = getFunctions(app);
 
 interface PartnerData {
   partnerId: string;
@@ -100,7 +108,49 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('cohorts');
+  const [hasAdminAccess, setHasAdminAccess] = useState(false);
+  const [accessChecked, setAccessChecked] = useState(false);
   const { user } = useAuthContext();
+  const router = useRouter();
+
+  // Check admin access
+  useEffect(() => {
+    const checkAdminAccess = async () => {
+      if (!user) {
+        setHasAdminAccess(false);
+        setAccessChecked(true);
+        return;
+      }
+
+      try {
+        const getUserRole = httpsCallable(functions, 'getUserRole');
+        const response = await getUserRole({ userId: user.uid });
+        const data = response.data as any;
+        
+        if (data.success && data.userRole) {
+          const roles = data.userRole.roles || [];
+          const isAdmin = roles.includes('admin');
+          setHasAdminAccess(isAdmin);
+          
+          if (!isAdmin) {
+            // Redirect non-admin users
+            router.push('/dashboard');
+          }
+        } else {
+          setHasAdminAccess(false);
+          router.push('/dashboard');
+        }
+      } catch (error) {
+        console.error('Error checking admin access:', error);
+        setHasAdminAccess(false);
+        router.push('/dashboard');
+      } finally {
+        setAccessChecked(true);
+      }
+    };
+
+    checkAdminAccess();
+  }, [user, router]);
 
   const fetchDashboardData = async () => {
     try {
@@ -216,6 +266,42 @@ function AdminDashboard() {
     </div>
   );
 
+  // Check access before rendering
+  if (!accessChecked) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gradient-to-br from-[#0A1F44] to-[#147AFF] flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+            <p className="mt-4 text-white">Checking admin access...</p>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  if (!hasAdminAccess) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gradient-to-br from-[#0A1F44] to-[#147AFF] flex items-center justify-center">
+          <div className="max-w-md mx-auto text-center">
+            <div className="bg-white/95 backdrop-blur-sm border-0 rounded-lg shadow-sm p-8">
+              <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
+              <p className="text-gray-600 mb-6">You do not have permission to access the admin dashboard.</p>
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="px-4 py-2 bg-[#147AFF] text-white rounded-md hover:bg-[#0A1F44] transition-colors"
+              >
+                Go to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
   if (loading) {
     return (
       <ProtectedRoute>
@@ -287,10 +373,10 @@ function AdminDashboard() {
           <div className="space-y-4">
             <div className="flex space-x-1 bg-white/10 backdrop-blur-sm rounded-lg p-1">
               {[
-                { id: 'cohorts', label: 'Cohort Management', icon: <Target className="w-4 h-4" /> },
+                { id: 'cohorts', label: 'Cohort Management', icon: <Shield className="w-4 h-4" /> },
                 { id: 'create', label: 'Create New', icon: <Plus className="w-4 h-4" /> },
                 { id: 'partners', label: 'Partners', icon: <Users className="w-4 h-4" /> },
-                { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" /> }
+                { id: 'analytics', label: 'Analytics', icon: <Activity className="w-4 h-4" /> }
               ].map((tab) => (
                 <button
                   key={tab.id}
