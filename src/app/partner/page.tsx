@@ -1,24 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { Suspense } from 'react';
-
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
+import { useGoogleAnalytics } from '@/presentation/providers/GoogleAnalyticsProvider';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { initializeApp } from 'firebase/app';
-import { 
-  Users, 
-  Target, 
-  CheckCircle, 
-  AlertTriangle,
-  ExternalLink,
-  Copy,
-  Mail,
-  Building
-} from 'lucide-react';
+import { Menu, X, Building, AlertTriangle } from 'lucide-react';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 // Initialize Firebase for client-side
 const firebaseConfig = {
@@ -116,6 +105,25 @@ function PartnerOnboardingContent() {
 
       const data = response.data as CohortCreationResponse;
       setResult(data);
+
+      // Track partner creation in Google Analytics
+      trackPartnerCreated({
+        partnerId: data.partnerId,
+        partnerName: formData.partnerName,
+        partnerEmail: formData.partnerEmail,
+        organizationType: formData.organizationType,
+      });
+
+      // Track cohort creation
+      trackCohortCreated({
+        cohortId: data.cohortId,
+        partnerId: data.partnerId,
+        cohortName: formData.cohortName,
+        targetSize: parseInt(formData.expectedParticipants),
+      });
+
+      // Track onboarding completion
+      trackPartnerOnboardingStep('partner_created', data.partnerId);
 
     } catch (error: any) {
       console.error('Error creating partner cohort:', error);

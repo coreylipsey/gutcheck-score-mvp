@@ -1,32 +1,42 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import AssessmentQuestion from '@/components/AssessmentQuestion';
-import { ASSESSMENT_QUESTIONS } from '@/domain/entities/Assessment';
-import { AssessmentResponse } from '@/domain/entities/Assessment';
-import { useAssessment } from '@/presentation/hooks/useAssessment';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
+import { useGoogleAnalytics } from '@/presentation/providers/GoogleAnalyticsProvider';
+import Link from 'next/link';
+import { AssessmentForm } from '@/components/assessment/AssessmentForm';
+import { ConsentForm } from '@/components/assessment/ConsentForm';
+import { LocationForm } from '@/components/assessment/LocationForm';
 import { DashboardService } from '@/application/services/DashboardService';
 
 export default function AssessmentPage() {
   const router = useRouter();
-  const { calculateScores, generateAIFeedback, saveSession, error } = useAssessment();
+  const searchParams = useSearchParams();
   const { user } = useAuthContext();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [responses, setResponses] = useState<AssessmentResponse[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [location, setLocation] = useState('');
-  const [industry, setIndustry] = useState('');
-  const [consentForML, setConsentForML] = useState(false);
-  const [assessmentLimits, setAssessmentLimits] = useState<{
-    canTakeAssessment: boolean;
-    nextAvailableDate: string | null;
-    daysUntilNextAssessment: number | null;
-    lastAssessmentDate: string | null;
-  } | null>(null);
+  const { trackAssessmentStarted, trackAssessmentStep } = useGoogleAnalytics();
+  
+  const partnerId = searchParams.get('partnerId');
+  const cohortId = searchParams.get('cohortId');
+  const sessionId = searchParams.get('sessionId');
+
+  const [currentStep, setCurrentStep] = useState(1);
+  const [sessionData, setSessionData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Track assessment start
+  useEffect(() => {
+    if (user && sessionData) {
+      trackAssessmentStarted({
+        sessionId: sessionData.sessionId,
+        partnerId: partnerId || undefined,
+        cohortId: cohortId || undefined,
+        userId: user.uid,
+      });
+      
+      trackAssessmentStep('assessment_started', sessionData.sessionId);
+    }
+  }, [user, sessionData, partnerId, cohortId, trackAssessmentStarted, trackAssessmentStep]);
 
   // Check assessment frequency limits
   useEffect(() => {
