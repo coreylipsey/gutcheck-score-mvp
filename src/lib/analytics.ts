@@ -1,51 +1,44 @@
 // Google Analytics 4 Tracking for Gutcheck.AI
 // This provides comprehensive analytics for partner and cohort management
 
-declare global {
-  interface Window {
-    gtag: (...args: any[]) => void;
+import { getAnalytics, logEvent, setUserId, setUserProperties } from 'firebase/analytics';
+import { initializeApp } from 'firebase/app';
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+let analytics: any = null;
+
+// Initialize analytics only on client side
+if (typeof window !== 'undefined') {
+  try {
+    analytics = getAnalytics(app);
+  } catch (error) {
+    console.warn('Analytics initialization failed:', error);
   }
 }
-
-// Initialize GA4
-export const initGA = (measurementId: string) => {
-  if (typeof window !== 'undefined' && !window.gtag) {
-    // Load GA4 script
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-    document.head.appendChild(script);
-
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function() {
-      window.dataLayer.push(arguments);
-    };
-
-    window.gtag('js', new Date());
-    window.gtag('config', measurementId, {
-      page_title: document.title,
-      page_location: window.location.href,
-    });
-  }
-};
-
-// Track page views
-export const trackPageView = (page_title: string, page_location?: string) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('config', process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID!, {
-      page_title,
-      page_location: page_location || window.location.href,
-    });
-  }
-};
 
 // Track custom events
 export const trackEvent = (
   eventName: string,
   parameters: Record<string, any> = {}
 ) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', eventName, parameters);
+  if (analytics) {
+    try {
+      logEvent(analytics, eventName, parameters);
+    } catch (error) {
+      console.warn('Failed to track event:', error);
+    }
   }
 };
 
@@ -190,13 +183,17 @@ export const setUserProperties = (userData: {
   partnerId?: string;
   partnerName?: string;
 }) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('config', process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID!, {
-      user_id: userData.userId,
-      user_role: userData.userRole,
-      partner_id: userData.partnerId || 'none',
-      partner_name: userData.partnerName || 'none',
-    });
+  if (analytics) {
+    try {
+      setUserId(analytics, userData.userId);
+      setUserProperties(analytics, {
+        user_role: userData.userRole,
+        partner_id: userData.partnerId || 'none',
+        partner_name: userData.partnerName || 'none',
+      });
+    } catch (error) {
+      console.warn('Failed to set user properties:', error);
+    }
   }
 };
 

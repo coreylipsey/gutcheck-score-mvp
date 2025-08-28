@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, ReactNode } from 'react';
-import { initGA, setUserProperties, partnerAnalytics, funnelAnalytics } from '@/lib/analytics';
+import { setUserProperties, partnerAnalytics, funnelAnalytics } from '@/lib/analytics';
 import { useAuthContext } from './AuthProvider';
 
 interface GoogleAnalyticsContextType {
@@ -32,14 +32,6 @@ interface GoogleAnalyticsProviderProps {
 
 export const GoogleAnalyticsProvider = ({ children }: GoogleAnalyticsProviderProps) => {
   const { user } = useAuthContext();
-
-  // Initialize GA4 on mount
-  useEffect(() => {
-    const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-    if (measurementId) {
-      initGA(measurementId);
-    }
-  }, []);
 
   // Set user properties when user changes
   useEffect(() => {
