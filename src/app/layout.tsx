@@ -5,6 +5,7 @@ import { DependencyProvider } from "../presentation/providers/DependencyProvider
 import { AuthProvider } from "../presentation/providers/AuthProvider";
 import { GoogleAnalyticsProvider } from "../presentation/providers/GoogleAnalyticsProvider";
 import { Footer } from "../components/results/Footer";
+import Script from "next/script";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,6 +24,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-FLV3CRVF7W"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-FLV3CRVF7W');
+          `}
+        </Script>
+      </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <DependencyProvider>
           <AuthProvider>

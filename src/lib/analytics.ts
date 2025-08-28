@@ -1,30 +1,9 @@
 // Google Analytics 4 Tracking for Gutcheck.AI
 // This provides comprehensive analytics for partner and cohort management
 
-import { getAnalytics, logEvent, setUserId, setUserProperties } from 'firebase/analytics';
-import { initializeApp } from 'firebase/app';
-
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-let analytics: any = null;
-
-// Initialize analytics only on client side
-if (typeof window !== 'undefined') {
-  try {
-    analytics = getAnalytics(app);
-  } catch (error) {
-    console.warn('Analytics initialization failed:', error);
+declare global {
+  interface Window {
+    gtag: (...args: any[]) => void;
   }
 }
 
@@ -33,12 +12,8 @@ export const trackEvent = (
   eventName: string,
   parameters: Record<string, any> = {}
 ) => {
-  if (analytics) {
-    try {
-      logEvent(analytics, eventName, parameters);
-    } catch (error) {
-      console.warn('Failed to track event:', error);
-    }
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', eventName, parameters);
   }
 };
 
@@ -183,17 +158,13 @@ export const setUserProperties = (userData: {
   partnerId?: string;
   partnerName?: string;
 }) => {
-  if (analytics) {
-    try {
-      setUserId(analytics, userData.userId);
-      setUserProperties(analytics, {
-        user_role: userData.userRole,
-        partner_id: userData.partnerId || 'none',
-        partner_name: userData.partnerName || 'none',
-      });
-    } catch (error) {
-      console.warn('Failed to set user properties:', error);
-    }
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('config', 'G-FLV3CRVF7W', {
+      user_id: userData.userId,
+      user_role: userData.userRole,
+      partner_id: userData.partnerId || 'none',
+      partner_name: userData.partnerName || 'none',
+    });
   }
 };
 
