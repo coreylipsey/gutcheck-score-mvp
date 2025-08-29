@@ -11,7 +11,7 @@ import { LocationForm } from '@/components/assessment/LocationForm';
 import { DashboardService } from '@/application/services/DashboardService';
 import { ASSESSMENT_QUESTIONS } from '@/domain/entities/Assessment';
 import { AssessmentResponse } from '@/domain/entities/Assessment';
-import { AssessmentQuestion } from '@/components/AssessmentQuestion';
+import AssessmentQuestion from '@/components/AssessmentQuestion';
 import { useAssessment } from '@/presentation/hooks/useAssessment';
 
 function AssessmentContent() {
