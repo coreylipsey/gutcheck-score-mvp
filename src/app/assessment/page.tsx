@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthContext } from '@/presentation/providers/AuthProvider';
 import { useGoogleAnalytics } from '@/presentation/providers/GoogleAnalyticsProvider';
@@ -9,12 +9,17 @@ import { AssessmentForm } from '@/components/assessment/AssessmentForm';
 import { ConsentForm } from '@/components/assessment/ConsentForm';
 import { LocationForm } from '@/components/assessment/LocationForm';
 import { DashboardService } from '@/application/services/DashboardService';
+import { ASSESSMENT_QUESTIONS } from '@/domain/entities/Assessment';
+import { AssessmentResponse } from '@/domain/entities/Assessment';
+import { AssessmentQuestion } from '@/components/AssessmentQuestion';
+import { useAssessment } from '@/presentation/hooks/useAssessment';
 
-export default function AssessmentPage() {
+function AssessmentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuthContext();
   const { trackAssessmentStarted, trackAssessmentStep } = useGoogleAnalytics();
+  const { calculateScores, generateAIFeedback, saveSession } = useAssessment();
   
   const partnerId = searchParams.get('partnerId');
   const cohortId = searchParams.get('cohortId');
@@ -23,6 +28,23 @@ export default function AssessmentPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [sessionData, setSessionData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [responses, setResponses] = useState<AssessmentResponse[]>([]);
+  const [consentForML, setConsentForML] = useState(false);
+  const [location, setLocation] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [assessmentLimits, setAssessmentLimits] = useState<{
+    canTakeAssessment: boolean;
+    nextAvailableDate: string | null;
+    daysUntilNextAssessment: number | null;
+    lastAssessmentDate: string | null;
+  }>({
+    canTakeAssessment: true,
+    nextAvailableDate: null,
+    daysUntilNextAssessment: null,
+    lastAssessmentDate: null
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Track assessment start
   useEffect(() => {
@@ -555,5 +577,20 @@ export default function AssessmentPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AssessmentPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading assessment...</p>
+        </div>
+      </div>
+    }>
+      <AssessmentContent />
+    </Suspense>
   );
 }
