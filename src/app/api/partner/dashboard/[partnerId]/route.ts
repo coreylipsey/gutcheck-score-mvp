@@ -21,20 +21,34 @@ export async function GET(
 ) {
   try {
     const { partnerId } = params;
+    console.log('API: Fetching partner dashboard data for partnerId:', partnerId);
 
     // Call the Cloud Function to get partner dashboard data
     const getPartnerDashboardData = httpsCallable(functions, 'getPartnerDashboardData');
     
+    console.log('API: Calling Cloud Function getPartnerDashboardData');
     const result = await getPartnerDashboardData({ partnerId });
+    console.log('API: Cloud Function result:', result);
+    
     const data = result.data as any;
+    console.log('API: Returning data:', data);
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error fetching partner dashboard data:', error);
+    console.error('API: Error fetching partner dashboard data:', error);
     
-    // Return error instead of mock data
+    // Return detailed error information
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : '';
+    
+    console.error('API: Error details:', { errorMessage, errorStack });
+    
     return NextResponse.json(
-      { error: 'Failed to fetch partner dashboard data' },
+      { 
+        error: 'Failed to fetch partner dashboard data',
+        details: errorMessage,
+        partnerId: params.partnerId
+      },
       { status: 500 }
     );
   }

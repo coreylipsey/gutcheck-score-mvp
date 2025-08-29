@@ -124,18 +124,34 @@ function PartnerDashboard() {
         console.log('Making API call to fetch partner dashboard data');
         // Fetch partner-specific data
         const response = await fetch(`/api/partner/dashboard/${partnerId}`);
+        console.log('API response status:', response.status);
+        console.log('API response headers:', response.headers);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch partner dashboard data');
+          const errorText = await response.text();
+          console.error('API response error:', errorText);
+          throw new Error(`Failed to fetch partner dashboard data: ${response.status} ${errorText}`);
         }
         
         const data = await response.json();
         console.log('Partner dashboard data received:', data);
+        
+        if (!data.partner) {
+          console.error('No partner data in response:', data);
+          throw new Error('No partner data received from API');
+        }
+        
         setPartner(data.partner);
-        setCohorts(data.cohorts);
-        setMetrics(data.metrics);
+        setCohorts(data.cohorts || []);
+        setMetrics(data.metrics || {
+          totalParticipants: 0,
+          totalCompleted: 0,
+          averageScore: 0,
+          completionRate: 0
+        });
       } catch (error) {
         console.error('Error fetching partner dashboard data:', error);
-        setError('Failed to load partner dashboard data. Please try again.');
+        setError(`Failed to load partner dashboard data: ${error instanceof Error ? error.message : 'Unknown error'}`);
       } finally {
         console.log('Setting loading to false');
         setLoading(false);
