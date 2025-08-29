@@ -6,7 +6,7 @@ import { useAuthContext } from '@/presentation/providers/AuthProvider';
 import { useGoogleAnalytics } from '@/presentation/providers/GoogleAnalyticsProvider';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { initializeApp } from 'firebase/app';
-import { Menu, X, Building, AlertTriangle } from 'lucide-react';
+import { Menu, X, Building, AlertTriangle, Users } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 // Initialize Firebase for client-side
