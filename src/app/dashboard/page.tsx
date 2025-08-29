@@ -11,24 +11,12 @@ import { TokenBalanceIndicator } from '@/components/tokens/TokenBalanceIndicator
 import { TokenPurchaseModal } from '@/components/tokens/TokenPurchaseModal';
 import { FeatureCard } from '@/components/tokens/FeatureCard';
 import { TransactionHistory } from '@/components/tokens/TransactionHistory';
-import { Brain, TrendingUp, Users, FileText, Zap, Target, Shield } from 'lucide-react';
+import { Brain, TrendingUp, Users, FileText, Zap, Target, Shield, BarChart3, CheckCircle, Clock, Calendar, ArrowRight, Plus } from 'lucide-react';
 import { ComingSoonOverlay } from '@/components/dashboard/ComingSoonOverlay';
 
 import { AssessmentHistoryDTO } from '@/application/services/DashboardService';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { initializeApp } from 'firebase/app';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Users, 
-  Target, 
-  CheckCircle, 
-  Clock, 
-  Calendar,
-  ArrowRight,
-  Plus,
-  Shield
-} from 'lucide-react';
 
 // Initialize Firebase for client-side
 const firebaseConfig = {
